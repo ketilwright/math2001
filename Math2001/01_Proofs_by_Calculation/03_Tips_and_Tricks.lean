@@ -105,26 +105,57 @@ up in Lean. -/
 
 
 example {x y : ℝ} (h1 : x = 3) (h2 : y = 4 * x - 3) : y = 9 :=
-  sorry
+  calc y
+    _ = 4 * x - 3 := h2
+    _ = 4 * 3 - 3 := by rw [h1]
+    _ = 9 := by ring
 
 example {a b : ℤ} (h : a - b = 0) : a = b :=
-  sorry
+  calc a
+    _ = a - b + b := by ring
+    _ = 0 + b := by rw [h]
+    _ = b := Int.zero_add b
 
 example {x y : ℤ} (h1 : x - 3 * y = 5) (h2 : y = 3) : x = 14 :=
-  sorry
+  calc x
+    _ = x - 3 * y + 3 * y := by ring
+    _ = 5 + 3 * 3 := by rw [h1, h2]
+    _ = 14 := by ring
 
 example {p q : ℚ} (h1 : p - 2 * q = 1) (h2 : q = -1) : p = -1 :=
-  sorry
+  calc p
+    _ = p - 2 * q + 2 * q := by ring
+    _ = 1 + 2 * (-1) := by rw [h1, h2]
+    _ = -1 := by ring
 
 example {x y : ℚ} (h1 : y + 1 = 3) (h2 : x + 2 * y = 3) : x = -1 :=
-  sorry
+  calc x
+    _ = x + 2 * y - 2 * y := by ring
+    _ = 3 - 2 * (y + 1 - 1) := by rw [h2]; ring
+    _ = 3 - 2 * (3 - 1) := by rw [h1]
+    _ = -1 := by ring
 
 example {p q : ℤ} (h1 : p + 4 * q = 1) (h2 : q - 1 = 2) : p = -11 :=
-  sorry
+  calc p
+    _ = p + 4 * q - 4 * q := by ring
+    _ = 1 - 4 * (q - 1 + 1) := by rw [h1]; ring
+    _ = 1 - 4 * (2 + 1) := by rw [h2]
+    _ = - 11 := by ring
 
 example {a b c : ℝ} (h1 : a + 2 * b + 3 * c = 7) (h2 : b + 2 * c = 3)
     (h3 : c = 1) : a = 2 :=
-  sorry
+  -- TODO: doubt the author intended adding this
+  have h4: b = 1 :=
+    calc b
+      _ = b + 2 * c - 2 * c := by ring
+      _ = 3 - 2 * 1 := by rw [←h2, h3]
+      _ = 1 := by ring
+
+  calc a
+   _ = a + 2 * b + 3 * c - (2 * b + 3 * c) := by ring
+   _ = 7 - (2 * b + 3 * c) := by rw [h1]
+   _ = 7 - (2 * 1 + 3 * 1) := by rw [h3, h4]
+   _ = 2 := by ring
 
 example {u v : ℚ} (h1 : 4 * u + v = 3) (h2 : v = 2) : u = 1 / 4 :=
   sorry
