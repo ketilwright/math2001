@@ -12,43 +12,91 @@ proofs. -/
 
 -- Example 1.3.1
 example {a b : ℤ} (h1 : a = 2 * b + 5) (h2 : b = 3) : a = 11 :=
-  sorry
+  calc a
+    _ = 2 * b + 5 := by rw [h1]
+    _ = 2 * 3 + 5 := by rw [h2]
+    _ = 11 := by ring
 
 -- Example 1.3.2
 example {x : ℤ} (h1 : x + 4 = 2) : x = -2 :=
-  sorry
+  calc x
+    _ = (x + 4) - 4 := by ring
+    _ = 2 - 4 := by rw [h1]
+    _ = - 2 := by ring
 
 -- Example 1.3.3
 example {a b : ℝ} (h1 : a - 5 * b = 4) (h2 : b + 2 = 3) : a = 9 :=
-  sorry
+  calc a
+    _ = (a - 5 * b) + 5 * b := by ring
+    _ = 4 + 5 * b := by rw [h1]
+    _ = -6 + 5 * (b + 2) := by ring
+    _ = -6 + 5 * 3 := by rw [h2]
+    _ = 9 := by ring
 
 -- Example 1.3.4
 example {w : ℚ} (h1 : 3 * w + 1 = 4) : w = 1 :=
-  sorry
+  calc w
+    _ = (3 * w + 1) / 3 - (1 / 3) := by ring
+    _ = 4 / 3 - 1 / 3 := by rw [←h1]
+    _ = 1 := by ring
 
 -- Example 1.3.5
 example {x : ℤ} (h1 : 2 * x + 3 = x) : x = -3 :=
-  sorry
+  calc x
+    _ = (2 * x + 3) - x - 3 := by ring
+    _ = x - x - 3 := by rw [h1]
+    _ = -3 := by ring
 
 -- Example 1.3.6
 example {x y : ℤ} (h1 : 2 * x - y = 4) (h2 : y - x + 1 = 2) : x = 5 :=
-  sorry
+  calc x
+    _ = (2 * x - y) + (y - x + 1) - 1 := by ring
+    _ = 4 + 2 - 1 := by rw [h1, h2]
+    _ = 5 := by ring
+
 
 -- Example 1.3.7
 example {u v : ℚ} (h1 : u + 2 * v = 4) (h2 : u - 2 * v = 6) : u = 5 :=
-  sorry
+  calc u
+    _ = ((u + 2 * v) + (u - 2 * v)) / 2 := by ring
+    _ = (4 + 6) / 2 := by rw [h1, h2]
+    _ = 5 := by ring
 
 -- Example 1.3.8
 example {x y : ℝ} (h1 : x + y = 4) (h2 : 5 * x - 3 * y = 4) : x = 2 :=
-  sorry
+  calc x
+    _ = ((3 * (x + y) + (5 * x - 3 * y))) / 8 := by ring
+    _ = (3 * 4 + 4) / 8 := by rw [h1, h2]
+    _ = 2 := by ring
 
 -- Example 1.3.9
 example {a b : ℚ} (h1 : a - 3 = 2 * b) : a ^ 2 - a + 3 = 4 * b ^ 2 + 10 * b + 9 :=
-  sorry
+  calc a ^ 2 - a + 3
+    _ = ((a - 3) ^ 2 + 6 * a - 9) - a + 3 := by ring
+    _ = (a - 3) ^ 2 + 5 * ((a - 3) + 3) - 6 := by ring
+    _ = (2 * b) ^ 2 + 5 * (2 * b) + 9 := by rw [h1]; ring
+    _ = 4 * b ^ 2 + 10 * b + 9 := by ring
 
 -- Example 1.3.10
+/-
+           z² - z  + 1
+          _______________________
+  z² - 2 | z⁴ - z³ -  z² + 2z + 1
+           z⁴      - 2z²
+           ----------------------
+              - z³ +  z² + 2z + 1
+              - z³       + 2z
+              -------------------
+                      z²      + 1
+                      z²      - 2
+                      -----------
+                                3
+-/
 example {z : ℝ} (h1 : z ^ 2 - 2 = 0) : z ^ 4 - z ^ 3 - z ^ 2 + 2 * z + 1 = 3 :=
-  sorry
+  calc z ^ 4 - z ^ 3 - z ^ 2 + 2 * z + 1
+    _ = (z ^ 2 - z + 1) * (z ^ 2 - 2) + 3 := by ring
+    _ = (z ^ 2 - z + 1) * 0 + 3 := by rw [h1]
+    _ = 3 := by ring
 
 /-! # Exercises
 
