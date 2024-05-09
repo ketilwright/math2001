@@ -173,8 +173,16 @@ example {c : ℚ} (h1 : 4 * c + 1 = 3 * c - 2) : c = -3 :=
     _ = -3 := by ring
 
 example {p : ℝ} (h1 : 5 * p - 3 = 3 * p + 1) : p = 2 := by
+  --have h2: 2 * p - 4 = 0 := by ring
+  -- From h1 we know, 5 * p - 3 = 3 * p + 1 = 0
+  -- Thus 2 * p - 4 = 0, which ring seems to find
   calc p
+    _ = (2 * p - 4) / 2 + 2 := by ring
+  --  We can add 3p + 1 - (3p + 1)
+    _ = (2 * p - 4 + 3 * p + 1 - (3 * p + 1)) / 2 + 2 := by ring
+  --  Collect some terms at the front
     _ = (5 * p - 3 - (3 * p + 1)) / 2 + 2 := by ring
+  --  Substitute 5p - 3 for 3p + 1 & we're done.
     _ = (5 * p - 3 - (5 * p - 3)) / 2 + 2 := by rw [←h1]
     _ = 2 := by ring
   done
