@@ -158,13 +158,26 @@ example {a b c : ℝ} (h1 : a + 2 * b + 3 * c = 7) (h2 : b + 2 * c = 3)
    _ = 2 := by ring
 
 example {u v : ℚ} (h1 : 4 * u + v = 3) (h2 : v = 2) : u = 1 / 4 :=
-  sorry
+  calc u
+    _ = (4 * u + v - v) / 4 := by ring
+    _ = (4 * u + v) / 4 - v / 4 := by ring
+    _ = 3 / 4 - 2 / 4 := by rw [h1, h2]
+    _ = 1 / 4 := by ring
 
 example {c : ℚ} (h1 : 4 * c + 1 = 3 * c - 2) : c = -3 :=
-  sorry
+  calc c
+    _ = c + (3 * c - 2) - (3 * c -2) := by ring -- the first tree steps can be skipped
+    _ = 4 * c - 2 - (3 * c -2) := by ring
+    _ = 4 * c + 1 - 3 - (3 * c -2) := by ring
+    _ = (3 * c - 2) - 3 - (3 * c - 2) := by rw [h1]
+    _ = -3 := by ring
 
-example {p : ℝ} (h1 : 5 * p - 3 = 3 * p + 1) : p = 2 :=
-  sorry
+example {p : ℝ} (h1 : 5 * p - 3 = 3 * p + 1) : p = 2 := by
+  calc p
+    _ = (5 * p - 3 - (3 * p + 1)) / 2 + 2 := by ring
+    _ = (5 * p - 3 - (5 * p - 3)) / 2 + 2 := by rw [←h1]
+    _ = 2 := by ring
+  done
 
 example {x y : ℤ} (h1 : 2 * x + y = 4) (h2 : x + y = 1) : x = 3 :=
   sorry
