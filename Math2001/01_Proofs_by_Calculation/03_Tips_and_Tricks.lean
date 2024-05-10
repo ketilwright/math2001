@@ -172,7 +172,7 @@ example {c : ℚ} (h1 : 4 * c + 1 = 3 * c - 2) : c = -3 :=
     _ = (3 * c - 2) - 3 - (3 * c - 2) := by rw [h1]
     _ = -3 := by ring
 
-example {p : ℝ} (h1 : 5 * p - 3 = 3 * p + 1) : p = 2 := by
+example {p : ℝ} (h1 : 5 * p - 3 = 3 * p + 1) : p = 2 := -- by
   -- From h1 we know, 5 * p - 3 = 3 * p + 1 = 0
   -- So 2 * p - 4 = 0, which ring seems to find
   calc p
@@ -184,13 +184,20 @@ example {p : ℝ} (h1 : 5 * p - 3 = 3 * p + 1) : p = 2 := by
   --  Substitute 5p - 3 for 3p + 1 & we're done.
     _ = (5 * p - 3 - (5 * p - 3)) / 2 + 2 := by rw [←h1]
     _ = 2 := by ring
-  done
+
 
 example {x y : ℤ} (h1 : 2 * x + y = 4) (h2 : x + y = 1) : x = 3 :=
-  sorry
+  calc x
+    _ = x + (x + y) - (x + y) := by ring
+    _ = (2 * x + y) - (x + y) := by ring
+    _ = 4 - 1 := by rw [h1, h2]
+    _ = 3 := by ring
 
 example {a b : ℝ} (h1 : a + 2 * b = 4) (h2 : a - b = 1) : a = 2 :=
-  sorry
+  calc a
+    _ = (a + 2 * b + 2 * (a - b)) / 3 := by ring
+    _ = (4 + 2 * 1) / 3 := by rw [h1, h2]
+    _ = 2 := by ring
 
 example {u v : ℝ} (h1 : u + 1 = v) : u ^ 2 + 3 * u + 1 = v ^ 2 + v - 1 :=
   sorry
