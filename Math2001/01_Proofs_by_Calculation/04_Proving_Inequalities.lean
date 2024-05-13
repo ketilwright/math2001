@@ -16,43 +16,49 @@ example {x y : ℤ} (hx : x + 3 ≤ 2) (hy : y + 2 * x ≥ 3) : y > 3 :=
     _ ≥ 9 - 2 * 2 := by rel [hx]
     _ > 3 := by numbers
 
+
 -- Example 1.4.2
 -- Exercise: replace the words "sorry" with the correct Lean justification.
 example {r s : ℚ} (h1 : s + 3 ≥ r) (h2 : s + r ≤ 3) : r ≤ 3 :=
   calc
-    r = (s + r + r - s) / 2 := by sorry
-    _ ≤ (3 + (s + 3) - s) / 2 := by sorry
-    _ = 3 := by sorry
+    r = (s + r + r - s) / 2 := by ring
+    _ ≤ (3 + (s + 3) - s) / 2 := by rel [h2, h1]
+    _ = 3 := by ring
 
 -- Example 1.4.3
 -- Exercise: type out the whole proof printed in the text as a Lean proof.
 example {x y : ℝ} (h1 : y ≤ x + 5) (h2 : x ≤ -2) : x + y < 2 :=
-  sorry
+  calc x + y
+    _ ≤ x + (x + 5) := by rel [h1]
+    _ = 2 * x + 5 := by ring
+    _ ≤ 2 * (-2) + 5 := by rel [h2]
+    _ < 2 := by numbers
 
 -- Example 1.4.4
 -- Exercise: replace the words "sorry" with the correct Lean justification.
+
 example {u v x y A B : ℝ} (h1 : 0 < A) (h2 : A ≤ 1) (h3 : 1 ≤ B) (h4 : x ≤ B)
     (h5 : y ≤ B) (h6 : 0 ≤ u) (h7 : 0 ≤ v) (h8 : u < A) (h9 : v < A) :
     u * y + v * x + u * v < 3 * A * B :=
   calc
     u * y + v * x + u * v
-      ≤ u * B + v * B + u * v := by sorry
-    _ ≤ A * B + A * B + A * v := by sorry
-    _ ≤ A * B + A * B + 1 * v := by sorry
-    _ ≤ A * B + A * B + B * v := by sorry
-    _ < A * B + A * B + B * A := by sorry
-    _ = 3 * A * B := by sorry
+      ≤ u * B + v * B + u * v := by rel [h4, h5]
+    _ ≤ A * B + A * B + A * v := by rel [h8, h9/-, h8-/]
+    _ ≤ A * B + A * B + 1 * v := by rel [h2]
+    _ ≤ A * B + A * B + B * v := by rel [h3]
+    _ < A * B + A * B + B * A := by rel [h9]
+    _ = 3 * A * B := by ring
 
 -- Example 1.4.5
 -- Exercise: replace the words "sorry" with the correct Lean justification.
 example {t : ℚ} (ht : t ≥ 10) : t ^ 2 - 3 * t - 17 ≥ 5 :=
   calc
     t ^ 2 - 3 * t - 17
-      = t * t - 3 * t - 17 := by sorry
-    _ ≥ 10 * t - 3 * t - 17 := by sorry
-    _ = 7 * t - 17 := by sorry
-    _ ≥ 7 * 10 - 17 := by sorry
-    _ ≥ 5 := by sorry
+      = t * t - 3 * t - 17 := by ring
+    _ ≥ 10 * t - 3 * t - 17 := by rel [ht]
+    _ = 7 * t - 17 := by ring
+    _ ≥ 7 * 10 - 17 := by rel [ht]
+    _ ≥ 5 := by numbers
 
 -- Example 1.4.6
 -- Exercise: type out the whole proof printed in the text as a Lean proof.
