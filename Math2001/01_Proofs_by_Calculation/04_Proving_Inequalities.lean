@@ -63,12 +63,18 @@ example {t : ℚ} (ht : t ≥ 10) : t ^ 2 - 3 * t - 17 ≥ 5 :=
 -- Example 1.4.6
 -- Exercise: type out the whole proof printed in the text as a Lean proof.
 example {n : ℤ} (hn : n ≥ 5) : n ^ 2 > 2 * n + 11 :=
-  sorry
+  calc n ^ 2
+    _ = n * n := by ring
+    _ ≥ 5 * n := by rel [hn]
+    _ = 2 * n + 3 * n := by ring
+    _ ≥ 2 * n + 3 * 5 := by rel [hn]
+    _ = 2 * n + 11 + 4 := by ring
+    _ > 2 * n + 11 := by exact Int.lt.intro rfl
 
 -- Example 1.4.7
 example {m n : ℤ} (h : m ^ 2 + n ≤ 2) : n ≤ 2 :=
   calc
-    n ≤ m ^ 2 + n := by extra
+    n ≤ m ^ 2 + n := by extra -- squares are positive
     _ ≤ 2 := by rel [h]
 
 
@@ -76,10 +82,10 @@ example {m n : ℤ} (h : m ^ 2 + n ≤ 2) : n ≤ 2 :=
 -- Exercise: replace the words "sorry" with the correct Lean justification.
 example {x y : ℝ} (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 < 3 :=
   calc
-    (x + y) ^ 2 ≤ (x + y) ^ 2 + (x - y) ^ 2 := by sorry
-    _ = 2 * (x ^ 2 + y ^ 2) := by sorry
-    _ ≤ 2 * 1 := by sorry
-    _ < 3 := by sorry
+    (x + y) ^ 2 ≤ (x + y) ^ 2 + (x - y) ^ 2 := by extra
+    _ = 2 * (x ^ 2 + y ^ 2) := by ring
+    _ ≤ 2 * 1 := by rel [h]
+    _ < 3 := by ring
 
 -- Example 1.4.9
 -- Exercise: replace the words "sorry" with the correct Lean justification.
@@ -87,12 +93,12 @@ example {a b : ℚ} (h1 : a ≥ 0) (h2 : b ≥ 0) (h3 : a + b ≤ 8) :
     3 * a * b + a ≤ 7 * b + 72 :=
   calc
     3 * a * b + a
-      ≤ 2 * b ^ 2 + a ^ 2 + (3 * a * b + a) := by sorry
-    _ = 2 * ((a + b) * b) + (a + b) * a + a := by sorry
-    _ ≤ 2 * (8 * b) + 8 * a + a := by sorry
-    _ = 7 * b + 9 * (a + b) := by sorry
-    _ ≤ 7 * b + 9 * 8 := by sorry
-    _ = 7 * b + 72 := by sorry
+      ≤ 2 * b ^ 2 + a ^ 2 + (3 * a * b + a) := by extra -- b², a² ≥ 0
+    _ = 2 * ((a + b) * b) + (a + b) * a + a := by ring
+    _ ≤ 2 * (8 * b) + 8 * a + a := by rel [h3]
+    _ = 7 * b + 9 * (a + b) := by ring
+    _ ≤ 7 * b + 9 * 8 := by rel [h3]
+    _ = 7 * b + 72 := by ring
 
 -- Example 1.4.10
 example {a b c : ℝ} :
