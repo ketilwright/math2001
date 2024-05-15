@@ -125,7 +125,7 @@ example {x y : ℤ} (h1 : x + 3 ≥ 2 * y) (h2 : 1 ≤ y) : x ≥ -1 :=
     _ = -1 := by ring
 
 -- clearly b ≥ 1/2, now to convince lean
-example {a b : ℚ} (h1 : /- 3 ≤ a -/ a ≥ 3) (h2 : a + 2 * b ≥ 4) : a + b ≥ 3 :=
+example {a b : ℚ} (h1 : 3 ≤ a) (h2 : a + 2 * b ≥ 4) : a + b ≥ 3 :=
   calc a + b
     _ = (a + 2 * b + a) / 2 := by ring
     _ ≥ (4 + a) / 2 := by rel [h2]
