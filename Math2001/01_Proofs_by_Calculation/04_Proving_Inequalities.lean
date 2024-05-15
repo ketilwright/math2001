@@ -133,17 +133,34 @@ example {a b : ℚ} (h1 : 3 ≤ a) (h2 : a + 2 * b ≥ 4) : a + b ≥ 3 :=
     _ ≥ 2 + 3 / 2 := by rel [h1]
     _ ≥ 3 := by numbers
 
-example {x : ℤ} (hx : x ≥ 9) : x ^ 3 - 8 * x ^ 2 + 2 * x ≥ 3 :=
-  sorry
+-- example {x : ℤ} (hx : x ≥ 9) : x ^ 3 - 8 * x ^ 2 + 2 * x ≥ 3 :=
+--   calc x ^ 3 - 8 * x ^ 2 + 2 * x
+--     _ = x * (x ^ 2 - 8 * x + 2) := by ring
+
+--     _ ≥ 3 := sorry
 
 example {n : ℤ} (hn : n ≥ 10) : n ^ 4 - 2 * n ^ 2 > 3 * n ^ 3 :=
-  sorry
+  calc n ^ 4 - 2 * n ^ 2
+    _ > 3 * n ^ 3 := sorry
 
 example {n : ℤ} (h1 : n ≥ 5) : n ^ 2 - 2 * n + 3 > 14 :=
-  sorry
+  calc n ^ 2 - 2 * n + 3
+    _ = n * (n - 2) + 3 := by ring
+    _ > n * (n - 2) + 0 := by extra
+    _ ≥ 5 * (5 - 2) + 0 := by rel [h1]
+    _ > 14 := by numbers
 
 example {x : ℚ} : x ^ 2 - 2 * x ≥ -1 :=
-  sorry
+  calc x ^ 2 - 2 * x
+    _ = x ^ 2 - 2 * x - 0 := by ring
+    _ ≥ x ^ 2 - 2 * x - 3 := by extra
+
+    _ = (x + 1) * (x - 3) := by ring
+
+    _ ≥ -1 := sorry
 
 example (a b : ℝ) : a ^ 2 + b ^ 2 ≥ 2 * a * b :=
-  sorry
+  calc a ^ 2 + b ^ 2
+    _ = a ^ 2 + b ^ 2 + 2 * a * b - 2 * a * b := by ring
+    _ = (a - b) ^ 2 + 2 * a * b := by ring
+    _ ≥ 2 * a * b := by extra
