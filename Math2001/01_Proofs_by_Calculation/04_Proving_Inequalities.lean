@@ -1,7 +1,7 @@
 /- Copyright (c) Heather Macbeth, 2022.  All rights reserved. -/
 import Mathlib.Data.Real.Basic
 import Library.Basic
-
+set_option maxHeartbeats 10000000
 math2001_init
 
 /-! # Section 1.4: Proving inequalities -/
@@ -85,7 +85,8 @@ example {x y : ℝ} (h : x ^ 2 + y ^ 2 ≤ 1) : (x + y) ^ 2 < 3 :=
     (x + y) ^ 2 ≤ (x + y) ^ 2 + (x - y) ^ 2 := by extra
     _ = 2 * (x ^ 2 + y ^ 2) := by ring
     _ ≤ 2 * 1 := by rel [h]
-    _ < 3 := by ring
+    _ = 2 := by ring
+    _ < 3 := by numbers
 
 -- Example 1.4.9
 -- Exercise: replace the words "sorry" with the correct Lean justification.
@@ -116,12 +117,21 @@ example {a b c : ℝ} :
 Solve these problems yourself.  You may find it helpful to solve them on paper before typing them
 up in Lean. -/
 
-
 example {x y : ℤ} (h1 : x + 3 ≥ 2 * y) (h2 : 1 ≤ y) : x ≥ -1 :=
-  sorry
+  calc x
+    _ = x + 3 - 3 := by ring
+    _ ≥ 2 * y - 3 := by rel [h1]
+    _ ≥ 2 * 1 - 3 := by rel [h2]
+    _ = -1 := by ring
 
-example {a b : ℚ} (h1 : 3 ≤ a) (h2 : a + 2 * b ≥ 4) : a + b ≥ 3 :=
-  sorry
+-- clearly b ≥ 1/2, now to convince lean
+example {a b : ℚ} (h1 : /- 3 ≤ a -/ a ≥ 3) (h2 : a + 2 * b ≥ 4) : a + b ≥ 3 :=
+  calc a + b
+    _ = (a + 2 * b + a) / 2 := by ring
+    _ ≥ (4 + a) / 2 := by rel [h2]
+    _ = 2 + a / 2 := by ring
+    _ ≥ 2 + 3 / 2 := by rel [h1]
+    _ ≥ 3 := by numbers
 
 example {x : ℤ} (hx : x ≥ 9) : x ^ 3 - 8 * x ^ 2 + 2 * x ≥ 3 :=
   sorry
