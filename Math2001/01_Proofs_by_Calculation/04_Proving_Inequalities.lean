@@ -152,12 +152,9 @@ example {n : ℤ} (h1 : n ≥ 5) : n ^ 2 - 2 * n + 3 > 14 :=
 
 example {x : ℚ} : x ^ 2 - 2 * x ≥ -1 :=
   calc x ^ 2 - 2 * x
-    _ = x ^ 2 - 2 * x - 0 := by ring
-    _ ≥ x ^ 2 - 2 * x - 3 := by extra
-
-    _ = (x + 1) * (x - 3) := by ring
-
-    _ ≥ -1 := sorry
+    _ = x ^ 2 - 2 * x + 1 - 1 := by ring
+    _ = (x - 1) ^ 2 - 1 := by ring
+    _ ≥ -1 := by extra
 
 example (a b : ℝ) : a ^ 2 + b ^ 2 ≥ 2 * a * b :=
   calc a ^ 2 + b ^ 2
