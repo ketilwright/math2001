@@ -141,11 +141,22 @@ example {x : ℤ} (hx : x ≥ 9) : x ^ 3 - 8 * x ^ 2 + 2 * x ≥ 3 :=
     _ ≥ (9 - 8) * (x ^ 2 + 2) := by rel [hx]
     _ = x ^ 2 + 2 := by ring
     _ ≥ 9 ^ 2 + 2 := by rel [hx]
+    _ = 83 := by ring
     _ ≥ 3 := by numbers
 
+-- TODO: cleam up this hideous mess.
 example {n : ℤ} (hn : n ≥ 10) : n ^ 4 - 2 * n ^ 2 > 3 * n ^ 3 :=
   calc n ^ 4 - 2 * n ^ 2
-    _ > 3 * n ^ 3 := sorry
+    _ = n ^ 4 - 2 * n ^ 2 - 0 := by ring
+    _ > n ^ 4 - 2 * n ^ 2 - 2 * n ^ 2 := by extra
+    _ = n ^ 4 - 3 * n ^ 3 - 4 * n ^ 2 + 3 * n ^ 3 := by ring
+    _ = n ^ 2 * (n ^ 2 - 3 * n - 4) + 3 * n ^ 3 := by ring
+    _ = n ^ 2 * (n - 4) * (n + 1) + 3 * n ^ 3 := by ring
+    _ ≥ n ^ 2 * (10 - 4) * (n + 1) + 3 * n ^ 3 := by rel [hn]
+    _ = 6 * n ^ 2 * (n + 1) + 3 * n ^ 3 := by ring
+    _ ≥ 6 * n ^ 2 * (10 + 1) + 3 * n ^ 3 := by rel [hn]
+    _ = 3 * n ^ 3 + 66 * n ^ 2 := by ring
+    _ > 3 * n ^ 3 := by extra
 
 example {n : ℤ} (h1 : n ≥ 5) : n ^ 2 - 2 * n + 3 > 14 :=
   calc n ^ 2 - 2 * n + 3
