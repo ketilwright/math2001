@@ -144,7 +144,7 @@ example {x : ℤ} (hx : x ≥ 9) : x ^ 3 - 8 * x ^ 2 + 2 * x ≥ 3 :=
     _ = 83 := by ring
     _ ≥ 3 := by numbers
 
--- TODO: cleam up this hideous mess.
+-- TODO: clean up this hideous mess.
 example {n : ℤ} (hn : n ≥ 10) : n ^ 4 - 2 * n ^ 2 > 3 * n ^ 3 :=
   calc n ^ 4 - 2 * n ^ 2
     _ = n ^ 4 - 2 * n ^ 2 - 0 := by ring
