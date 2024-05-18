@@ -14,27 +14,28 @@ example {a b : ℝ} (h1 : a - 5 * b = 4) (h2 : b + 2 = 3) : a = 9 := by
 
 
 example {m n : ℤ} (h1 : m + 3 ≤ 2 * n - 1) (h2 : n ≤ 5) : m ≤ 6 := by
-  have h3 :=
+  have h3 := -- m + 3 ≤ 9
   calc
-    m + 3 ≤ 2 * n - 1 := by rel [h1]
+    m + 3 ≤ 2 * n - 1 := by rel [h1] -- why is rel used here? just h1 works
     _ ≤ 2 * 5 - 1 := by rel [h2]
     _ = 9 := by numbers
   addarith [h3]
 
 
 example {r s : ℚ} (h1 : s + 3 ≥ r) (h2 : s + r ≤ 3) : r ≤ 3 := by
-  have h3 : r ≤ 3 + s := by sorry -- justify with one tactic
-  have h4 : r ≤ 3 - s := by sorry -- justify with one tactic
+  have h3 : r ≤ 3 + s := by addarith [h1]
+  have h4 : r ≤ 3 - s := by addarith [h2]
   calc
-    r = (r + r) / 2 := by sorry -- justify with one tactic
-    _ ≤ (3 - s + (3 + s)) / 2 := by sorry -- justify with one tactic
-    _ = 3 := by sorry -- justify with one tactic
+    r = (r + r) / 2 := by ring
+    _ ≤ (3 - s + (3 + s)) / 2 := by rel [h4, h3]
+    _ = 3 := by ring
 
 example {t : ℝ} (h1 : t ^ 2 = 3 * t) (h2 : t ≥ 1) : t ≥ 2 := by
   have h3 :=
   calc t * t = t ^ 2 := by ring
     _ = 3 * t := by rw [h1]
-  cancel t at h3
+  cancel t at h3 -- sort of "rewrites" t * t = 3 * t ↔ t = 3
+                 -- this works since t ≠ 0 from h2
   addarith [h3]
 
 
@@ -43,18 +44,60 @@ example {a b : ℝ} (h1 : a ^ 2 = b ^ 2 + 1) (h2 : a ≥ 0) : a ≥ 1 := by
   calc
     a ^ 2 = b ^ 2 + 1 := by rw [h1]
     _ ≥ 1 := by extra
-    _ = 1 ^ 2 := by ring
-  cancel 2 at h3
+    _ = 1 ^ 2 := by ring -- a ^ 2 ≥ 1 ^ 2
+  cancel 2 at h3 -- works with exponents when base non negative
 
 
 example {x y : ℤ} (hx : x + 3 ≤ 2) (hy : y + 2 * x ≥ 3) : y > 3 := by
-  sorry
+  have h1: x ≤ -1 :=
+    calc x
+      _ = x + 3 - 3 := by ring
+      _ ≤ 2 - 3 := by rel [hx]
+      _ ≤ -1 := by numbers
+  calc y
+    _ = y + 2 * x - 2 * x := by ring
+    _ ≥ 3 - 2 * x := by rel [hy]
+    _ ≥ 3 - 2 * (-1) := by rel [h1]
+    _ > 3 := by numbers
 
+-- I must be missing some point here. The text claims
+-- lean will find that (b + a) * (b - a) is non negative on its own
 example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
-  sorry
+  have h3: 0 ≤ b + a := by addarith [h1]
+  have h4: 0 ≤ b - a := by addarith [h2]
+  have h5: 0 ≤ (b + a) * (b - a) := mul_nonneg h3 h4
+  calc a ^ 2
+    _ ≤ a ^ 2 + (b + a) * (b - a) := le_add_of_nonneg_right h5
+    _ = b ^ 2 := by ring
+
+-- Maybe they're looking for something like this:
+example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
+  have h3: 0 ≤ b + a := by addarith [h1]
+  have h4: 0 ≤ b - a := by addarith [h2]
+  have h5: b ^ 2 - a ^ 2 ≥ 0 :=
+    calc b ^ 2 - a ^ 2
+      _ = (b + a) * (b - a) := by ring
+      _ ≥ 0 := mul_nonneg h3 h4
+  addarith [h5]
+
 
 example (a b : ℝ) (h : a ≤ b) : a ^ 3 ≤ b ^ 3 := by
-  sorry
+  have h2: 0 ≤ b - a := by addarith [h]
+  have h3: ((b - a) * ((b - a) ^ 2) + 3 * (b + a) ^ 2) / 4 ≥ 0 := by extra
+  have h4: b ^ 3 - a ^ 3 = (b - a) * (b ^ 2 + b * a + a ^ 2) := by ring
+
+  have h5: b ^ 2 ≥ 0 := by extra
+  have h6: a ^ 2 ≥ 0 := by extra
+  have h7: (b + a) ^ 2 ≥ (b ^ 2 + b * a + a ^ 2) := by
+    calc
+    done
+  --have h5: b ^ 2 + b * a + a ^ 2 ≥ 0 := by extra
+  --have h6: b ^ 3 - a ^ 3 ≥ 0 :=
+  calc a ^ 3
+    _ ≤ a ^ 3 + ((b - a) * ((b - a) ^ 2) + 3 * (b + a) ^ 2) / 4 := by addarith [h3]
+
+    _ = b ^ 3 := by ring
+
 
 /-! # Exercises -/
 
