@@ -144,6 +144,14 @@ example {x : ℤ} (hx : x ≥ 9) : x ^ 3 - 8 * x ^ 2 + 2 * x ≥ 3 :=
     _ = 83 := by ring
     _ ≥ 3 := by numbers
 
+example {n : ℤ} (hn : n ≥ 10) : n ^ 4 - 2 * n ^ 2 > 3 * n ^ 3 :=
+  calc n ^ 4 - 2 * n ^ 2
+    _ = n ^ 4 - 2 * n ^ 2 - 0 := by ring
+    _ > n ^ 4 - 2 * n ^ 2 - 2 * n ^ 2 := by extra
+    _ = n ^ 2 * (n - 4) * (n + 1) + 3 * n ^ 3 := by ring
+    _ ≥ n ^ 2 * (10 - 4) * (n + 1) + 3 * n ^ 3 := by rel [hn]
+    _ ≥ 10 ^ 2 * (10 - 4) * (10 + 1) + 3 * n ^ 3 := by rel [hn]
+    _ > 3 * n ^ 3 := by extra
 -- TODO: clean up this hideous mess.
 example {n : ℤ} (hn : n ≥ 10) : n ^ 4 - 2 * n ^ 2 > 3 * n ^ 3 :=
   calc n ^ 4 - 2 * n ^ 2
