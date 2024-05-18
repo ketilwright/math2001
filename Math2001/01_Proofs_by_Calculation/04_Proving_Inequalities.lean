@@ -149,21 +149,10 @@ example {n : ℤ} (hn : n ≥ 10) : n ^ 4 - 2 * n ^ 2 > 3 * n ^ 3 :=
     _ = n ^ 4 - 2 * n ^ 2 - 0 := by ring
     _ > n ^ 4 - 2 * n ^ 2 - 2 * n ^ 2 := by extra
     _ = n ^ 2 * (n - 4) * (n + 1) + 3 * n ^ 3 := by ring
+    -- not clear to me why it's necessary to issue rel(hn) on 10 - 4
+    -- in isolation
     _ ≥ n ^ 2 * (10 - 4) * (n + 1) + 3 * n ^ 3 := by rel [hn]
     _ ≥ 10 ^ 2 * (10 - 4) * (10 + 1) + 3 * n ^ 3 := by rel [hn]
-    _ > 3 * n ^ 3 := by extra
--- TODO: clean up this hideous mess.
-example {n : ℤ} (hn : n ≥ 10) : n ^ 4 - 2 * n ^ 2 > 3 * n ^ 3 :=
-  calc n ^ 4 - 2 * n ^ 2
-    _ = n ^ 4 - 2 * n ^ 2 - 0 := by ring
-    _ > n ^ 4 - 2 * n ^ 2 - 2 * n ^ 2 := by extra
-    _ = n ^ 4 - 3 * n ^ 3 - 4 * n ^ 2 + 3 * n ^ 3 := by ring
-    _ = n ^ 2 * (n ^ 2 - 3 * n - 4) + 3 * n ^ 3 := by ring
-    _ = n ^ 2 * (n - 4) * (n + 1) + 3 * n ^ 3 := by ring
-    _ ≥ n ^ 2 * (10 - 4) * (n + 1) + 3 * n ^ 3 := by rel [hn]
-    _ = 6 * n ^ 2 * (n + 1) + 3 * n ^ 3 := by ring
-    _ ≥ 6 * n ^ 2 * (10 + 1) + 3 * n ^ 3 := by rel [hn]
-    _ = 3 * n ^ 3 + 66 * n ^ 2 := by ring
     _ > 3 * n ^ 3 := by extra
 
 example {n : ℤ} (h1 : n ≥ 5) : n ^ 2 - 2 * n + 3 > 14 :=
