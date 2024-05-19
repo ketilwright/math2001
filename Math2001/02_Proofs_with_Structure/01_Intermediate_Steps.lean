@@ -82,7 +82,7 @@ example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
 
 example (a b : ℝ) (h : a ≤ b) : a ^ 3 ≤ b ^ 3 := by
   have h1: b - a ≥ 0 := by addarith [h]
-
+  -- the intermediate steps
   have h2: ((b - a) * ((b - a) ^ 2 + 3 * (b + a) ^ 2)) / 4 = b ^ 3 - a ^ 3 :=
     calc ((b - a) * ((b - a) ^ 2 + 3 * (b + a) ^ 2)) / 4
       _ = ((b - a) * (b ^ 2 - 2 * a * b + a ^ 2 + 3 * b ^ 2 + 6 * a * b + 3 * a ^ 2)) / 4 := by ring
