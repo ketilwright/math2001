@@ -80,22 +80,18 @@ example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
       _ ≥ 0 := mul_nonneg h3 h4
   addarith [h5]
 
-
 example (a b : ℝ) (h : a ≤ b) : a ^ 3 ≤ b ^ 3 := by
-  have h2: 0 ≤ b - a := by addarith [h]
-  have h3: ((b - a) * ((b - a) ^ 2) + 3 * (b + a) ^ 2) / 4 ≥ 0 := by extra
-  have h4: b ^ 3 - a ^ 3 = (b - a) * (b ^ 2 + b * a + a ^ 2) := by ring
+  have h1: b - a ≥ 0 := by addarith [h]
 
-  have h5: b ^ 2 ≥ 0 := by extra
-  have h6: a ^ 2 ≥ 0 := by extra
-  have h7: (b + a) ^ 2 ≥ (b ^ 2 + b * a + a ^ 2) := by
-    calc
-    done
-  --have h5: b ^ 2 + b * a + a ^ 2 ≥ 0 := by extra
-  --have h6: b ^ 3 - a ^ 3 ≥ 0 :=
+  have h2: ((b - a) * ((b - a) ^ 2 + 3 * (b + a) ^ 2)) / 4 = b ^ 3 - a ^ 3 :=
+    calc ((b - a) * ((b - a) ^ 2 + 3 * (b + a) ^ 2)) / 4
+      _ = ((b - a) * (b ^ 2 - 2 * a * b + a ^ 2 + 3 * b ^ 2 + 6 * a * b + 3 * a ^ 2)) / 4 := by ring
+      _ = ((b - a) * (4 * b ^ 2 + 4 * a * b + 4 * a ^ 2)) / 4 := by ring
+      _ = b ^ 3 - a ^ 3 := by ring
+
   calc a ^ 3
-    _ ≤ a ^ 3 + ((b - a) * ((b - a) ^ 2) + 3 * (b + a) ^ 2) / 4 := by addarith [h3]
-
+    _ ≤ a ^ 3 + ((b - a) * ((b - a) ^ 2 + 3 * (b + a) ^ 2)) / 4 := by extra
+    _ = a ^ 3 + (b ^ 3 - a ^ 3) := by rw [← h2]
     _ = b ^ 3 := by ring
 
 
