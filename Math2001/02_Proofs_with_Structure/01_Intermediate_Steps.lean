@@ -115,7 +115,23 @@ example {x : ℚ} (h1 : x ^ 2 = 4) (h2 : 1 < x) : x = 2 := by
     _ = 2 := by numbers
 
 example {n : ℤ} (hn : n ^ 2 + 4 = 4 * n) : n = 2 := by
-  sorry
+  have h1 :=
+    calc (n - 2) ^ 2
+      _ = n ^ 2 + 4 - 4 * n:= by ring
+      _ = 4 * n - 4 * n := by rw [hn]
+      _ = 0 := by ring
+  calc n
+    _ = n - 2 + 2 := by ring
+    _ = 0 + 2 := by rw [pow_eq_zero h1] -- xⁿ = 0 → x = 0
+    _ = 2 := by ring
+
 
 example (x y : ℚ) (h : x * y = 1) (h2 : x ≥ 1) : y ≤ 1 := by
-  sorry
+  have h1: 0 < 1 := by numbers
+  have h3: 0 < x * y := by exact Eq.trans_gt (id h.symm) rfl
+  cancel x at h3
+  have h4: ¬ x = 0 := by exact left_ne_zero_of_mul_eq_one h
+  calc y
+    _ = x * y / x := by exact CancelDenoms.cancel_factors_eq_div rfl h4
+    _ = 1 / x := by rw [h]
+    _ ≤ 1 := by exact div_le_self rfl h2
