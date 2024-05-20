@@ -12,14 +12,18 @@ example {x : ℚ} (hx : 3 * x = 2) : x ≠ 1 := by
     _ < 1 := by numbers
 
 example {y : ℝ} : y ^ 2 + 1 ≠ 0 := by
-  sorry
+  apply ne_of_gt -- goal becomes 0 < y² + 1
+  calc 0
+    _ ≤ y ^ 2 := by extra
+    _ = y ^ 2 + 0 := by ring -- is this step really necessary?
+    _ < y ^ 2 + 1 := by extra
 
 example {a b : ℝ} (h1 : a ^ 2 + b ^ 2 = 0) : a ^ 2 = 0 := by
   apply le_antisymm
   calc
     a ^ 2 ≤ a ^ 2 + b ^ 2 := by extra
     _ = 0 := h1
-  extra
+  extra -- satisfies 0 ≤ a²
 
 
 /-! # Exercises -/

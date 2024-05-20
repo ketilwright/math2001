@@ -127,7 +127,7 @@ example {n : ℤ} (hn : n ^ 2 + 4 = 4 * n) : n = 2 := by
 
 
 example (x y : ℚ) (h : x * y = 1) (h2 : x ≥ 1) : y ≤ 1 := by
-  have h1: 0 < 1 := by numbers
+  --have h1: 0 < 1 := by numbers
   have h3: 0 < x * y := by exact Eq.trans_gt (id h.symm) rfl
   cancel x at h3
   have h4: ¬ x = 0 := by exact left_ne_zero_of_mul_eq_one h
