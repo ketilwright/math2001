@@ -47,7 +47,6 @@ example {a b : ℝ} (h1 : a ^ 2 = b ^ 2 + 1) (h2 : a ≥ 0) : a ≥ 1 := by
     _ = 1 ^ 2 := by ring -- a ^ 2 ≥ 1 ^ 2
   cancel 2 at h3 -- works with exponents when base non negative
 
-
 example {x y : ℤ} (hx : x + 3 ≤ 2) (hy : y + 2 * x ≥ 3) : y > 3 := by
   have h1: x ≤ -1 :=
     calc x
@@ -97,9 +96,23 @@ example (a b : ℝ) (h : a ≤ b) : a ^ 3 ≤ b ^ 3 := by
 
 /-! # Exercises -/
 
-
+-- a more convoluted approach than that suggested in math2001
+-- TODO: implement her way
 example {x : ℚ} (h1 : x ^ 2 = 4) (h2 : 1 < x) : x = 2 := by
-  sorry
+  have h3: x ^ 2 + 4 * x + 4 = 4 * x + 8 := by addarith [h1]
+  have h4: x ^ 2 + 4 * x + 4 = (x + 2) * (x + 2) := by ring
+  have h5: 4 * x + 8 = (2 + 2) * (x + 2) := by ring
+  rw [h4, h5] at h3
+  have h6: 1 + 2 < x + 2 := by rel [h2]
+  have h7:=
+    calc x + 2
+      _ > 1 + 2 := by rel [h2]
+      _ > 0 := by numbers
+  cancel (x + 2) at h3
+  calc x
+    _ = x + 2 - 2 := by ring
+    _ = 2 + 2 - 2 := by rw [h3]
+    _ = 2 := by numbers
 
 example {n : ℤ} (hn : n ^ 2 + 4 = 4 * n) : n = 2 := by
   sorry
