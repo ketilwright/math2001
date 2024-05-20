@@ -30,7 +30,17 @@ example {a b : ℝ} (h1 : a ^ 2 + b ^ 2 = 0) : a ^ 2 = 0 := by
 
 
 example {m : ℤ} (hm : m + 1 = 5) : 3 * m ≠ 6 := by
-  sorry
+  have h1 :=
+    calc m
+      _ = m + 1 - 1 := by ring
+      _ = 5 - 1 := by rw[hm]
+      _ = 4 := by numbers
+  have h2 :=
+    calc 3 * m
+      _ = 3 * 4 := by rw [h1]
+      _ = 12 := by ring
+  rw [h2]; /-12 ≠ 6 -/ numbers
+
 
 example {s : ℚ} (h1 : 3 * s ≤ -6) (h2 : 2 * s ≥ -4) : s = -2 := by
   sorry
