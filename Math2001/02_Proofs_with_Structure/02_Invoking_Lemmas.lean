@@ -41,6 +41,14 @@ example {m : ℤ} (hm : m + 1 = 5) : 3 * m ≠ 6 := by
       _ = 12 := by ring
   rw [h2]; /-12 ≠ 6 -/ numbers
 
-
 example {s : ℚ} (h1 : 3 * s ≤ -6) (h2 : 2 * s ≥ -4) : s = -2 := by
-  sorry
+  apply le_antisymm
+  calc s
+    _ = 3 * s / 3 := by ring
+    _ ≤ - 6 / 3 := by rel [h1]
+    _ = -2 := by ring
+  calc - 2
+    -- won't work without Q
+    _ = -(4: ℚ) / 2 := by ring
+    _ ≤ 2 * s / 2 := by rel [h2]
+    _ = s := by ring
