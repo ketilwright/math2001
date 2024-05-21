@@ -48,7 +48,7 @@ example {s : ℚ} (h1 : 3 * s ≤ -6) (h2 : 2 * s ≥ -4) : s = -2 := by
     _ ≤ - 6 / 3 := by rel [h1]
     _ = -2 := by ring
   calc - 2
-    -- won't work without Q
+    -- won't work without Q-cast
     _ = -(4: ℚ) / 2 := by ring
     _ ≤ 2 * s / 2 := by rel [h2]
     _ = s := by ring

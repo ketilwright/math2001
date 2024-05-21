@@ -6,6 +6,7 @@ math2001_init
 
 
 example {x y : ℝ} (h : x = 1 ∨ y = -1) : x * y + x = y + 1 := by
+  -- splits h into statements hx and hy
   obtain hx | hy := h
   calc
     x * y + x = 1 * y + 1 := by rw [hx]
@@ -16,16 +17,27 @@ example {x y : ℝ} (h : x = 1 ∨ y = -1) : x * y + x = y + 1 := by
     _ = y + 1 := by rw [hy]
 
 example {n : ℕ} : n ^ 2 ≠ 2 := by
+  -- It's exhaustive to consider the cases
+  -- (1) n ≤ 1 and (2) 2 ≤ n
   have hn := le_or_succ_le n 1
+  -- note hn on both sides of |. How clever.
   obtain hn | hn := hn
+  -- 1) suppose n ≤ 1
   apply ne_of_lt
   calc
     n ^ 2 ≤ 1 ^ 2 := by rel [hn]
     _ < 2 := by numbers
-  sorry
+  -- 2) suppose n ≥ 2
+  apply ne_of_gt -- lean reverses the inequality (which doesn't appear to matter)
+  calc n ^ 2
+    _ = n * n := by ring
+    _ ≥ 2 * 2 := by rel [hn]
+    _ > 2 := by numbers
+  -- "this exhausts all possible cases & we conclude blah . . ."
 
 example {x : ℝ} (hx : 2 * x + 1 = 5) : x = 1 ∨ x = 2 := by
-  right
+  right -- just prove the right side. It is unclear in the text
+        -- how one would assume the negation of the left disjunct
   calc
     x = (2 * x + 1 - 1) / 2 := by ring
     _ = (5 - 1) / 2 := by rw [hx]
@@ -37,8 +49,22 @@ example {x : ℝ} (hx : x ^ 2 - 3 * x + 2 = 0) : x = 1 ∨ x = 2 := by
     calc
     (x - 1) * (x - 2) = x ^ 2 - 3 * x + 2 := by ring
     _ = 0 := by rw [hx]
+  -- transforms (x - 1)(x - 2) = 0 into x - 1 = 0 ∨ x - 2 = 0
   have h2 := eq_zero_or_eq_zero_of_mul_eq_zero h1
-  sorry
+
+  obtain h2 | h2 := h2
+  -- now we have 2 goals / cases on h2
+  left
+  calc x
+    _ = x - 1 + 1 := by ring
+    _ = 0 + 1 := by rw [h2]
+    _ = 1 := by numbers
+  right
+  calc x
+    _ = x - 2 + 2 := by ring
+    _ = 0 + 2 := by rw [h2]
+    _ = 2 := by ring
+
 
 example {n : ℤ} : n ^ 2 ≠ 2 := by
   have hn0 := le_or_succ_le n 0
