@@ -36,8 +36,7 @@ example {n : ℕ} : n ^ 2 ≠ 2 := by
   -- "this exhausts all possible cases & we conclude blah . . ."
 
 example {x : ℝ} (hx : 2 * x + 1 = 5) : x = 1 ∨ x = 2 := by
-  right -- just prove the right side. It is unclear in the text
-        -- how one would assume the negation of the left disjunct
+  right -- prove right side of disjunct goal (left is false)
   calc
     x = (2 * x + 1 - 1) / 2 := by ring
     _ = (5 - 1) / 2 := by rw [hx]
@@ -98,25 +97,68 @@ example {n : ℤ} : n ^ 2 ≠ 2 := by
 
 
 example {x : ℚ} (h : x = 4 ∨ x = -4) : x ^ 2 + 1 = 17 := by
-  sorry
+  obtain h | h := h
+  calc x ^ 2 + 1
+    _ = 4 ^ 2 + 1 := by rw [h]
+    _ = 17 := by numbers
+
+  calc x ^ 2 + 1
+    _ = (-4) ^ 2 + 1 := by rw [h]
+    _ = 17 := by numbers
 
 example {x : ℝ} (h : x = 1 ∨ x = 2) : x ^ 2 - 3 * x + 2 = 0 := by
-  sorry
+  obtain h | h := h
+  -- suppose x = 1
+  calc x ^ 2 - 3 * x + 2
+    _ = 1 ^ 2 - 3 * 1 + 2 := by rw [h]
+    _ = 0 := by ring
+  -- suppose x = 2
+  calc x ^ 2 - 3 * x + 2
+    _ = 2 ^ 2 - 3 * 2 + 2 := by rw [h]
+    _ = 0 := by ring
 
 example {t : ℚ} (h : t = -2 ∨ t = 3) : t ^ 2 - t - 6 = 0 := by
-  sorry
+  obtain h | h := h
+  -- suppose t = - 2
+  calc t ^ 2 - t - 6
+    _ = (-2) ^ 2 - (-2) - 6 := by rw [h]
+    _ = 0 := by ring
+  -- t = 3
+  calc t ^ 2 - t - 6
+    _ = 3 ^ 2 - (3) - 6 := by rw [h]
+    _ = 0 := by ring
 
 example {x y : ℝ} (h : x = 2 ∨ y = -2) : x * y + 2 * x = 2 * y + 4 := by
-  sorry
+  obtain h | h := h
+  -- suppose x = 2
+  calc x * y + 2 * x
+    _ = 2 * y + 2 * 2 := by rw [h]
+    _ = 2 * y + 4 := by ring
+  -- suppose y = -2
+  -- then replace y by - 2 & we're done □
+  rw [h]; ring
+
 
 example {s t : ℚ} (h : s = 3 - t) : s + t = 3 ∨ s + t = 5 := by
-  sorry
+  left
+  calc s + t
+    _ = 3 - t + t := by rw [h]
+    _ = 3 := by ring
 
 example {a b : ℚ} (h : a + 2 * b < 0) : b < a / 2 ∨ b < - a / 2 := by
-  sorry
+  right
+  calc b
+      _ = (a + 2 * b) / 2 - a / 2 := by ring
+      _ < 0 / 2 - a / 2 := by rel [h]
+      _ = - a  / 2 := by ring
 
 example {x y : ℝ} (h : y = 2 * x + 1) : x < y / 2 ∨ x > y / 2 := by
-  sorry
+  left
+  calc x
+    _ = (2 * x + 1) / 2 - 1 / 2 := by ring
+    _ = y / 2 - 1 / 2 := by rw [h]
+    _ < y / 2 - 1 / 2 + 1 / 2 := by extra
+    _ = y / 2 := by ring
 
 example {x : ℝ} (hx : x ^ 2 + 2 * x - 3 = 0) : x = -3 ∨ x = 1 := by
   sorry
