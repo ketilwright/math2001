@@ -263,7 +263,15 @@ example {t : ℤ} : 5 * t ≠ 18 := by
     _ ≥ 5 * 4 := by rel [ht]
     _ > 18 := by numbers
 
-
-
 example {m : ℕ} : m ^ 2 + 4 * m ≠ 46 := by
-  sorry
+  obtain hm | hm := le_or_succ_le m 5
+  -- suppose m ≤ 5
+  apply ne_of_lt
+  calc m ^ 2 + 4 * m
+    _ ≤ 5 ^ 2 + 4 * 5 := by rel [hm]
+    _ < 46 := by numbers
+  -- suppose 6 ≤ m
+  apply ne_of_gt
+  calc 46
+    _ < 6 ^ 2 + 4 * 6 := by numbers
+    _ ≤ m ^ 2 + 4 * m := by rel [hm]
