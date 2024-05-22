@@ -161,22 +161,109 @@ example {x y : ℝ} (h : y = 2 * x + 1) : x < y / 2 ∨ x > y / 2 := by
     _ = y / 2 := by ring
 
 example {x : ℝ} (hx : x ^ 2 + 2 * x - 3 = 0) : x = -3 ∨ x = 1 := by
-  sorry
+  have h1 :=
+    calc x ^ 2 + 2 * x - 3
+      _ = (x + 3) * (x - 1) := by ring
+  rw [h1] at hx
+  have h2: x + 3 = 0 ∨ x - 1 = 0 := eq_zero_or_eq_zero_of_mul_eq_zero hx
+  obtain h2 | h2 := h2
+  left
+  calc x
+    _ = x + 3 - 3 := by ring
+    _ = 0 - 3 := by rw [h2]
+    _ = -3 := by numbers
+  right
+  calc x
+    _ = x - 1 + 1 := by ring
+    _ = 0 + 1 := by rw [h2]
+    _ = 1 := by numbers
+
 
 example {a b : ℝ} (hab : a ^ 2 + 2 * b ^ 2 = 3 * a * b) : a = b ∨ a = 2 * b := by
-  sorry
+  -- a² + 3ab + 2b² = (a-b)(a-2b)
+  have h1 :=
+    calc (a - b) * (a - 2 * b)
+      _ = a ^ 2 + 2 * b ^ 2 - 3 * a * b := by ring
+      _ = 3 * a * b - 3 * a * b := by rw [hab]
+      _ = 0 := by ring
+  -- obtain a disjunction of the quad
+  obtain h2 | h2 := eq_zero_or_eq_zero_of_mul_eq_zero h1
+  -- handle case a - b = 0
+  left
+  calc a
+    _ = a - b + b := by ring
+    _ = 0 + b := by rw [h2]
+    _ = b := by ring
+  -- handle case a - 2b = 0
+  right
+  calc a
+    _ = a - 2 * b + 2 * b := by ring
+    _ = 0 + 2 * b := by rw [h2]
+    _ = 2 * b := by ring
 
 example {t : ℝ} (ht : t ^ 3 = t ^ 2) : t = 1 ∨ t = 0 := by
-  sorry
+  have h1 :=
+    calc (t ^ 2) * (t - 1)
+      _ = t ^ 3 - t ^ 2 := by ring
+      _ = t ^ 2 - t ^ 2 := by rw [ht]
+      _ = 0 := by ring
+  -- obtain a disjunction
+  obtain h2 | h2 := eq_zero_or_eq_zero_of_mul_eq_zero h1
+  right
+  -- this is downright silly (pow_eq_zero closes the left side), but I'm trying to
+  -- avoid theorems buried in the depths of lean
+  obtain h5 | h5 := eq_zero_or_eq_zero_of_mul_eq_zero
+    (calc t * t
+      _ = t ^ 2 := by ring
+      _ = 0 := by rw [h2])
+  exact h5; exact h5 -- since h5 is t = 0 ∨ t = 0
+  left
+  calc t
+    _ = t - 1 + 1 := by ring
+    _ = 0 + 1 := by rw [h2]
+    _ = 1 := by numbers
 
 example {n : ℕ} : n ^ 2 ≠ 7 := by
-  sorry
+  -- handle the cases n ≤ 2 or n ≥ 3
+  obtain hn | hn := le_or_succ_le n 2
+  -- suppose n ≤ 2
+  apply ne_of_lt
+  calc n ^ 2
+    _ = n * n := by ring
+    _ ≤ 2 * 2 := by rel [hn]
+    _ < 7 := by numbers
+  -- suppose n ≥ 3
+  apply ne_of_gt
+  calc 7
+    _ < 3 ^ 2 := by numbers
+    _ ≤ n ^ 2 := by rel [hn]
+
 
 example {x : ℤ} : 2 * x ≠ 3 := by
-  sorry
+  obtain hx | hx := le_or_succ_le x 1
+  -- case x ≤ 1
+  apply ne_of_lt
+  calc 2 * x
+    _ ≤ 2 * 1 := by rel [hx]
+    _ < 3 := by numbers
+  -- case 2 ≤ x
+  apply ne_of_gt -- 3 < 2 * x
+  calc 2 * x
+    _ ≥ 2 * 2 := by rel [hx]
+    _ > 3 := by numbers
 
 example {t : ℤ} : 5 * t ≠ 18 := by
-  sorry
+  obtain ht | ht := le_or_succ_le t 3
+  apply ne_of_lt
+  calc 5 * t
+    _ ≤ 5 * 3 := by rel [ht]
+    _ < 18 := by numbers
+  apply ne_of_gt
+  calc 5 * t
+    _ ≥ 5 * 4 := by rel [ht]
+    _ > 18 := by numbers
+
+
 
 example {m : ℕ} : m ^ 2 + 4 * m ≠ 46 := by
   sorry
