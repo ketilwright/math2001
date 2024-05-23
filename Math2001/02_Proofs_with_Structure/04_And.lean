@@ -20,7 +20,12 @@ example {p : ℚ} (hp : p ^ 2 ≤ 8) : p ≥ -5 := by
       p ^ 2 ≤ 9 := by addarith [hp]
       _ = 3 ^ 2 := by numbers
     numbers
-  sorry
+  -- for future ref: type \< for  ⟨ and \> for ⟩
+  obtain ⟨h1, h2 ⟩ := hp'
+  calc p
+    _ ≥ -3 := h1
+    _ ≥ - 5 := by numbers
+
 
 example {a b : ℝ} (h1 : a - 5 * b = 4) (h2 : b + 2 = 3) : a = 9 ∧ b = 1 := by
   constructor
@@ -48,14 +53,38 @@ example {a b : ℝ} (h1 : a ^ 2 + b ^ 2 = 0) : a = 0 ∧ b = 0 := by
     calc
       a ^ 2 ≤ a ^ 2 + b ^ 2 := by extra
       _ = 0 := by rw [h1]
-    extra
-  sorry
+    extra --  a² nonnegative
+
+  have h3:=
+    calc a * a
+      _ = a ^ 2 := by ring
+      _ = 0 := h2
+  have h4:=
+    calc b * b--b ^ 2
+      _ = a ^ 2 + b ^ 2 - a ^ 2 := by ring
+      _ = 0 - a ^ 2 := by rw [h1]
+      _ = 0 - (0) := by rw [h2]
+      _ = 0 := by ring
+  constructor
+
+
+  obtain h5 | h5 := eq_zero_or_eq_zero_of_mul_eq_zero h3
+  apply h5; apply h5
+  obtain h6 | h6 := eq_zero_or_eq_zero_of_mul_eq_zero h4
+  apply h6; apply h6
+
 
 /-! # Exercises -/
 
-
 example {a b : ℚ} (H : a ≤ 1 ∧ a + b ≤ 3) : 2 * a + b ≤ 4 := by
-  sorry
+  obtain ⟨h1, h2⟩ := H
+  calc 2 * a + b
+    _ = 2 * a + (a + b - a) := by ring
+    _ ≤ 2 * a + (3 - a) := by rel [h2]
+    _ = a + 3 := by ring
+    _ ≤ 1 + 3 := by rel [h1]
+    _ = 4 := by numbers
+
 
 example {r s : ℝ} (H : r + s ≤ 1 ∧ r - s ≤ 5) : 2 * r ≤ 6 := by
   sorry
