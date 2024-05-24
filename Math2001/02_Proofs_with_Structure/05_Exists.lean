@@ -11,7 +11,7 @@ example {a : ℚ} (h : ∃ b : ℚ, a = b ^ 2 + 1) : a > 0 := by
     a = b ^ 2 + 1 := hb
     _ > 0 := by extra
 
-
+--#check ne_of_lt
 example {t : ℝ} (h : ∃ a : ℝ, a * t < 0) : t ≠ 0 := by
   obtain ⟨x, hxt⟩ := h
   have H := le_or_gt x 0
@@ -21,7 +21,19 @@ example {t : ℝ} (h : ∃ a : ℝ, a * t < 0) : t ≠ 0 := by
     cancel -x at hxt'
     apply ne_of_gt
     apply hxt'
-  · sorry
+  ·
+    -- sufficient to show t < 0
+    apply ne_of_lt
+    calc t
+      _ = x * t / x := by
+        calc t
+          _ = t * 1 := by ring
+          -- since x > 0 thus x ≠ 0 so x / x = 1
+          _ = t * (x / x) := by rw [div_self (ne_of_gt hx)]
+          _ = x * t / x := by ring
+      _ < 0 / x := by rel [hxt]
+      _ = 0 := by ring
+
 
 example : ∃ n : ℤ, 12 * n = 84 := by
   use 7
@@ -34,13 +46,25 @@ example (x : ℝ) : ∃ y : ℝ, y > x := by
 
 
 example : ∃ m n : ℤ, m ^ 2 - n ^ 2 = 11 := by
-  sorry
+  use 6; use 5; numbers
 
 example (a : ℤ) : ∃ m n : ℤ, m ^ 2 - n ^ 2 = 2 * a + 1 := by
-  sorry
+  use a + 1; use a;
+  --just ring works, but where's the fun in that?
+  calc (a + 1) ^ 2 - a ^ 2
+    _ = a ^ 2 + 2 * a + 1 - a ^ 2 := by ring
+    _ = 2 * a + 1 := by ring
+
 
 example {p q : ℝ} (h : p < q) : ∃ x, p < x ∧ x < q := by
-  sorry
+  use (p + q) / 2
+  constructor
+  calc p
+    _ = (p + p) / 2 := by ring
+    _ < (p + q) / 2 := by rel [h]
+  calc (p + q) / 2
+    _ < (q + q) / 2 := by rel [h]
+    _ = q := by ring
 
 example : ∃ a b c d : ℕ,
     a ^ 3 + b ^ 3 = 1729 ∧ c ^ 3 + d ^ 3 = 1729 ∧ a ≠ c ∧ a ≠ d := by
