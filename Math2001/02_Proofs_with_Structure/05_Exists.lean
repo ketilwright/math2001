@@ -81,17 +81,46 @@ example : ∃ a b c d : ℕ,
 
 
 example : ∃ t : ℚ, t ^ 2 = 1.69 := by
-  sorry
+  use 1.3; ring
 example : ∃ m n : ℤ, m ^ 2 + n ^ 2 = 85 := by
-  sorry
+  use 6; use 7; ring
 
 example : ∃ x : ℝ, x < 0 ∧ x ^ 2 < 1 := by
-  sorry
+  use -0.5
+  constructor
+  numbers
+  numbers
+
 example : ∃ a b : ℕ, 2 ^ a = 5 * b + 1 := by
-  sorry
+  use 0; use 0
+  numbers
 
 example (x : ℚ) : ∃ y : ℚ, y ^ 2 > x := by
-  sorry
+  have hx : x ^ 2 ≥ 0 := by extra
+  obtain h | h := le_or_gt x 0
+  -- suppose x ≤ 0
+  -- Then choose (x²+ 1)², which is > x
+  use x ^ 2 + 1;
+  calc (x ^ 2 + 1) ^ 2
+    _ = x ^ 4 + 2 * x ^ 2 + 1 := by ring
+    _ ≥ 1 := by extra
+    _ > 0 := by numbers
+    _ ≥ x := by rel [h]
+  -- Suppose x > 0
+  use x + 1
+  -- Since x > 0, 2x > x
+  have h2x:=
+    calc 2 * x
+      _ = x + x := by ring
+      _ > x + 0 := by rel [h]
+      _ = x := by ring
+  -- x² ≥ 0 and 2x > x, thus (x+1)² > x
+  calc (x + 1) ^ 2
+    _ = x ^ 2 + 2 * x + 1 := by ring
+    _ > x ^ 2 + x + 1 := by rel [h2x]
+    _ ≥ 0 + x + 1:= by rel [hx]
+    _ = x + 1 := by ring
+    _ > x := by extra
 
 example {t : ℝ} (h : ∃ a : ℝ, a * t + 1 < a + t) : t ≠ 1 := by
   sorry
