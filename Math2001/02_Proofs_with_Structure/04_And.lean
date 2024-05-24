@@ -155,8 +155,6 @@ example {x y : ℚ} (h : x + y = 5 ∧ x + 2 * y = 7) : x = 3 ∧ y = 2 := by
   addarith [h1, hy]
   apply hy
 
-
-
 example {a b : ℝ} (h1 : a * b = a) (h2 : a * b = b) :
     a = 0 ∧ b = 0 ∨ a = 1 ∧ b = 1 := by
 
@@ -173,12 +171,24 @@ example {a b : ℝ} (h1 : a * b = a) (h2 : a * b = b) :
   apply ha
   calc b
     _ = 0 := by rw [←h3, ha]
-  -- Suppose a ≠ 0. Then b = a / a = 1 = a
+  -- Suppose a ≠ 0.
   right
-  have hb :=
+  -- Then since a = b, b ≠ 0
+  have h4:=
     calc b
-      _ = a / a := CancelDenoms.cancel_factors_eq_div h1 ha
-      _ = 1 := div_self ha
-  rw [h3]
+      _ = a := by rw [←h3]
+      _ ≠ 0 := ha
+  -- Since a * b = a, a b = a * 1
+  have h5:=
+    calc a * b
+      _ = a := h1
+      _ = a * 1 := by ring
+  -- Since a = b, we have b * b = b * 1, and since
+  -- b ≠ 0 divide both sides by b to have b = 1
+  rw [h3] at h5
+  cancel b at h5
   constructor
-  apply hb; apply hb
+  calc a
+    _ = b := h3
+    _ = 1 := h5
+  apply h5
