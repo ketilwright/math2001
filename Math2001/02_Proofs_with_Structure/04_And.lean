@@ -75,32 +75,110 @@ example {a b : ℝ} (h1 : a ^ 2 + b ^ 2 = 0) : a = 0 ∧ b = 0 := by
 
 
 /-! # Exercises -/
-
 example {a b : ℚ} (H : a ≤ 1 ∧ a + b ≤ 3) : 2 * a + b ≤ 4 := by
   obtain ⟨h1, h2⟩ := H
   calc 2 * a + b
-    _ = 2 * a + (a + b - a) := by ring
-    _ ≤ 2 * a + (3 - a) := by rel [h2]
-    _ = a + 3 := by ring
-    _ ≤ 1 + 3 := by rel [h1]
+    _ = a + b + a := by ring
+    _ ≤ 3 + a := by rel [h2]
+    _ ≤ 3 + 1 := by rel [h1]
     _ = 4 := by numbers
 
-
 example {r s : ℝ} (H : r + s ≤ 1 ∧ r - s ≤ 5) : 2 * r ≤ 6 := by
-  sorry
+  obtain ⟨h1, h2⟩ := H
+  calc 2 * r
+    _ = (r + s) + (r - s) := by ring
+    _ ≤ 1 + 5 := by rel [h1, h2]
+    _ = 6 := by ring
+
 
 example {m n : ℤ} (H : n ≤ 8 ∧ m + 5 ≤ n) : m ≤ 3 := by
-  sorry
+  obtain ⟨h1, h2⟩ := H
+  calc m
+    _ = m + 5 - 5 := by ring
+    _ ≤ n - 5 := by rel [h2]
+    _ ≤ 8 - 5 := by rel [h1]
+    _ = 3 := by ring
+
+-- Must be missing something here. This is about the 3rd time
+-- I have a proof which repeats itself verbatim on a conjunction
 
 example {p : ℤ} (hp : p + 2 ≥ 9) : p ^ 2 ≥ 49 ∧ 7 ≤ p := by
-  sorry
+
+  have hp1 :=
+    calc p
+      _ = p + 2 - 2 := by ring
+      _ ≥ 9 - 2 := by rel [hp]
+      _ = 7 := by ring
+
+  obtain h1 | h1 := LE.le.eq_or_gt hp1
+  constructor -- p² ≥ 49
+  calc p ^ 2
+    _ ≥ 7 ^ 2 := by rel [hp1]
+    _ = 49 := by ring
+  apply hp1
+
+  constructor -- p² ≥ 49
+  calc p ^ 2
+    _ ≥ 7 ^ 2 := by rel [hp1]
+    _ = 49 := by ring
+  apply hp1
+
 
 example {a : ℚ} (h : a - 1 ≥ 5) : a ≥ 6 ∧ 3 * a ≥ 10 := by
-  sorry
+  have ha :=
+    calc a
+      _ = a - 1 + 1 := by ring
+      _ ≥ 5 + 1 := by rel [h]
+      _ = 6 := by ring
+  obtain h1 | h1 := LE.le.eq_or_gt ha
+  constructor
+  apply ha
+  calc 3 * a
+    _ = 3 * 6 := by rw [←h1]
+    _ ≥ 10 := by numbers
+  constructor
+  apply ha
+  calc 3 * a
+    _ ≥ 3 * 6 := by rel [h1]
+    _ = 18 := by numbers
+    _ ≥ 10 := by numbers
+
 
 example {x y : ℚ} (h : x + y = 5 ∧ x + 2 * y = 7) : x = 3 ∧ y = 2 := by
-  sorry
+  obtain ⟨h1, h2⟩ := h
+  have hy :=
+    calc y
+      _ = (x + 2 * y) - (x + y) := by ring
+      _ = 7 - 5 := by rw [←h2, ←h1]
+      _ = 2 := by ring
+  constructor
+  addarith [h1, hy]
+  apply hy
+
+
 
 example {a b : ℝ} (h1 : a * b = a) (h2 : a * b = b) :
     a = 0 ∧ b = 0 ∨ a = 1 ∧ b = 1 := by
-  sorry
+
+  -- Clearly a = b from h1 & h2
+  have h3 :=
+    calc a
+      _ = a * b := by rw [h1]
+      _ = b := by rw [h2]
+  -- Either a = 0 or a ≠ 0
+  obtain ha | ha := eq_or_ne a 0
+  -- Suppose a = 0. Then since a = b, b = 0 & we're done with the case a = 0
+  left
+  constructor
+  apply ha
+  calc b
+    _ = 0 := by rw [←h3, ha]
+  -- Suppose a ≠ 0. Then b = a / a = 1 = a
+  right
+  have hb :=
+    calc b
+      _ = a / a := CancelDenoms.cancel_factors_eq_div h1 ha
+      _ = 1 := div_self ha
+  rw [h3]
+  constructor
+  apply hb; apply hb
