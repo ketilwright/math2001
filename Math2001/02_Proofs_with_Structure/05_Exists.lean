@@ -122,8 +122,53 @@ example (x : ℚ) : ∃ y : ℚ, y ^ 2 > x := by
     _ = x + 1 := by ring
     _ > x := by extra
 
+-- I found it necessary to go "outside" of math2001 & use
+-- a few tricks I learned with HTPIwL
 example {t : ℝ} (h : ∃ a : ℝ, a * t + 1 < a + t) : t ≠ 1 := by
-  sorry
+  -- obtain a with a ⬝ t + 1 < a + t
+  obtain ⟨a, ha ⟩ := h
+  -- We have the cases (i) 1 ≤ a or (ii) a > 1
+  obtain h1 | h1 := le_or_gt 1 a
+  -- case (i): suppose 1 ≤ a, so that 1 - a ≤ 0
+  -- Then since a ⬝ t + a < a + t we know
+  -- that (t - 1) ⬝ (1 - a) ≠ 0
+  have h2 : (t - 1) * (1 - a) ≠ 0 := by
+    apply ne_of_gt
+    calc (t - 1) * (1 - a)
+      _ = t - a * t - 1 + a := by ring
+      _ > 0 := by addarith [ha]
+  -- Thus in particular, t - 1 cannot be zero and t ≠ 1
+  have h3: t - 1 ≠ 0 := by exact left_ne_zero_of_mul h2
+  calc t
+    _ = t - 1 + 1 := by ring
+    _ ≠ 0 + 1 := by exact (add_ne_add_left 1).mpr h3
+    _ = 1 := by ring
+  -- case(ii): suppose 1 > a. Then a - 1 is strictly negative
+  -- and from a * t + 1 < a + t, we have (a - 1) ⬝ (t - 1) ≠ 0
+  have h4: (a - 1) * (t - 1) ≠ 0 := by
+    apply ne_of_lt
+    calc (a - 1) * (t - 1)
+      _ = a * t + 1 - (a + t) := by ring
+      _ < 0 := by addarith [ha]
+  -- Thus in particular t - 1 ≠ 0 and t ≠ 1
+  have h5: t - 1 ≠ 0 := right_ne_zero_of_mul h4
+  calc t
+    _ = t - 1 + 1 := by ring
+    _ ≠ 0 + 1 := by exact (add_ne_add_left 1).mpr h5
+    _ = 1 := by ring
+  -- We've addressed all possible cases of 1 ≤ a and a > 1 and can conclude that t ≠ 1
+  -- BTW: Similar reasoning shows that a ≠ 1
+
+-- previous exercise is trivial by contrapositive, but that's not
+-- discussed yet
+example {t : ℝ} (h :t = 1) : ¬ ∃ a : ℝ, a * t + 1 < a + t := by
+  push_neg
+  intro a
+  rw [h]
+  ring_nf
+  apply Eq.ge
+  rfl
+
 
 example {m : ℤ} (h : ∃ a, 2 * a = m) : m ≠ 5 := by
   sorry
