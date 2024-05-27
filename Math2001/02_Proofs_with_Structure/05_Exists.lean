@@ -137,6 +137,7 @@ example {t : ℝ} (h : ∃ a : ℝ, a * t + 1 < a + t) : t ≠ 1 := by
       _ < 0 := by addarith [ha]
   -- Thus, in particular t - 1 ≠ 0
   have h2: t - 1 ≠ 0 := by exact right_ne_zero_of_mul h1
+
   -- And clearly then t ≠ 1
   calc t
     _ = (t - 1) + 1 := by ring
@@ -157,7 +158,26 @@ example {t : ℝ} (h :t = 1) : ¬ ∃ a : ℝ, a * t + 1 < a + t := by
 
 
 example {m : ℤ} (h : ∃ a, 2 * a = m) : m ≠ 5 := by
-  sorry
+  obtain ⟨a, h1⟩ := h
+  obtain h2 | h2 := le_or_gt a 2
+  -- suppose a ≤ 2.
+  -- it's sufficient to prove m < 5
+  apply ne_of_lt
+  calc m
+    _ = 2 * a := by rw [←h1]
+    _ ≤ 2 * 2 := by rel [h2]
+    _ < 5 := by numbers
+  -- suppose a > 2
+  --it's sufficient to prove m > 5
+  apply ne_of_gt
+  have h3: a ≥ 3 := h2
+  calc m
+    _ = 2 * a := by rw [←h1]
+    _ ≥ 2 * 3 := by rel [h3]
+    _ > 5 := by numbers
+
+
+
 
 example {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7 := by
   sorry
