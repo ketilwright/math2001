@@ -158,6 +158,7 @@ example {t : ℝ} (h :t = 1) : ¬ ∃ a : ℝ, a * t + 1 < a + t := by
 
 
 example {m : ℤ} (h : ∃ a, 2 * a = m) : m ≠ 5 := by
+
   obtain ⟨a, h1⟩ := h
   obtain h2 | h2 := le_or_gt a 2
   -- suppose a ≤ 2.
@@ -176,11 +177,69 @@ example {m : ℤ} (h : ∃ a, 2 * a = m) : m ≠ 5 := by
     _ ≥ 2 * 3 := by rel [h3]
     _ > 5 := by numbers
 
-
-
-
 example {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7 := by
-  sorry
+-- since n ∈ ℤ, either n ≤ 0 or n ≥ 1
+  obtain h1 | h1 := le_or_succ_le n 0
+  -- suppose n ≤ 0
+  -- Then either n = 0 or n < 0
+  obtain h2 | h2 := eq_or_lt_of_le h1
+  -- suppose n = 0
+  use 2
+  rw [h2]
+  numbers
+  -- suppose n < 0
+  -- Then n - 2 < 0 also
+  use (2 - n)
+  -- it seems lean works better with < or ≤ than it does with > or ≥
+  rw [ge_iff_le]
+  rw [le_iff_eq_or_lt]
+  right
+
+  have h4: (0: ℤ) < (9: ℤ) := by numbers
+  have h7: (12: ℤ) > (-1: ℤ) := by numbers
+
+  have h5:= -- n² > 0 this is awkward, but works
+    calc n ^ 2
+      _ = (-n) * (-n) := by ring
+      _ > (-0) * (-0) := by rel [h2]
+      _ = 0 := by ring
+  have h6:= -- n³ < 0
+    calc n ^ 3
+      _ = n * n ^ 2 := by ring
+      _ < 0 * n ^ 2 := by rel [h2]
+      _ = 0 := by ring
+  --have h7: 12 * n ^ 2 > - (n ^ 2) := by
+
+  have h6a: (2: ℤ) > (0: ℤ) := by numbers
+  --have h6_ : 2 * (n ^ 3) < 0 := by exact Int.mul_neg_of_pos_of_neg h6a h6
+  have h6b: -2 * n ^ 3 > 0 := Int.mul_pos_of_neg_of_neg h6a h6
+  have h6c: 0 = 0 * n ^ 3 := by exact (Int.zero_mul (n ^ 3)).symm
+  rewrite [h6c] at h6b
+
+  have h8:=
+    calc 12 * n ^ 2
+      _ > (-1) * n ^ 2 := by rel [h7]
+      _ = - (n ^ 2) := by ring
+
+  -- since n < 0, -24n > 2n
+  have h9a: -24 < 2 := by numbers
+  have h9e: (2: ℤ) * n < (-24: ℤ) * n := by exact Int.mul_lt_mul_of_neg_right h9a h2
+  have h10: (-2 * n ^ 3 + 12 * n ^ 2 + 16) + 2 * n  < (-2 * n ^ 3 + 12 * n ^ 2 + 16) + (- 24 * n) := by rel [h9e]
+
+
+  calc n * (2 - n) + 7
+    _ = - n ^ 2 + 2 * n + 7 + 0:= by ring
+    _ < - n ^ 2 + 2 * n + 7 + 9 := by rel [h4]
+    _ < 12 * n ^ 2 + 2 * n + 7 + 9 := by rel [h8]
+    _ = 0 * n ^ 3 + 12 * n ^ 2 + 2 * n + 16 := by ring
+    _ < -2 * n ^ 3 + 12 * n ^ 2 + 2 * n + 16 := by rel [h6b]
+    _ = (-2 * n ^ 3 + 12 * n ^ 2 + 16) + 2 * n := by ring
+    _ < (-2 * n ^ 3 + 12 * n ^ 2 + 16) + (- 24 * n) := by rel [h9e]
+    _ = -2 * n ^ 3 + 12 * n ^ 2 - 24 * n + 16  := by ring
+    _ = 2 * (2 - n) ^ 3 := by ring
+  sorry -- todo: n ≥ 1
+
+
 
 example {a b c : ℝ} (ha : a ≤ b + c) (hb : b ≤ a + c) (hc : c ≤ a + b) :
     ∃ x y z, x ≥ 0 ∧ y ≥ 0 ∧ z ≥ 0 ∧ a = y + z ∧ b = x + z ∧ c = x + y := by
