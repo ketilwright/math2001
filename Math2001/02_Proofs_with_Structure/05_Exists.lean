@@ -195,8 +195,8 @@ example {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7 := by
   rw [le_iff_eq_or_lt]
   right
 
-  have h4: (0: ℤ) < (9: ℤ) := by numbers
-  have h7: (12: ℤ) > (-1: ℤ) := by numbers
+  have h3: (0: ℤ) < (9: ℤ) := by numbers
+  have h4: (12: ℤ) > (-1: ℤ) := by numbers
 
   have h5:= -- n² > 0 this is awkward, but works
     calc n ^ 2
@@ -208,36 +208,55 @@ example {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7 := by
       _ = n * n ^ 2 := by ring
       _ < 0 * n ^ 2 := by rel [h2]
       _ = 0 := by ring
-  --have h7: 12 * n ^ 2 > - (n ^ 2) := by
 
-  have h6a: (2: ℤ) > (0: ℤ) := by numbers
-  --have h6_ : 2 * (n ^ 3) < 0 := by exact Int.mul_neg_of_pos_of_neg h6a h6
-  have h6b: -2 * n ^ 3 > 0 := Int.mul_pos_of_neg_of_neg h6a h6
-  have h6c: 0 = 0 * n ^ 3 := by exact (Int.zero_mul (n ^ 3)).symm
-  rewrite [h6c] at h6b
+  have h7: (2: ℤ) > (0: ℤ) := by numbers
+  have h6b: -2 * n ^ 3 > 0 := Int.mul_pos_of_neg_of_neg h7 h6
 
-  have h8:=
+  rw [←Int.zero_mul (n ^ 3)] at h6b
+
+  have h9:=
     calc 12 * n ^ 2
-      _ > (-1) * n ^ 2 := by rel [h7]
+      _ > (-1) * n ^ 2 := by rel [h4]
       _ = - (n ^ 2) := by ring
 
   -- since n < 0, -24n > 2n
-  have h9a: -24 < 2 := by numbers
-  have h9e: (2: ℤ) * n < (-24: ℤ) * n := by exact Int.mul_lt_mul_of_neg_right h9a h2
-  have h10: (-2 * n ^ 3 + 12 * n ^ 2 + 16) + 2 * n  < (-2 * n ^ 3 + 12 * n ^ 2 + 16) + (- 24 * n) := by rel [h9e]
+  have h10: -24 < 2 := by numbers
+  have h11: (2: ℤ) * n < (-24: ℤ) * n := by exact Int.mul_lt_mul_of_neg_right h10 h2
 
 
   calc n * (2 - n) + 7
     _ = - n ^ 2 + 2 * n + 7 + 0:= by ring
-    _ < - n ^ 2 + 2 * n + 7 + 9 := by rel [h4]
-    _ < 12 * n ^ 2 + 2 * n + 7 + 9 := by rel [h8]
+    _ < - n ^ 2 + 2 * n + 7 + 9 := by rel [h3]
+    _ < 12 * n ^ 2 + 2 * n + 7 + 9 := by rel [h9]
     _ = 0 * n ^ 3 + 12 * n ^ 2 + 2 * n + 16 := by ring
     _ < -2 * n ^ 3 + 12 * n ^ 2 + 2 * n + 16 := by rel [h6b]
     _ = (-2 * n ^ 3 + 12 * n ^ 2 + 16) + 2 * n := by ring
-    _ < (-2 * n ^ 3 + 12 * n ^ 2 + 16) + (- 24 * n) := by rel [h9e]
+    _ < (-2 * n ^ 3 + 12 * n ^ 2 + 16) + (- 24 * n) := by rel [h11]
     _ = -2 * n ^ 3 + 12 * n ^ 2 - 24 * n + 16  := by ring
     _ = 2 * (2 - n) ^ 3 := by ring
-  sorry -- todo: n ≥ 1
+
+  -- suppose n ≥ 1
+  use (n + 1)
+  apply le_of_lt -- not "greater than or equal of greater than"
+  have h12:=
+    calc 2 * n ^ 3
+      _ ≥ 2 * 1 ^ 3 := by rel [h1]
+      _ > 0 := by numbers
+  have h13: (1: ℤ) < (6: ℤ) := by numbers
+
+  have h14:=
+    calc 6 * n ^ 2 + 6 * n + 2
+      _ = n ^ 2 + 6 * n + 2 + 5 * n ^ 2 := by ring
+      _ ≥ n ^ 2 + 6 * n + 2 + 5 * 1 ^ 2 := by rel [h1]
+      _ = n ^ 2 + 6 * n + 7 := by ring
+      _ > n ^ 2 + 1 * n + 7 := by rel [h13, h1]--6]
+
+  calc n * (n + 1) + 7
+    _ = n ^ 2 + 1 * n + 7 := by ring
+    _ ≤ 6 * n ^ 2 + 6 * n + 2 := by rel [h14]
+    _ = 0 + 6 * n ^ 2 + 6 * n + 2 := by ring
+    _ < 2 * n ^ 3 + 6 * n ^ 2 + 6 * n + 2 := by rel [h12]
+    _ = 2 * (n + 1) ^ 3 := by ring
 
 
 
