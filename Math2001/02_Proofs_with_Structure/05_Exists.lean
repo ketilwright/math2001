@@ -210,9 +210,9 @@ example {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7 := by
       _ = 0 := by ring
 
   have h7: (2: ℤ) > (0: ℤ) := by numbers
-  have h6b: -2 * n ^ 3 > 0 := Int.mul_pos_of_neg_of_neg h7 h6
+  have h8: -2 * n ^ 3 > 0 := Int.mul_pos_of_neg_of_neg h7 h6
 
-  rw [←Int.zero_mul (n ^ 3)] at h6b
+  rw [←Int.zero_mul (n ^ 3)] at h8
 
   have h9:=
     calc 12 * n ^ 2
@@ -229,7 +229,7 @@ example {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7 := by
     _ < - n ^ 2 + 2 * n + 7 + 9 := by rel [h3]
     _ < 12 * n ^ 2 + 2 * n + 7 + 9 := by rel [h9]
     _ = 0 * n ^ 3 + 12 * n ^ 2 + 2 * n + 16 := by ring
-    _ < -2 * n ^ 3 + 12 * n ^ 2 + 2 * n + 16 := by rel [h6b]
+    _ < -2 * n ^ 3 + 12 * n ^ 2 + 2 * n + 16 := by rel [h8]
     _ = (-2 * n ^ 3 + 12 * n ^ 2 + 16) + 2 * n := by ring
     _ < (-2 * n ^ 3 + 12 * n ^ 2 + 16) + (- 24 * n) := by rel [h11]
     _ = -2 * n ^ 3 + 12 * n ^ 2 - 24 * n + 16  := by ring
