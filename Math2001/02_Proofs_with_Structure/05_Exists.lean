@@ -1,7 +1,7 @@
 /- Copyright (c) Heather Macbeth, 2022.  All rights reserved. -/
 import Mathlib.Data.Real.Basic
 import Library.Basic
-
+set_option maxHeartbeats 1000000
 math2001_init
 
 
@@ -251,6 +251,7 @@ example {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7 := by
       _ = n ^ 2 + 6 * n + 7 := by ring
       _ > n ^ 2 + 1 * n + 7 := by rel [h13, h1]--6]
 
+
   calc n * (n + 1) + 7
     _ = n ^ 2 + 1 * n + 7 := by ring
     _ ≤ 6 * n ^ 2 + 6 * n + 2 := by rel [h14]
@@ -262,4 +263,19 @@ example {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7 := by
 
 example {a b c : ℝ} (ha : a ≤ b + c) (hb : b ≤ a + c) (hc : c ≤ a + b) :
     ∃ x y z, x ≥ 0 ∧ y ≥ 0 ∧ z ≥ 0 ∧ a = y + z ∧ b = x + z ∧ c = x + y := by
-  sorry
+    use ((b + c) - a) / 2; use ((a + c) - b) / 2; use ((a + b) - c) / 2
+    constructor
+    calc ((b + c) - a) / 2
+      _ ≥ (a - a) / 2 := by rel [ha]
+      _ =  0 := by ring
+    constructor
+    calc ((a + c) - b) / 2
+      _ ≥ (b - b) / 2 := by rel [hb]
+      _ = 0 := by ring
+    constructor
+    calc ((a + b) - c) / 2
+      _ ≥ (c - c) / 2 := by rel [hc]
+      _ = 0 := by ring
+    constructor; ring
+    constructor; ring
+    ring
