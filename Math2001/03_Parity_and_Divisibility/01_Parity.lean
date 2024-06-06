@@ -7,16 +7,16 @@ open Int
 
 
 example : Odd (7 : ℤ) := by
-  dsimp [Odd]
+  dsimp [Odd] -- dsimp = "definitional simplify"
   use 3
   numbers
 
 
 example : Odd (-3 : ℤ) := by
-  sorry
+  use -2; numbers
 
 example {n : ℤ} (hn : Odd n) : Odd (3 * n + 2) := by
-  dsimp [Odd] at *
+  dsimp [Odd] at * -- unfold def of Odd everywhere
   obtain ⟨k, hk⟩ := hn
   use 3 * k + 2
   calc
@@ -25,34 +25,61 @@ example {n : ℤ} (hn : Odd n) : Odd (3 * n + 2) := by
 
 
 example {n : ℤ} (hn : Odd n) : Odd (7 * n - 4) := by
-  sorry
+  obtain ⟨j, h1⟩ := hn
+  use 7 * j + 1
+  calc 7 * n - 4
+    _ = 7 * (2 * j + 1) - 4 := by rw [h1]
+    _ = 2 * (7 * j + 1) + 1 := by ring
+
 
 example {x y : ℤ} (hx : Odd x) (hy : Odd y) : Odd (x + y + 1) := by
-  obtain ⟨a, ha⟩ := hx
-  obtain ⟨b, hb⟩ := hy
+  obtain ⟨a, ha⟩ := hx -- ∃a | x = 2a + 1
+  obtain ⟨b, hb⟩ := hy -- ∃b | y = 2b + 1
   use a + b + 1
   calc
     x + y + 1 = 2 * a + 1 + (2 * b + 1) + 1 := by rw [ha, hb]
     _ = 2 * (a + b + 1) + 1 := by ring
+  -- thus ∃n = a + b + 1 | x + y + 1 is odd
 
 
 example {x y : ℤ} (hx : Odd x) (hy : Odd y) : Odd (x * y + 2 * y) := by
-  sorry
+  obtain ⟨a, ha⟩ := hx -- ∃a | x = 2a + 1
+  obtain ⟨b, hb⟩ := hy -- ∃b | y = 2b + 1
+  use 2 * a * b + 3 * b + a + 1
+  calc x * y + 2 * y
+    _ = (2 * a + 1) * (2 * b + 1) + 2 * (2 * b + 1) := by rw [ha, hb]
+    _ = 4 * a * b + 2 * a + 2 * b + 1 + 4 * b + 2 := by ring
+    _ = 4 * a * b + 6 * b + 2 * a + 3 := by ring
+    _ = 2 * (2 * a * b + 3 * b + a + 1) + 1 := by ring
+
+
 
 example {m : ℤ} (hm : Odd m) : Even (3 * m - 5) := by
-  sorry
+  obtain ⟨a, ha⟩ := hm -- ∃a | m = 2a + 1
+  dsimp [Even]
+  use 3 * a - 1
+  calc 3 * m - 5
+    _ = 3 * (2 * a + 1) - 5 := by rw[ha]
+    _ = 6 * a - 2 := by ring
+    _ = 2 * (3 * a - 1) := by ring
+
 
 example {n : ℤ} (hn : Even n) : Odd (n ^ 2 + 2 * n - 5) := by
-  sorry
+  obtain ⟨x, hx⟩ := hn -- n = 2 * x
+  use 2 * x ^ 2 + 2 * x - 3
+  -- seems unsportsmanlike to just use ring
+  rewrite [hx]
+  ring
+
 
 example (n : ℤ) : Even (n ^ 2 + n + 4) := by
   obtain hn | hn := Int.even_or_odd n
-  · obtain ⟨x, hx⟩ := hn
+  · obtain ⟨x, hx⟩ := hn -- suppose n is even
     use 2 * x ^ 2 + x + 2
     calc
       n ^ 2 + n + 4 = (2 * x) ^ 2 + 2 * x + 4 := by rw [hx]
       _ = 2 * (2 * x ^ 2 + x + 2) := by ring
-  · obtain ⟨x, hx⟩ := hn
+  · obtain ⟨x, hx⟩ := hn -- suppose n is odd
     use 2 * x ^ 2 + 3 * x + 3
     calc
       n ^ 2 + n + 4 = (2 * x + 1) ^ 2 + (2 * x + 1) + 4 := by rw [hx]
