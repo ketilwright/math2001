@@ -205,4 +205,37 @@ example (n : ℤ) : ∃ m ≥ n, Odd m := by
   use k; apply hk
 
 example (a b c : ℤ) : Even (a - b) ∨ Even (a + c) ∨ Even (b - c) := by
-  sorry
+  -- a - b is either even or odd
+  obtain h1 | h1 := Int.even_or_odd (a - b)
+  -- if a - b is even, we're done
+  left; apply h1
+  -- But suppose a - b is odd, and choose k with a - b = 2k + 1
+  obtain ⟨k, hk⟩ := h1
+  -- It's sufficient to prove a + c or b - c is even
+  right
+  -- a + c is either even or odd
+  obtain h2 | h2 := Int.even_or_odd (a + c)
+  -- If a + c is even, we're done
+  left; apply h2
+  -- But suppose a + c is odd, and choose j with a + c = 2j + 1
+  obtain ⟨j, hj⟩ := h2
+  -- it's sufficient to prove that b - c is even
+  right
+
+  have h3:=
+    calc b
+      _ = -1 * (a - b) + a := by ring
+      _ = -1 * (2 * k + 1) + a := by rw [hk]
+      _ = a - 2 * k - 1 := by ring
+
+  have h4:=
+    calc c
+      _ = a + c - a := by ring
+      _ = 2 * j + 1 - a := by rw [hj]
+
+  use a - k - j - 1
+
+  calc b - c
+    _ = (a - 2 * k - 1) - (2 * j + 1 - a ) := by rw [h3, h4]
+    _ = 2 * a - 2 * k - 2 * j - 2 := by ring
+    _ = 2 * (a - k - j - 1) := by ring
