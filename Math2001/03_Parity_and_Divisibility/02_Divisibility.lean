@@ -77,28 +77,71 @@ example {a b : ℕ} (hab : a ∣ b) (hb : 0 < b) : 0 < a := by
 
 
 example (t : ℤ) : t ∣ 0 := by
-  sorry
-
+  use 0
+  ring
 example : ¬(3 : ℤ) ∣ -10 := by
-  sorry
+  -- equivalent to show there is some x ∈ ℤ
+  -- with 3x < -10 and -10 < 3(x + 1)
+  apply Int.not_dvd_of_exists_lt_and_lt
+  use -4
+  constructor
+  numbers
+  numbers
 
 example {x y : ℤ} (h : x ∣ y) : x ∣ 3 * y - 4 * y ^ 2 := by
-  sorry
+  obtain ⟨k, hk⟩ := h
+  use 3 * k - 4 * x * k ^ 2
+  rw[hk]
+  ring
+
 
 example {m n : ℤ} (h : m ∣ n) : m ∣ 2 * n ^ 3 + n := by
-  sorry
+  obtain ⟨k, hk⟩ := h
+  use 2 * m ^ 2 * k ^ 3 + k
+  calc 2 * n ^ 3 + n
+    _ = 2 * (m * k) ^ 3 + m * k := by rw [hk]
+    _ = m * (2 * m ^ 2 * k ^ 3 + k) := by ring
+
 
 example {a b : ℤ} (hab : a ∣ b) : a ∣ 2 * b ^ 3 - b ^ 2 + 3 * b := by
-  sorry
+  obtain ⟨k, hk⟩ := hab
+  use 2 * a ^ 2 * k ^ 3 - k ^ 2 * a + 3 * k
+  rw [hk]; ring
+
 
 example {k l m : ℤ} (h1 : k ∣ l) (h2 : l ^ 3 ∣ m) : k ^ 3 ∣ m := by
-  sorry
+  obtain ⟨x, hx⟩ := h1 -- l = kx
+  obtain ⟨y, hy⟩ := h2 -- m = l³y
+  use x ^ 3 * y
+  calc m
+    _ = l ^ 3 * y := by rw [hy]
+    _ = (k * x) ^ 3 * y := by rw [hx]
+    _ = k ^ 3 * (x ^ 3 * y) := by ring
+
 
 example {p q r : ℤ} (hpq : p ^ 3 ∣ q) (hqr : q ^ 2 ∣ r) : p ^ 6 ∣ r := by
-  sorry
+  obtain ⟨a, ha⟩ := hpq -- q = p³a
+  obtain ⟨b, hb⟩ := hqr -- r = q²b
+  use (a ^ 2) * b
+  calc r
+    _ = q ^ 2 * b := hb
+    _ = (p ^ 3 * a) ^ 2 * b := by rw [ha]
+    _ = p ^ 6 * (a ^ 2 * b) := by ring
 
 example : ∃ n : ℕ, 0 < n ∧ 9 ∣ 2 ^ n - 1 := by
-  sorry
+  -- 0 < 6 and 9 ∣ 63 = 2⁶-1
+  use 6
+  constructor
+  numbers
+  use 7
+  ring
 
 example : ∃ a b : ℤ, 0 < b ∧ b < a ∧ a - b ∣ a + b := by
-  sorry
+  -- 0 < 1 < 2 and 2 - 1 ∣ 2 + 1
+  use 2; use 1
+  constructor
+  numbers
+  constructor
+  numbers
+  use 3
+  ring
