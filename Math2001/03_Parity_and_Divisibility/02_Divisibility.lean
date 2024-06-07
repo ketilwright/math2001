@@ -12,10 +12,14 @@ example : (11 : ℕ) ∣ 88 := by
 
 
 example : (-2 : ℤ) ∣ 6 := by
-  sorry
+  use -3
+  numbers
+
 
 example {a b : ℤ} (hab : a ∣ b) : a ∣ b ^ 2 + 2 * b := by
+  -- since a ∣ b, there is k with b = ak
   obtain ⟨k, hk⟩ := hab
+  dsimp [(. ∣ .)] -- ∃ c, b ^ 2 + 2 * b = a * c
   use k * (a * k + 2)
   calc
     b ^ 2 + 2 * b = (a * k) ^ 2 + 2 * (a * k) := by rw [hk]
@@ -23,35 +27,51 @@ example {a b : ℤ} (hab : a ∣ b) : a ∣ b ^ 2 + 2 * b := by
 
 
 example {a b c : ℕ} (hab : a ∣ b) (hbc : b ^ 2 ∣ c) : a ^ 2 ∣ c := by
-  sorry
+
+  obtain ⟨k, hk⟩ := hab
+  obtain ⟨j, hj⟩ := hbc
+  dsimp [(. ∣ .)]
+  -- not discussed (?): from hab we have a ≠ 0, and b ≠ 0 from hbc
+  use k ^ 2 * j
+  rw [hj, hk]
+  ring
+
 
 example {x y z : ℕ} (h : x * y ∣ z) : x ∣ z := by
-  sorry
+  obtain ⟨k, hk⟩ := h -- z = x * y * k
+  use y * k
+  rw [hk]
+  ring
 
 example : ¬(5 : ℤ) ∣ 12 := by
+  -- not lean native
   apply Int.not_dvd_of_exists_lt_and_lt
   use 2
   constructor
   · numbers -- show `5 * 2 < 12`
   · numbers -- show `12 < 5 * (2 + 1)`
 
-
+-- Nat.le_of_dvd
 example {a b : ℕ} (hb : 0 < b) (hab : a ∣ b) : a ≤ b := by
+  -- ∃k ∈ ℕ | b = ak
   obtain ⟨k, hk⟩ := hab
   have H1 :=
     calc
       0 < b := hb
       _ = a * k := hk
-  cancel a at H1
+  cancel a at H1 -- OK since ℕ
   have H : 1 ≤ k := H1
   calc
     a = a * 1 := by ring
     _ ≤ a * k := by rel [H]
     _ = b := by rw [hk]
 
-
+-- Nat.pos_of_dvd_pos
 example {a b : ℕ} (hab : a ∣ b) (hb : 0 < b) : 0 < a := by
-  sorry
+  obtain ⟨k, hk⟩ := hab
+  rewrite [hk] at hb
+  cancel k at hb
+
 
 /-! # Exercises -/
 
