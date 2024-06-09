@@ -97,8 +97,23 @@ example : ∃ k : ℤ, 5 * k ≡ 6 [ZMOD 8] := by
   use 6; use 3; ring
 
 example (n : ℤ) : 5 * n ^ 2 + 3 * n + 7 ≡ 1 [ZMOD 2] := by
-  dsimp [Int.ModEq, . ∣ .]
-  -- ∃ c, 5 * n ^ 2 + 3 * n + 6 = 2 * c
+  mod_cases hn: n % 2
+  obtain ⟨c, hc⟩ := hn
+  have h1:=
+    calc n
+      _ = n - 0 := by ring
+      _ = 2 * c := hc
+  rw [h1]
+  use 10 * c ^ 2 + 3 * c + 3
+  ring
+  obtain ⟨c, hc⟩ := hn
+  have h2:=
+    calc n
+      _ = n - 1 + 1 := by ring
+      _ = 2 * c + 1 := by rw [hc]
+  rw [h2]
+  use 10 * c ^ 2 + 13 * c + 7
+  ring
 
 example {x : ℤ} : x ^ 5 ≡ x [ZMOD 5] := by
 
