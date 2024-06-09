@@ -168,19 +168,32 @@ example {m n : ℤ} (h : m ≡ n [ZMOD 4]) : 3 * m - 1 ≡ 3 * n - 1 [ZMOD 4] :=
 
 example {k : ℤ} (hb : k ≡ 3 [ZMOD 5]) :
     4 * k + k ^ 3 + 3 ≡ 4 * 3 + 3 ^ 3 + 3 [ZMOD 5] := by
-    -- ∃ j ∈ Z | k - 3 = 5 ⬝ j
+    -- Since 4 ⬝ 3 + 3³ + 3 = 42, we need to show
+    -- ∃ c ∈ Z such that k³ + 4 ⬝ k - 39 = 5 ⬝ c
+    -- Since k ≡₅ 3, there is j such that k = 5 ⬝ j + 3
     obtain ⟨j, hj⟩ := hb
-    -- 4 * k + k ^ 3 + 3 ≡ 4 * 3 + 3 ^ 3 + 3 [ZMOD 5]
-    -- goal ∃ x ∈ ℤ | 4 ⬝ k + k³ + 3 - (4 ⬝ 3 + 3³ + 3) = 5x
-    dsimp [Int.ModEq, . ∣ .]
     have h2:=
       calc k
         _ = k - 3 + 3 := by ring
         _ = 5 * j + 3 := by rw [hj]
+    -- Substituting 5 ⬝ j + 3 for k, we get
+    -- (5j + 3)³ + 4(5j + 3) - 39 = 125 ⬝ j³ + 225 ⬝ j² + 155 ⬝ j
+    -- = 5 ⬝ (25 ⬝ j³ + 45 ⬝ j² + 31 ⬝ j)
     use 25 * j ^ 3 + 45 * j ^ 2 + 31 * j
     calc 4 * k + k ^ 3 + 3 - (4 * 3 + 3 ^ 3 + 3)
       _ = 4 * (5 * j + 3) + (5 * j + 3) ^ 3 + 3 - (4 * 3 + 3 ^ 3 + 3) := by rw [h2]
       _ = 125 * j ^ 3 + 225 * j ^ 2 + 155 * j := by ring
       _ = 5 * (25 * j ^ 3 + 45 * j ^ 2 + 31 * j) := by ring
 
-    -- or perhaps there's something which requires less thinking.
+-- The prescribed way. But where's the fun in that?
+example {k : ℤ} (hb : k ≡ 3 [ZMOD 5]) :
+    4 * k + k ^ 3 + 3 ≡ 4 * 3 + 3 ^ 3 + 3 [ZMOD 5] := by
+    obtain ⟨j, hj⟩ := hb
+    apply Int.ModEq.add -- (4 ⬝ k + k³) ≡₅ 27 ∧ 3 ≡₅ 3
+    apply Int.ModEq.add -- (4 ⬝ k) ≡₅ 12 ∧ k³ ≡₅ 3³
+    apply Int.ModEq.mul -- 4 ≡₅ 4 ∧ k ≡₅ 3
+    apply Int.ModEq.refl -- proof of 4 ≡₅ 4
+    /-dsimp [Int.ModEq]-/; use j; apply hj -- we were given k ≡₅ 3
+    apply Int.ModEq.pow_three -- since k ≡₅ 3, pow_three says that k³ ≡₅ 3³
+    /-dsimp [Int.ModEq]-/; use j; apply hj -- we were given k ≡₅ 3
+    apply Int.ModEq.refl -- mod is reflexive, so 3 ≡₅ 3
