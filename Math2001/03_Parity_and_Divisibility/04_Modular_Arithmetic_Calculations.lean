@@ -101,6 +101,33 @@ example (n : ℤ) : 5 * n ^ 2 + 3 * n + 7 ≡ 1 [ZMOD 2] := by
   -- ∃ c, 5 * n ^ 2 + 3 * n + 6 = 2 * c
 
 example {x : ℤ} : x ^ 5 ≡ x [ZMOD 5] := by
-  dsimp [Int.ModEq, . ∣ .] --  ∃ c, x ^ 5 - x = 5 * c
-  have h1: x ^ 5 - x = (x - 1) * x * (x + 1) * (x ^ 2 + 1) := by ring
-  rw [h1]
+
+  mod_cases hx: x % 5
+  -- x ≡ 0 [ZMOD 5]
+  calc x ^ 5
+    _ ≡ 0 ^ 5 [ZMOD 5] := by rel [hx]
+    _ = 0 := by numbers
+    _ ≡ x [ZMOD 5] := by rel [hx]
+  -- x ≡ 1 [ZMOD 5]
+  calc x ^ 5
+    _ ≡ 1 ^ 5 [ZMOD 5] := by rel [hx]
+    _ = 1 := by numbers
+    _ ≡ x [ZMOD 5] := by rel [hx]
+  -- x ≡ 2 [ZMOD 5]
+  calc x ^ 5
+    _ ≡ (2 ^ 5) [ZMOD 5] := by rel [hx]
+    _ = 32 := by numbers
+    _ ≡ 2 [ZMOD 5] := by use 6; ring
+    _ ≡ x [ZMOD 5] := by rel [hx]
+  -- x ≡ 3 [ZMOD 5]
+  calc x ^ 5
+    _ ≡ (3 ^ 5) [ZMOD 5] := by rel [hx]
+    _ = 243 := by numbers
+    _ ≡ 3 [ZMOD 5] := by use 48; ring
+    _ ≡ x [ZMOD 5] := by rel [hx]
+  -- x ≡ 4 [ZMOD 5]
+  calc x ^ 5
+    _ ≡ 4 ^ 5 [ZMOD 5] := by rel [hx]
+    _ = 1024 := by numbers
+    _ ≡ 4 [ZMOD 5] := by use 204; ring
+    _ ≡ x [ZMOD 5] := by rel [hx]
