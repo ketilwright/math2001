@@ -95,7 +95,7 @@ example {a b : ℤ} (ha : a ≡ 2 [ZMOD 4]) :
     _ = 4 * x * (b ^ 2 + a * b + 2 * b + 3) := by rw [hx]
     _ = 4 * (x * (b ^ 2 + a * b + 2 * b + 3)) := by ring
 
--- this requires less thinking, you gotta be kidding. god forbid.
+-- this requires less thinking, god forbid.
 example {a b : ℤ} (ha : a ≡ 2 [ZMOD 4]) :
     a * b ^ 2 + a ^ 2 * b + 3 * a ≡ 2 * b ^ 2 + 2 ^ 2 * b + 3 * 2 [ZMOD 4] := by
   apply Int.ModEq.add
