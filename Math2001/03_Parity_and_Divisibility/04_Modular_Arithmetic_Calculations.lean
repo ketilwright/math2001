@@ -97,7 +97,9 @@ example : ∃ k : ℤ, 5 * k ≡ 6 [ZMOD 8] := by
   use 6; use 3; ring
 
 example (n : ℤ) : 5 * n ^ 2 + 3 * n + 7 ≡ 1 [ZMOD 2] := by
+  -- ∀n ∈ ℤ, n % 2 = 0 ∨ n % 2 = 1
   mod_cases hn: n % 2
+  -- suppose n % 2 = 0
   obtain ⟨c, hc⟩ := hn
   have h1:=
     calc n
@@ -106,6 +108,7 @@ example (n : ℤ) : 5 * n ^ 2 + 3 * n + 7 ≡ 1 [ZMOD 2] := by
   rw [h1]
   use 10 * c ^ 2 + 3 * c + 3
   ring
+  -- suppose n % 2 = 1
   obtain ⟨c, hc⟩ := hn
   have h2:=
     calc n
