@@ -20,26 +20,68 @@ example {n : ℕ} (hn : ∀ m, n ∣ m) : n = 1 := by
 
 
 example {a b : ℝ} (h : ∀ x, x ≥ a ∨ x ≤ b) : a ≤ b := by
-  sorry
+  have h1: (a + b) / 2 ≥ a ∨ (a + b) / 2 ≤ b := by apply h
+  obtain h2 | h2 := h1 -- like "by_cases on" in htpi
+  -- suppose (a + b) / 2 ≥ a
+  calc b
+    _ = 2 * ((a + b) / 2) - a := by ring
+    _ ≥ 2 * a - a := by rel [h2]
+    _ = a := by ring
+  -- suppose (a + b) / 2 ≤ b
+  calc a
+    _ = 2 * ((a + b) / 2) - b := by ring
+    _ ≤ 2 * b - b := by rel [h2]
+    _ = b := by ring
 
+/-
+  Let a, b ∈ ℝ with a², b² at most 2. Prove a = b
+-/
 example {a b : ℝ} (ha1 : a ^ 2 ≤ 2) (hb1 : b ^ 2 ≤ 2) (ha2 : ∀ y, y ^ 2 ≤ 2 → y ≤ a)
     (hb2 : ∀ y, y ^ 2 ≤ 2 → y ≤ b) :
     a = b := by
+  -- Since ≤ is antisymmetric, we can prove both a ≤ b and b ≤ a
   apply le_antisymm
-  · apply hb2
+  -- Proof that a ≤ b
+  ·
+    -- Since ∀y ∈ ℝ, y² ≤ 2 → y < b, we can prove that a² ≤ 2
+    apply hb2
+    -- & we were given that a² ≤ 2
     apply ha1
-  · sorry
+  ·
+    -- Since ∀y ∈ ℝ, y² ≤ 2 → y < a, we can prove that b² ≤ 2
+    apply ha2
+    -- And, we already know b² ≤ 2
+    apply hb1
+
+
 
 example : ∃ b : ℝ, ∀ x : ℝ, b ≤ x ^ 2 - 2 * x := by
   use -1
-  intro x
+  intro x -- "let x be arbitrary": universal instantiation
   calc
     -1 ≤ -1 + (x - 1) ^ 2 := by extra
     _ = x ^ 2 - 2 * x := by ring
 
-
+/-
+  Show that there exists c ∈ R s.t. ∀x, y ∈ ℝ, x² + y² ≤ 4 → x + y ≥ c
+-/
 example : ∃ c : ℝ, ∀ x y, x ^ 2 + y ^ 2 ≤ 4 → x + y ≥ c := by
-  sorry
+  use -3
+  intro x
+  intro y
+  intro h1 -- x² + y^2 ≤ 4 -- this was not explained, but appears to work
+
+  have h2 :=
+    calc (x + y) ^ 2
+      _ ≤ (x + y) ^ 2 + (x - y)^ 2 := by extra
+      _ = 2 * (x ^ 2 + y ^ 2) := by ring
+      _ ≤ 2 * 4 := by rel [h1]
+      _ ≤ 3 ^ 2 := by numbers
+  -- adding an hypothesis h: 0 ≤ 3 doesn't work
+  -- unless you say 0 ≤ (3: ℝ) := by numbers
+  have h3: -3 ≤ x + y ∧ x + y ≤ 3 := abs_le_of_sq_le_sq' h2 (by numbers /- 0 ≤ 3-/)
+  apply h3.left -- not covered, but this is how HTPIwL handles this sort of thing
+
 
 example : forall_sufficiently_large n : ℤ, n ^ 3 ≥ 4 * n ^ 2 + 7 := by
   dsimp
