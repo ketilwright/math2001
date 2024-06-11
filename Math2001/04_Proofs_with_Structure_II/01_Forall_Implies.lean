@@ -84,7 +84,7 @@ example : ∃ c : ℝ, ∀ x y, x ^ 2 + y ^ 2 ≤ 4 → x + y ≥ c := by
 
 
 example : forall_sufficiently_large n : ℤ, n ^ 3 ≥ 4 * n ^ 2 + 7 := by
-  dsimp
+  dsimp -- ∃ C, ∀ x ≥ C, x ^ 3 ≥ 4 * x ^ 2 + 7
   use 5
   intro n hn
   calc
@@ -95,14 +95,31 @@ example : forall_sufficiently_large n : ℤ, n ^ 3 ≥ 4 * n ^ 2 + 7 := by
     _ = 4 * n ^ 2 + 7 + 18 := by ring
     _ ≥ 4 * n ^ 2 + 7 := by extra
 
+-- from the lean source: it appears interval_cases finds w₁ and w₂
+-- & based on that changes the goal to 41 = 41 ∨ 41 = 42 ∨ 41 = 43 ∨ 41 = 44
+example (n : ℕ) (w₁ : n ≥ 41) (w₂ : n < 45) : n = 41 ∨ n = 42 ∨ n = 43 ∨ n = 44:= by
+  interval_cases n; left;
+  ring;
+  right; left;
+  ring;
+  right; right; left
+  ring
+  right; right; right; ring
+
+
 
 example : Prime 2 := by
+
   constructor
   · numbers -- show `2 ≤ 2`
+  -- let m be arbitrary
+  --    Suppose 2 | n
   intro m hmp
   have hp : 0 < 2 := by numbers
   have hmp_le : m ≤ 2 := Nat.le_of_dvd hp hmp
   have h1m : 1 ≤ m := Nat.pos_of_dvd_of_pos hmp hp
+  -- couldn't be expected to work with Q or R since
+  -- intervals of those have no lub or glb
   interval_cases m
   · left
     numbers -- show `1 = 1`
@@ -120,19 +137,50 @@ example : ¬ Prime 6 := by
 
 
 example {a : ℚ} (h : ∀ b : ℚ, a ≥ -3 + 4 * b - b ^ 2) : a ≥ 1 :=
-  sorry
+  calc a
+    _ ≥ -3 + 4 * 2 - 2 ^ 2 := h 2
+    _ = 1 := by ring
+    _ ≥ 1 := by numbers
 
 example {n : ℤ} (hn : ∀ m, 1 ≤ m → m ≤ 5 → m ∣ n) : 15 ∣ n := by
-  sorry
+  have h1: 3 ∣ n := by apply hn 3; numbers; numbers
+  have h2: 5 ∣ n := by apply hn 5; numbers; numbers
+  obtain ⟨a, ha⟩ := h1 -- n = 3a
+  obtain ⟨b, hb⟩ := h2 -- n = 2b
+  use 2 * a - 3 * b
+  calc n
+    _ = 10 * n - 9 * n := by ring
+    _ = 10 * (3 * a) - 9 * n := by rw [ha]
+    _ = 10 * (3 * a) - 9 * (5 * b) := by rw [hb]
+    _ = 15 * (2 * a - 3 * b) := by ring
 
 example : ∃ n : ℕ, ∀ m : ℕ, n ≤ m := by
-  sorry
+  use 0
+  intro m
+  extra
+
 
 example : ∃ a : ℝ, ∀ b : ℝ, ∃ c : ℝ, a + b < c := by
-  sorry
+  use 0
+  intro b
+  use b + 1
+  calc 0 + b
+    _ = b := by ring
+    _ < b + 1 := by extra
 
 example : forall_sufficiently_large x : ℝ, x ^ 3 + 3 * x ≥ 7 * x ^ 2 + 12 := by
-  sorry
+  use 7; intro x; intro hx -- x ≥ 7
+  apply le_of_lt_or_eq
+  left
+  calc x ^ 3 + 3 * x
+    _ = x * x ^ 2 + 3 * x := by ring
+    _ ≥ 7 * x ^ 2 + 3 * 7 := by rel [hx]
+    _ = (7 * x ^ 2 + 12) + 9 := by ring
+    _ > (7 * x ^ 2 + 12) + 0 := by extra
+    _ = 7 * x ^ 2 + 12 := by ring
 
 example : ¬(Prime 45) := by
-  sorry
+  apply not_prime 3 15
+  .numbers
+  .numbers
+  .numbers
