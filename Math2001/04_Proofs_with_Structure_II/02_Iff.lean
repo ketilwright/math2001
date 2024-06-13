@@ -145,26 +145,32 @@ example {a : ℤ} : a ^ 2 - 5 * a + 5 ≤ -1 ↔ a = 2 ∨ a = 3 := by
         _ = -1 := by ring
         _ ≤ -1 := by extra
 
-
-
-
-
 example {n : ℤ} (hn : n ^ 2 - 10 * n + 24 = 0) : Even n := by
   have hn1 :=
     calc (n - 4) * (n - 6) = n ^ 2 - 10 * n + 24 := by ring
       _ = 0 := hn
   have hn2 := eq_zero_or_eq_zero_of_mul_eq_zero hn1
-  sorry
+  obtain h3 | h3 := hn2
+  have h4: n = 4 := by addarith [h3]
+  use 2; rw [h4]; numbers
+  have h5: n = 6 := by addarith [h3]
+  use 3; rw [h5]; numbers
+
 
 example {n : ℤ} (hn : n ^ 2 - 10 * n + 24 = 0) : Even n := by
   have hn1 :=
     calc (n - 4) * (n - 6) = n ^ 2 - 10 * n + 24 := by ring
       _ = 0 := hn
   rw [mul_eq_zero] at hn1 -- `hn1 : n - 4 = 0 ∨ n - 6 = 0`
-  sorry
+  obtain h2 | h2 := hn1
+  have h3: n = 4 := by addarith [h2]
+  use 2; rw [h3]; numbers
+  have h4: n = 6 := by addarith [h2]
+  use 3; rw [h4]; numbers
 
 example {x y : ℤ} (hx : Odd x) (hy : Odd y) : Odd (x + y + 1) := by
-  rw [Int.odd_iff_modEq] at *
+  rw [Int.odd_iff_modEq] at * --  x + y + 1 ≡ 1 [ZMOD 2]
+
   calc x + y + 1 ≡ 1 + 1 + 1 [ZMOD 2] := by rel [hx, hy]
     _ = 2 * 1 + 1 := by ring
     _ ≡ 1 [ZMOD 2] := by extra
@@ -175,7 +181,9 @@ example (n : ℤ) : Even n ∨ Odd n := by
   · left
     rw [Int.even_iff_modEq]
     apply hn
-  · sorry
+  · right
+    rw [Int.odd_iff_modEq]
+    apply hn
 
 /-! # Exercises -/
 
