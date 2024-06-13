@@ -273,7 +273,9 @@ example {a b : ℤ} (hab : a ∣ b) : a ∣ 2 * b ^ 3 - b ^ 2 + 3 * b := by
       _ = 3 * (a * c) := by rw [hc]
       _ = a * (3 * c) := by ring
   rw [dvd_iff_modEq] at h3
-  have h4: a ∣ 2 * b ^ 3 - b ^ 2 := by rw [dvd_iff_modEq]; apply Int.ModEq.add h1 h2
+  have h4: a ∣ 2 * b ^ 3 - b ^ 2 := by
+    rw [dvd_iff_modEq];
+    apply Int.ModEq.add h1 h2
   have h5: a ∣ (2 * b ^ 3 - b ^ 2) + 3 * b := by
     rw [dvd_iff_modEq]
     rw [dvd_iff_modEq] at h4
