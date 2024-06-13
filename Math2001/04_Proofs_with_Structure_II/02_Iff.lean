@@ -189,16 +189,97 @@ example (n : ℤ) : Even n ∨ Odd n := by
 
 
 example {x : ℝ} : 2 * x - 1 = 11 ↔ x = 6 := by
-  sorry
+  constructor
+  · -- →
+    intro hx -- 2 * x - 1 = 11
+    calc x
+      _ = 2 * x / 2 := by ring
+      _ = 12 / 2 := by addarith [hx]
+      _ = 6 := by ring
+  · -- ←
+    intro hx
+    rw [hx]; numbers
+
 
 example {n : ℤ} : 63 ∣ n ↔ 7 ∣ n ∧ 9 ∣ n := by
-  sorry
+  constructor
+  · -- →
+    intro hn
+    obtain ⟨j, hj⟩ := hn
+    constructor
+    · -- 7 | n
+      use 9 * j
+      calc n
+        _ = 63 * j := hj
+        _ = 7 * (9 * j) := by ring
+    · -- 9 | n
+      use 7 * j
+      calc n
+        _ = 63 * j := hj
+        _ = 9 * (7 * j) := by ring
+  · -- ←
+    intro h
+    obtain ⟨h1, h2⟩ := h
+    obtain ⟨a, ha⟩ := h1 -- n = 7a
+    obtain ⟨b, hb⟩ := h2 -- n = 9b
+    use 4 * b - 3 * a
+    calc n
+      _ = 7 * 4 * n - 9 * 3 * n := by ring
+      _ = 7 * 4 * (9 * b) - 9 * 3 * n := by rw [hb]
+      _ = 7 * 4 * (9 * b) - 9 * 3 * (7 * a) := by rw [ha] -- why can't we combine in 1 step??
+      _ = 63 * (4 * b - 3 * a) := by ring
 
 theorem dvd_iff_modEq {a n : ℤ} : n ∣ a ↔ a ≡ 0 [ZMOD n] := by
+  constructor
+  · -- →
+    intro h
+    obtain ⟨x, hx⟩ := h
+    use x
+    calc a - 0
+      _ = a := by ring
+      _ = n * x := hx
+  · -- ←
+    intro h
+    obtain ⟨x, hx⟩ := h
+    use x
+    calc a
+      _ = a - 0 := by ring
+      _= n * x := hx
+
+example {a b : ℤ} (hab : a ∣ b) : a ∣ 2 * b ^ 3 - b ^ 2 + 3 * b := by
+  --rw [div_iff_modEq (2 * b ^ 3 - b ^ 2 + 3 * b) a ]
+  -- apply div_iff_modEq (2 * b ^ 3 - b ^ 2 + 3 * b) a
+  -- have h1: a ∣ (2 * b ^ 3 - b ^ 2 + 3 * b) ↔ a ≡ 0 [ZMOD 2 * b ^ 3 - b ^ 2 + 3 * b] := dvd_iff_modEq a (2 * b ^ 3 - b ^ 2 + 3 * b)
   sorry
 
 example {a b : ℤ} (hab : a ∣ b) : a ∣ 2 * b ^ 3 - b ^ 2 + 3 * b := by
-  sorry
+  -- according to hab, a also divides each term in the goal expression
+  obtain ⟨c, hc⟩ := hab
+  have h1: a ∣ 2 * b ^ 3 := by
+    use 2 * a ^ 2 * c ^ 3
+    calc 2 * b ^ 3
+      _ = 2 * (a * c) ^ 3 := by rw [hc]
+      _ = a * (2 * a ^ 2 * c ^ 3) := by ring
+  rw [dvd_iff_modEq] at h1
+  have h2: a ∣ - b ^ 2 := by
+    use - a * c ^ 2
+    calc -b ^ 2
+      _ = - (a * c) ^ 2 := by rw [hc]
+      _ = a * (-a * c ^ 2) := by ring
+  rw [dvd_iff_modEq] at h2
+  have h3: a ∣ 3 * b := by
+    use 3 * c
+    calc 3 * b
+      _ = 3 * (a * c) := by rw [hc]
+      _ = a * (3 * c) := by ring
+  rw [dvd_iff_modEq] at h3
+  have h4: a ∣ 2 * b ^ 3 - b ^ 2 := by rw [dvd_iff_modEq]; apply Int.ModEq.add h1 h2
+  have h5: a ∣ (2 * b ^ 3 - b ^ 2) + 3 * b := by
+    rw [dvd_iff_modEq]
+    rw [dvd_iff_modEq] at h4
+    apply Int.ModEq.add h4 h3
+  apply h5
+
 
 example {k : ℕ} : k ^ 2 ≤ 6 ↔ k = 0 ∨ k = 1 ∨ k = 2 := by
   sorry
