@@ -284,4 +284,31 @@ example {a b : ℤ} (hab : a ∣ b) : a ∣ 2 * b ^ 3 - b ^ 2 + 3 * b := by
 
 
 example {k : ℕ} : k ^ 2 ≤ 6 ↔ k = 0 ∨ k = 1 ∨ k = 2 := by
-  sorry
+  constructor
+  ·
+    intro hk
+    -- we have k² ≤ 6 < 3²
+    have h1:=
+      calc k ^ 2
+        _ ≤ 6 := hk
+        _ < 3 ^ 2 := by numbers
+    -- Since k² < 9, k < 3
+    apply lt_of_pow_lt_pow' 2 at h1 -- abs_le_of_sq_le_sq doesn't work here. Probably because of ℕ
+    -- Since k ∈ ℕ < 3, we are done
+    interval_cases (k)
+    left; numbers
+    right; left; numbers
+    right; right; numbers
+  ·
+    intro hk
+    obtain h1 | h1 := hk
+    calc k ^ 2
+      _ = 0 ^ 2 := by rw [h1]
+      _ ≤ 6 := by numbers
+    obtain h2 | h2 := h1
+    calc k ^ 2
+      _ = 1 ^ 2 := by rw [h2]
+      _ ≤ 6 := by numbers
+    calc k ^ 2
+      _ = 2 ^ 2 := by rw [h2]
+      _ ≤ 6 := by numbers
