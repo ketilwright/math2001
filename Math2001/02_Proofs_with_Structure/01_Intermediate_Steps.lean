@@ -59,12 +59,10 @@ example {x y : ℤ} (hx : x + 3 ≤ 2) (hy : y + 2 * x ≥ 3) : y > 3 := by
     _ ≥ 3 - 2 * (-1) := by rel [h1]
     _ > 3 := by numbers
 
--- I must be missing some point here. The text claims
--- lean will find that (b + a) * (b - a) is non negative on its own
 example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
   have h3: 0 ≤ b + a := by addarith [h1]
   have h4: 0 ≤ b - a := by addarith [h2]
-  have h5: 0 ≤ (b + a) * (b - a) := mul_nonneg h3 h4
+  have h5: 0 ≤ (b + a) * (b - a) := by extra -- must use mul_nonneg h3 h4
   calc a ^ 2
     _ ≤ a ^ 2 + (b + a) * (b - a) := le_add_of_nonneg_right h5
     _ = b ^ 2 := by ring
@@ -76,7 +74,7 @@ example (a b : ℝ) (h1 : -b ≤ a) (h2 : a ≤ b) : a ^ 2 ≤ b ^ 2 := by
   have h5: b ^ 2 - a ^ 2 ≥ 0 :=
     calc b ^ 2 - a ^ 2
       _ = (b + a) * (b - a) := by ring
-      _ ≥ 0 := mul_nonneg h3 h4
+      _ ≥ 0 := by extra --mul_nonneg h3 h4
   addarith [h5]
 
 example (a b : ℝ) (h : a ≤ b) : a ^ 3 ≤ b ^ 3 := by

@@ -247,13 +247,15 @@ theorem dvd_iff_modEq {a n : ℤ} : n ∣ a ↔ a ≡ 0 [ZMOD n] := by
       _= n * x := hx
 
 example {a b : ℤ} (hab : a ∣ b) : a ∣ 2 * b ^ 3 - b ^ 2 + 3 * b := by
-  --rw [div_iff_modEq (2 * b ^ 3 - b ^ 2 + 3 * b) a ]
-  -- apply div_iff_modEq (2 * b ^ 3 - b ^ 2 + 3 * b) a
-  -- have h1: a ∣ (2 * b ^ 3 - b ^ 2 + 3 * b) ↔ a ≡ 0 [ZMOD 2 * b ^ 3 - b ^ 2 + 3 * b] := dvd_iff_modEq a (2 * b ^ 3 - b ^ 2 + 3 * b)
-  sorry
+  obtain ⟨c, hc⟩ := hab
+  use 2 * a ^ 2 * c ^ 3 - a * (c ^ 2) + 3 * c
+  calc  2 * b ^ 3 - b ^ 2 + 3 * b
+    _ = 2 * (a * c) ^ 3 - (a * c) ^ 2 + 3 * (a * c) := by rw [hc]
+    _ = a * (2 * a ^ 2 * c ^ 3 - a * c ^ 2 + 3 * c) := by ring
 
+-- alternativly: make use of n ∣ a ↔ a ≡ₙ 0
 example {a b : ℤ} (hab : a ∣ b) : a ∣ 2 * b ^ 3 - b ^ 2 + 3 * b := by
-  -- according to hab, a also divides each term in the goal expression
+  -- since a ∣ b, and b divides each term in the goal expression
   obtain ⟨c, hc⟩ := hab
   have h1: a ∣ 2 * b ^ 3 := by
     use 2 * a ^ 2 * c ^ 3
@@ -293,7 +295,9 @@ example {k : ℕ} : k ^ 2 ≤ 6 ↔ k = 0 ∨ k = 1 ∨ k = 2 := by
         _ ≤ 6 := hk
         _ < 3 ^ 2 := by numbers
     -- Since k² < 9, k < 3
-    apply lt_of_pow_lt_pow' 2 at h1 -- abs_le_of_sq_le_sq doesn't work here. Probably because of ℕ
+    --apply lt_of_pow_lt_pow' 2 at h1 -- abs_le_of_sq_le_sq doesn't work here. Probably because of ℕ
+    -- hmmm. See section 2.1.5
+    cancel 2 at h1 -- section 2.1.5: cancel works on exponents.
     -- Since k ∈ ℕ < 3, we are done
     interval_cases (k)
     left; numbers
