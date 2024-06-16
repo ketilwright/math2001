@@ -108,8 +108,8 @@ example : ∃! r : ℤ, 0 ≤ r ∧ r < 5 ∧ 14 ≡ r [ZMOD 5] := by
   addarith [hr3]
 
 /-
-  I found the preceding proof's uniqueness bit too difficult to follow,
-  so I rewrote that part more pedantically
+  I found the preceding proof's uniqueness part a bit too opaque
+  so I rewrote it more pedantically
 -/
 example : ∃! r : ℤ, 0 ≤ r ∧ r < 5 ∧ 14 ≡ r [ZMOD 5] := by
   use 4
@@ -182,8 +182,8 @@ example : ∃! n : ℕ, ∀ a, n ≤ a := by
     calc y = 0 := Nat.le_zero.mp (hy 0)
 
 
-
 example : ∃! r : ℤ, 0 ≤ r ∧ r < 3 ∧ 11 ≡ r [ZMOD 3] := by
+  -- The value 2 has the property 0 ≤ 2 < 3 and 11 ≡₃ 2
   use 2
   dsimp
   constructor
@@ -199,80 +199,26 @@ example : ∃! r : ℤ, 0 ≤ r ∧ r < 3 ∧ 11 ≡ r [ZMOD 3] := by
         use 3
         numbers
   ·
+  -- Proof that 2 is the only number with this property
+    -- let y ∈ ℤ be arbitrary & suppose 0 ≤ y < 3 and 11 ≡₃ y
     intro y hy
-    obtain ⟨hy1, hy2, x, hy3⟩ := hy
-
+    -- Since 11 ≡₃ y, there is x ∈ ℤ with 11 - y = 3x
+    obtain ⟨h1, h2, x, h3⟩ := hy
+    -- Since 11 - y = 3x and y < 3, 3x > 8, thus x > 2
     have h4:=
-      calc 3 * 1
-        --_ < 3 * 1 := by numbers
-        _ < 11 - y := by addarith [hy2]
-        _ = 3 * x := hy3
-    cancel 3 at h4 -- 1 < x
-    have h5:=
       calc 3 * x
-        _ = 11 - y := by rw [hy3]
-        _ < 3 * 4 := by addarith [hy1]
-    cancel 3 at h5 -- x < 4
-
-    have h7:=
-      calc 11 - y
-        _ > 11 - 3 := by rel [hy2]
-
-
-    -- cancel 1 at h6
-    -- interval_cases x
-    -- addarith [hy3]
-    -- have h4:=
-    --   calc 2 * 1
-    --     _ < 3 * 1 := by numbers
-    --     _ < 11 - y := by addarith [hy2]
-
-    -- have h4:=
-    --   calc 3 * 1
-    --     _ < 11 - y := by addarith [hy2]
-    --     _ = 3 * x := hy3
-    -- cancel 3 at h4
-    -- have h5:=
-    --   calc 3 * x
-    --     _ = 11 - y := by rw [hy3]
-    --     _ < 3 * 4  := by addarith [hy1]
-
-    -- cancel 3 at h5
-    -- interval_cases x
-
-
-
-
-    --have h4: y = 11 - 3 * x := by addarith [hy3]
-  --   obtain ⟨h1, hConj⟩ := hy -- h1: 0 ≤ y
-  --   obtain ⟨h2, h3⟩ := hConj -- h2: y < 3
-  --   dsimp [Int.ModEq] at h3
-  --   --dsimp [. ∣ .] at h3
-  --   -- we consider the 3 possible values of y
-  --   /-
-  --   lemma Int.existsUnique_modEq_lt (a b : ℤ) (h : 0 < b) :
-  -- ∃! r : ℤ, 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b] :=
-  --   -/
-  --   have h42: 3 ∣ (11 - 2) := by use 3; numbers
-
-
-    -- interval_cases y
-    -- ·
-    --   -- Suppose y = 2
-    --   -- have h42: 3 ∣ (11 - 2) := by use 3; numbers
-
-    --   --obtain ⟨x, hx⟩ := h3
-
-    --   sorry
-    -- ·
-    --   sorry
-    -- ·
-    --   sorry
-    -- -- dsimp [Int.ModEq] at h3
-
-    -- -- dsimp [. ∣ .] at h3
-
-    -- -- obtain ⟨x, h4⟩ := h3 -- 11 - y = 3 * x
-
-
-    sorry
+        _ = 11 - y := by rw [h3]
+        _ > 11 - 3 := by rel [h2]
+        _ = 8 := by numbers
+        _ > 3 * 2 := by numbers
+    -- Since 11 - y = 3x and y ≥ 0, 3x < 12, so x < 4
+    have h5:=
+      calc  3 * x
+        _ = 11 - y := by rw [h3]
+        _ ≤ 11 - 0 := by rel [h1]
+        _ < 3 * 4 := by numbers
+    cancel 3 at h4; cancel 3 at h5
+    -- Since 2 < x < 4, x = 3
+    interval_cases x
+    -- Since 11 - y = 3x and x = 3, y = 2
+    addarith [h3]
