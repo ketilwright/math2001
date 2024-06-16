@@ -94,16 +94,17 @@ example : ∃! r : ℤ, 0 ≤ r ∧ r < 5 ∧ 14 ≡ r [ZMOD 5] := by
     numbers
   intro r hr
   obtain ⟨hr1, hr2, q, hr3⟩ := hr
-  have :=
+  have h42:=
     calc
       5 * 1 < 14 - r := by addarith [hr2]
       _ = 5 * q := by rw [hr3]
-  cancel 5 at this
-  have :=
+
+  cancel 5 at h42 -- q > 1
+  have h43:=
     calc
       5 * q = 14 - r := by rw [hr3]
       _ < 5 * 3 := by addarith [hr1]
-  cancel 5 at this
+  cancel 5 at h43 -- q < 3
   interval_cases q
   addarith [hr3]
 
@@ -111,10 +112,28 @@ example : ∃! r : ℤ, 0 ≤ r ∧ r < 5 ∧ 14 ≡ r [ZMOD 5] := by
 
 
 example : ∃! x : ℚ, 4 * x - 3 = 9 := by
-  sorry
+  use 3
+  dsimp
+  constructor
+  ·
+    numbers
+  ·
+    intro y hy
+    calc y
+      _ = (4 * y - 3 - 9) / 4 + 3 := by ring
+      _ = (9 - 9) / 4 + 3 := by rw [hy]
+      _ = 3 := by numbers
 
 example : ∃! n : ℕ, ∀ a, n ≤ a := by
-  sorry
+  use 0
+  dsimp
+  constructor
+  ·
+    intro a
+    apply Nat.zero_le a
+  ·
+    intro y hy
+    calc y = 0 := Nat.le_zero.mp (hy 0)
 
 example : ∃! r : ℤ, 0 ≤ r ∧ r < 3 ∧ 11 ≡ r [ZMOD 3] := by
   sorry
