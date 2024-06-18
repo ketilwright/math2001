@@ -230,7 +230,24 @@ example (n : ℤ) (hn : n ^ 2 ≡ 4 [ZMOD 5]) : n ≡ 2 [ZMOD 5] ∨ n ≡ 3 [ZM
 
 
 example : Prime 7 := by
-  sorry
+  apply prime_test
+  numbers
+  intro m h1_lt_m hm_lt_7
+  apply Nat.not_dvd_of_exists_lt_and_lt
+  interval_cases m
+  ·
+    use 3; constructor; numbers; numbers
+  ·
+    use 2; constructor; numbers; numbers
+  ·
+    use 1; constructor; numbers; numbers
+  ·
+    use 1; constructor; numbers; numbers
+  ·
+    use 1; constructor; numbers; numbers
+
+
+
 
 example {x : ℚ} (h1 : x ^ 2 = 4) (h2 : 1 < x) : x = 2 := by
   have h3 :=
