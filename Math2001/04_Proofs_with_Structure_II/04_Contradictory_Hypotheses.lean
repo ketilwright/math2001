@@ -255,9 +255,35 @@ example {x : ℚ} (h1 : x ^ 2 = 4) (h2 : 1 < x) : x = 2 := by
       (x + 2) * (x - 2) = x ^ 2 + 2 * x - 2 * x - 4 := by ring
       _ = 0 := by addarith [h1]
   rw [mul_eq_zero] at h3
-  sorry
+  obtain h4 | h4 := h3
+  · -- suppose x + 2 = 0
+    have h5:=
+      calc x
+        _ = -2 := by addarith [h4]
+        _ ≤ 1 := by numbers
+    have h6: ¬ x > 1 := not_lt.mpr h5
+    contradiction
+  ·
+    calc x = 2 := by addarith [h4]
+
+
 
 namespace Nat
-
+-- running into trouble N vs Z
 example (p : ℕ) (h : Prime p) : p = 2 ∨ Odd p := by
-  sorry
+  obtain ⟨h1, h2⟩ := h
+  obtain h3 | h3  := Nat.lt_or_eq_of_le h1
+  ·
+    right
+    mod_cases h4: (p: ℤ) % 2
+    ·
+      have h5: 2 ∣ p := Int.ofNat_dvd.mp h4
+      have h6: 2 ∣ p → 2 = 1 ∨ 2 = p := by apply h2
+      sorry
+    ·
+      obtain ⟨c, hc⟩ := h4
+      sorry
+
+
+  ·
+    left; apply h3.symm
