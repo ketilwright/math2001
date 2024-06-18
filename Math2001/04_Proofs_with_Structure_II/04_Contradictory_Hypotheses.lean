@@ -61,14 +61,6 @@ example (n : ℤ) (hn : n ^ 2 + n + 1 ≡ 1 [ZMOD 3]) :
     apply h
 
 
-#check Int.not_dvd_of_exists_lt_and_lt
-#check Nat.not_dvd_of_exists_lt_and_lt
-#check Nat.pos_of_dvd_of_pos
-/-
-Nat.pos_of_dvd_of_pos {m n : ℕ} (H1 : m ∣ n) (H2 : 0 < n) : 0 < m
--/
---#check Nat.le_of_dvd
---#check Int.le_of_dvd
 example {p : ℕ} (hp : 2 ≤ p) (H : ∀ m : ℕ, 1 < m → m < p → ¬m ∣ p) : Prime p := by
   constructor
   · apply hp -- show that `2 ≤ p`
@@ -172,10 +164,70 @@ example {a b c : ℕ} (ha : 0 < a) (hb : 0 < b) (hc : 0 < c)
 
 example {x y : ℝ} (n : ℕ) (hx : 0 ≤ x) (hn : 0 < n) (h : y ^ n ≤ x ^ n) :
     y ≤ x := by
-  sorry
+  cancel n at h -- appears to be enough, since h is now y ≤ x
 
 example (n : ℤ) (hn : n ^ 2 ≡ 4 [ZMOD 5]) : n ≡ 2 [ZMOD 5] ∨ n ≡ 3 [ZMOD 5] := by
-  sorry
+  -- ∃ c ∈ ℤ | n ^ 2 - 4 = 5c
+  obtain ⟨c, hc⟩ := hn
+  -- We evaluate the cases of n % 5 = 0, 1, 2, 3, 4
+  mod_cases hMod: n % 5
+  · -- suppose n ≡₀ 5
+    -- Then there is d ∈ ℤ | n = 5 ⬝ d
+    obtain ⟨d, hd⟩ := hMod -- n - 0 = 5 * d
+    ring_nf at hd -- converts n - 0 to n (& also reverse 5 & d :-( )
+    -- Substituting 5d for n in n² ≡₅ 4 we have
+    -- 5 ∣ 25d² - 4. Since 5 ∣ 25d², 5 must also divide -4
+    have h1:=
+      calc 25 * d ^ 2 - 4
+        _ = (d * 5) ^ 2 - 4 := by ring
+        _ = n ^ 2 - 4 := by rw [hd]
+        _ = 5 * c := hc
+    have h2: 5 ∣ 25 * d ^ 2 - 4 := by use c; apply h1
+    have h3: 5 ∣ 25 * d ^ 2 := by use 5 * d ^ 2; ring
+    apply (Int.dvd_add_right h3).mp at h2
+    -- But since ¬ 5 ∣ (-4), we reach a contradiction.
+    have h5: ¬ 5 ∣ (-4) := by
+      apply Int.not_dvd_of_exists_lt_and_lt
+      use -1
+      constructor; numbers; numbers
+    contradiction
+  · -- suppose n ≡₁ 5
+    obtain ⟨d, hd⟩ := hMod -- n - 1 = 5 * d
+    have h6: n = 5 * d + 1 := by addarith [hd]
+    have h7:=
+      calc 25 * d ^ 2 + 10 * d - 3
+        _ = (5 * d + 1) ^ 2 - 4 := by ring
+        _ = n ^ 2 - 4 := by rw [h6]
+        _ = 5 * c := hc
+    have h8 : 5 ∣ 25 * d ^ 2 + 10 * d - 3 := by use c; apply h7
+    have h9 : 5 ∣ 25 * d ^ 2 + 10 * d := by use 5 * d ^ 2 + 2 * d; ring
+    apply (Int.dvd_add_right h9).mp at h8
+    have h10: ¬ 5 ∣ (-3) := by
+      apply Int.not_dvd_of_exists_lt_and_lt
+      use -1
+      constructor; numbers; numbers
+    contradiction
+  · -- suppose n ≡₂ 5
+    left; apply hMod
+  · -- suppose n ≡₃ 5
+    right; apply hMod
+  · -- suppose n ≡₄ 5
+    obtain ⟨d, hd⟩ := hMod -- n - 4 = 5 * d
+    have h11: n = 5 * d + 4 := by addarith [hd]
+    have h12:=
+      calc 25 * d ^ 2 + 40 * d + 12
+        _ = (5 * d + 4) ^ 2 - 4 := by ring
+        _ = n ^ 2 - 4 := by rw [h11]
+        _ = 5 * c := hc
+    have h13: 5 ∣ 25 * d ^ 2 + 40 * d + 12 := by use c; apply h12
+    have h14: 5 ∣ 25 * d ^ 2 + 40 * d := by use 5 * d ^ 2 + 8 * d; ring
+    apply (Int.dvd_add_right h14).mp at h13
+    have h10: ¬ 5 ∣ (12: ℤ) := by
+      apply Int.not_dvd_of_exists_lt_and_lt
+      use 2
+      constructor; numbers; numbers
+    contradiction
+
 
 example : Prime 7 := by
   sorry

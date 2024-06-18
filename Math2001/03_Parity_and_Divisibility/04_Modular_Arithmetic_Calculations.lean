@@ -47,7 +47,6 @@ example {x : ℤ} : x ^ 3 ≡ x [ZMOD 3] := by
 
 /-! # Exercises -/
 
-#check Int.ModEq.trans
 
 example {n : ℤ} (hn : n ≡ 1 [ZMOD 3]) : n ^ 3 + 7 * n ≡ 2 [ZMOD 3] :=
   -- maybe this can be done with a long string of apply(s)
