@@ -269,21 +269,20 @@ example {x : ℚ} (h1 : x ^ 2 = 4) (h2 : 1 < x) : x = 2 := by
 
 
 namespace Nat
--- running into trouble N vs Z
 example (p : ℕ) (h : Prime p) : p = 2 ∨ Odd p := by
   obtain ⟨h1, h2⟩ := h
   obtain h3 | h3  := Nat.lt_or_eq_of_le h1
   ·
-    right
-    mod_cases h4: (p: ℤ) % 2
-    ·
-      have h5: 2 ∣ p := Int.ofNat_dvd.mp h4
-      have h6: 2 ∣ p → 2 = 1 ∨ 2 = p := by apply h2
-      sorry
+    obtain h4 | h4 := even_or_odd p
     ·
       obtain ⟨c, hc⟩ := h4
-      sorry
-
-
+      have h5: 2 ∣ p := by use c; apply hc
+      obtain h7 | h7 := (h2 2) h5
+      ·
+        numbers at h7
+      ·
+        left; rw [h7]
+    ·
+      right; apply h4
   ·
-    left; apply h3.symm
+    left; rw [h3]
