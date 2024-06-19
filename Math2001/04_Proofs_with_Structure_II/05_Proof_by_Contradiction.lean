@@ -193,22 +193,47 @@ example {p : ℕ} (hp : 2 ≤ p)  (T : ℕ) (hTp : p < T ^ 2)
     (H : ∀ (m : ℕ), 1 < m → m < T → ¬ (m ∣ p)) :
     Prime p := by
   apply prime_test hp
+  -- let m ∈ ℕ be arbitrary, and assume 1 < m and m < p
   intro m hm1 hmp
+  -- we know that either m < T or m ≥ T
   obtain hmT | hmT := lt_or_le m T
-  · apply H m hm1 hmT
-  intro h_div
-  obtain ⟨l, hl⟩ := h_div
-  have : l ∣ p
-  · sorry
-  have hl1 :=
-    calc m * 1 = m := by ring
-      _ < p := hmp
-      _ = m * l := hl
-  cancel m at hl1
-  have hl2 : l < T
-  · sorry
-  have : ¬ l ∣ p := H l hl1 hl2
-  contradiction
+  · -- Suppose m < T
+    -- Then since ∀ m ∈ N, 1 < m ∧ m < T → ¬ m ∣ p and 1 < m and m < T, ¬ m ∣ p
+    apply H m hm1 hmT
+  · -- Suppose T ≤ m, and (for a contradiction) that m ∣ p
+    intro h_div
+    -- Since m ∣ p, there is l ∈ ℕ with p = m ⬝ l
+    obtain ⟨l, hl⟩ := h_div
+    -- Since p = m ⬝ l, l divides p
+    have h_l_div_p: l ∣ p
+    ·
+      use m;
+      calc p
+        _ = m * l := hl
+        _ = l * m := by ring
+    --  Since m < p = m ⬝ l thus 1 < l
+    have hl1 :=
+      calc m * 1 = m := by ring
+        _ < p := hmp
+        _ = m * l := hl
+    cancel m at hl1
+    -- We claim that 1 < l.
+    have hl2 : l < T
+    ·
+    --   To see why, note that since T ≤ m, Tl ≤ ml = p < T²
+    --   Thus we have T ⬝ l < T² and l < T
+      have hl_lt_T:=
+        calc T * l
+          _ ≤ m * l := by rel [hmT]
+          _ = p := by rw [hl]
+          _ < T ^ 2 := by rel [hTp]
+          _ = T * T := by ring
+      cancel T at hl_lt_T
+    -- Finally, since ∀ m ∈ N, 1 < m ∧ m < T → ¬ m ∣ p and 1 < l and l < T, ¬ l ∣ p
+    -- which contradicts l ∣ p
+    have : ¬ l ∣ p := H l hl1 hl2
+    contradiction
+    -- Since m ∣ p results in l ∣ p ∧ ¬ l ∣ p, ¬ m ∣ p
 
 
 example : Prime 79 := by
@@ -224,10 +249,14 @@ example : Prime 79 := by
     constructor <;> numbers
   · use 19
     constructor <;> numbers
-  · sorry
-  · sorry
-  · sorry
-  · sorry
+  · use 15
+    constructor <;> numbers
+  · use 13
+    constructor <;> numbers
+  · use 11
+    constructor <;> numbers
+  · use 9
+    constructor <;> numbers
 
 /-! # Exercises -/
 
