@@ -16,26 +16,57 @@ example : ¬ (∀ x : ℝ, x ^ 2 ≥ x) := by
 
 
 example : ¬ 3 ∣ 13 := by
-  intro H
+  intro H -- Suppose 3 ∣ 13, goal becomes "False"
   obtain ⟨k, hk⟩ := H
   obtain h4 | h5 := le_or_succ_le k 4
   · have h :=
     calc 13 = 3 * k := hk
       _ ≤ 3 * 4 := by rel [h4]
     numbers at h
-  · sorry
+  · -- Suppose k ≥ 5
+    have h :=
+      calc 13 = 3 * k := hk
+        _ ≥ 3 * 5 := by rel [h5]
+        _ = 15 := by ring
+    numbers at h
+
+
 
 example {x y : ℝ} (h : x + y = 0) : ¬(x > 0 ∧ y > 0) := by
-  intro h
-  obtain ⟨hx, hy⟩ := h
+  -- Suppose both x, y > 0
+  intro h -- h
+  obtain ⟨hx, hy⟩ := h -- splits conjunction at h
+
   have H :=
   calc 0 = x + y := by rw [h]
-    _ > 0 := by extra
+    -- my OCD requires I sniff out what "extra" is doing
+    _ > 0 + y := by rel [hx]
+    _ > 0 + 0 := by rel [hy]
+    _ = 0 := by numbers
+    --_ > 0 := by extra
   numbers at H
 
-
+-- Prove there is no natural number whose square is 2
 example : ¬ (∃ n : ℕ, n ^ 2 = 2) := by
-  sorry
+  -- Suppose there is n ∈ ℕ with n² = 2
+  intro h
+  obtain ⟨n, hn⟩ := h
+  -- either n ≤ 1 or n ≥ 2
+  obtain h1 | h2 := le_or_succ_le n 1
+  · -- suppose n ≤ 1
+    -- Then 2 ≤ 1², a contradiction
+    have h3:=
+      calc 2
+        _ = n ^ 2 := by rw [hn]
+        _ ≤ 1 ^ 2 := by rel [h1]
+
+    numbers at h3
+  · -- suppose n ≥ 2
+    have h4:=
+      calc 2
+        _ = n ^ 2 := by rw [hn]
+        _ ≥ 2 ^ 2 := by rel [h2]
+    numbers at h4
 
 example (n : ℤ) : Int.Even n ↔ ¬ Int.Odd n := by
   constructor
@@ -51,9 +82,25 @@ example (n : ℤ) : Int.Even n ↔ ¬ Int.Odd n := by
     · apply h1
     · contradiction
 
-
+-- no contrapositive support? (yet?)
 example (n : ℤ) : Int.Odd n ↔ ¬ Int.Even n := by
-  sorry
+  constructor
+  · -- (→)
+    intro h1 h2
+    rw [Int.odd_iff_modEq] at h1
+    rw [Int.even_iff_modEq] at h2
+    have h3 :=
+      calc 0 ≡ n [ZMOD 2] := by rel [h2]
+          _ ≡ 1 [ZMOD 2] := by rel [h1]
+    numbers at h3
+  · -- (←)
+    intro h4
+    obtain h5 | h5 := Int.even_or_odd n
+    ·
+      contradiction
+    ·
+      apply h5
+
 
 example (n : ℤ) : ¬(n ^ 2 ≡ 2 [ZMOD 3]) := by
   intro h
