@@ -36,13 +36,12 @@ example {x y : ℝ} (h : x + y = 0) : ¬(x > 0 ∧ y > 0) := by
   -- Suppose both x, y > 0
   intro h -- h
   obtain ⟨hx, hy⟩ := h -- splits conjunction at h
-
   have H :=
-  calc 0 = x + y := by rw [h]
-    -- my OCD requires I sniff out what "extra" is doing
-    _ > 0 + y := by rel [hx]
-    _ > 0 + 0 := by rel [hy]
-    _ = 0 := by numbers
+    calc 0 = x + y := by rw [h]
+      -- my OCD requires I sniff out what "extra" is doing
+      _ > 0 + y := by rel [hx]
+      _ > 0 + 0 := by rel [hy]
+      _ = 0 := by numbers
     --_ > 0 := by extra
   numbers at H
 
@@ -101,44 +100,94 @@ example (n : ℤ) : Int.Odd n ↔ ¬ Int.Even n := by
     ·
       apply h5
 
+/-
+Int.ModEq.neg {n a b : ℤ} (h1 : a ≡ b [ZMOD n]) : -a ≡ -b [ZMOD n]
+Int.ModEq.mul {n a b c d : ℤ} (h1 : a ≡ b [ZMOD n]) (h2 : c ≡ d [ZMOD n]) : a * c ≡ b * d [ZMOD n]
+Int.ModEq.pow {n a b : ℤ} (k : ℕ) (h : a ≡ b [ZMOD n]) : a ^ k ≡ b ^ k [ZMOD n]
+-/
+
 
 example (n : ℤ) : ¬(n ^ 2 ≡ 2 [ZMOD 3]) := by
   intro h
   mod_cases hn : n % 3
-  · have h :=
+  · have h0 := -- original eclipses outer scope h
     calc (0:ℤ) = 0 ^ 2 := by numbers
       _ ≡ n ^ 2 [ZMOD 3] := by rel [hn]
       _ ≡ 2 [ZMOD 3] := by rel [h]
-    numbers at h -- contradiction!
-  · sorry
-  · sorry
+    numbers at h0 -- contradiction!
+  · -- suppose n ≡ 1 [ZMOD 3]
+    have h1 :=
+      calc (1: ℤ) = 1 ^ 2 := by numbers
+        _ ≡ n ^ 2 [ZMOD 3] := by rel [hn]
+        _ ≡ 2 [ZMOD 3] := by rel [h]
+    numbers at h1
+  · -- suppose n % 3 = 2: ie n ≡ 2 [ZMOD 3]
+    have h3:=
+      calc 1
+        _ ≡ 4 [ZMOD 3] := by use -1; numbers
+        _ = 2 ^ 2 := by ring
+        _ ≡ n ^ 2 [ZMOD 3] := by rel [hn]
+        _ ≡ 2 [ZMOD 3] := h
+    numbers at h3
+
 
 example {p : ℕ} (k l : ℕ) (hk1 : k ≠ 1) (hkp : k ≠ p) (hkl : p = k * l) :
     ¬(Prime p) := by
+  -- since p = k ⬝ l, k divides p
   have hk : k ∣ p
   · use l
     apply hkl
+  -- Suppose for a contradiction that p is prime
   intro h
+  -- Then ∀ m ∈ ℕ, m ∣ p → m = 1 ∨ m = p
   obtain ⟨h2, hfact⟩ := h
-  have : k = 1 ∨ k = p := hfact k hk
-  obtain hk1' | hkp' := this
-  · contradiction
-  · contradiction
+  -- by UI on the above and k | p, either k = 1 or k = p
+  have h3: k = 1 ∨ k = p := hfact k hk
+  obtain hk1' | hkp' := h3
+  ·
+    -- Suppose k = 1. But we were given k ≠ 1
+    contradiction
+  ·
+    -- Suppose k = p. But we were given k ≠ p
+    contradiction
 
-
+/-
+  Let a, b be integers. If there exists q ∈ Z with bq < a < b(q + 1)
+  then b does not divide a
+-/
 example (a b : ℤ) (h : ∃ q, b * q < a ∧ a < b * (q + 1)) : ¬b ∣ a := by
+  -- Suppose for a contradiction that b ∣ a
   intro H
+  -- then there is k such that a = kb
   obtain ⟨k, hk⟩ := H
+  -- From the given, we can choose q ∈ ℤ with
+  -- bq < a and a < b(q + 1)
   obtain ⟨q, hq₁, hq₂⟩ := h
   have hb :=
+  -- Since bq < a and a < b(q + 1) it follows that b > 0
   calc 0 = a - a := by ring
     _ < b * (q + 1) - b * q := by rel [hq₁, hq₂]
     _ = b := by ring
+  -- Since a = bk and a < b(q + q), we have bk < b(q + 1)
   have h1 :=
   calc b * k = a := by rw [hk]
     _ < b * (q + 1) := hq₂
+  -- Thus k < q + 1
   cancel b at h1
-  sorry
+  -- We next observe that bq = bk
+  have h2 :=
+    calc b * q
+      _ < a := hq₁
+      _ = b * k := hk
+  -- And, since b > 0, thus q < k
+  cancel b at h2
+  -- But we already know k < q + 1, so q ≥ k
+  have h3: q ≥ k := by addarith [h1]
+  -- But we have a contradiction, since q can't be both less than and
+  -- greater than or equal to k
+  have False := by exact a
+  -- (It was not clear to me to see exactly how to use "contradiction",
+  -- but I happen to know the trick above works. )
 
 example {p : ℕ} (hp : 2 ≤ p)  (T : ℕ) (hTp : p < T ^ 2)
     (H : ∀ (m : ℕ), 1 < m → m < T → ¬ (m ∣ p)) :
