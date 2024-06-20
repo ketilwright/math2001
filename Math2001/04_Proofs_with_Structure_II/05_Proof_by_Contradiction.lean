@@ -100,13 +100,6 @@ example (n : ℤ) : Int.Odd n ↔ ¬ Int.Even n := by
     ·
       apply h5
 
-/-
-Int.ModEq.neg {n a b : ℤ} (h1 : a ≡ b [ZMOD n]) : -a ≡ -b [ZMOD n]
-Int.ModEq.mul {n a b c d : ℤ} (h1 : a ≡ b [ZMOD n]) (h2 : c ≡ d [ZMOD n]) : a * c ≡ b * d [ZMOD n]
-Int.ModEq.pow {n a b : ℤ} (k : ℕ) (h : a ≡ b [ZMOD n]) : a ^ k ≡ b ^ k [ZMOD n]
--/
-
-
 example (n : ℤ) : ¬(n ^ 2 ≡ 2 [ZMOD 3]) := by
   intro h
   mod_cases hn : n % 3
@@ -181,13 +174,10 @@ example (a b : ℤ) (h : ∃ q, b * q < a ∧ a < b * (q + 1)) : ¬b ∣ a := by
       _ = b * k := hk
   -- And, since b > 0, thus q < k
   cancel b at h2
-  -- But we already know k < q + 1, so q ≥ k
-  have h3: q ≥ k := by addarith [h1]
-  -- But we have a contradiction, since q can't be both less than and
-  -- greater than or equal to k
-  have False := by exact a
-  -- (It was not clear to me to see exactly how to use "contradiction",
-  -- but I happen to know the trick above works. )
+  -- But we already know k < q + 1, so q ≥ k & thus ¬ q < k, contradicting q < k
+  have h3: ¬ q < k := by addarith [h1]
+  contradiction
+
 
 example {p : ℕ} (hp : 2 ≤ p)  (T : ℕ) (hTp : p < T ^ 2)
     (H : ∀ (m : ℕ), 1 < m → m < T → ¬ (m ∣ p)) :
@@ -262,20 +252,84 @@ example : Prime 79 := by
 
 
 example : ¬ (∃ t : ℝ, t ≤ 4 ∧ t ≥ 5) := by
-  sorry
+  intro h
+  obtain ⟨t, ht⟩ := h
+  obtain ⟨h1, h2⟩  := ht
+  have h3:=
+    calc t
+      _ ≤ 4 := h1
+      _ < 5 := by numbers
+  have h4: ¬ t < 5 := not_lt.mpr h2
+  contradiction
+
 
 example : ¬ (∃ a : ℝ, a ^ 2 ≤ 8 ∧ a ^ 3 ≥ 30) := by
-  sorry
+  intro h
+  obtain ⟨a, ha⟩ := h
+  obtain ⟨h1, h2⟩ := ha
+
+  obtain h4 | h4 := lt_or_ge a 0
+  · -- Suppose a < 0.
+
+    have h5: a ^ 2 > 0 := sq_pos_of_neg h4
+    have h6:=
+      calc a
+        _ < 0 := h4
+        _ < 1 := by numbers
+
+    have h7:=
+      calc a ^ 3
+        _ = a * a ^ 2 := by ring
+        _ < 1 * (a ^ 2) := by rel [h6]
+        _ = a ^ 2 := by ring
+    have h8:=
+      calc 8
+        _ ≥ a ^ 2 := h1
+        _ > a ^ 3 := h7
+        _ ≥ 30 := h2
+
+    numbers at h8
+
+  · -- suppose a ≥ 0
+
+    have h9:=
+      calc a * a
+        _ = a ^ 2 := by ring
+        _ ≤ 8 := h1
+        _ < 3 * 3 := by numbers
+    have h10: (0: ℝ) ≤ 3 := by numbers
+    have h11: a < 3 := (mul_self_lt_mul_self_iff h4 h10).mpr h9
+    have h12:=
+      calc a ^ 3
+        _ < 3 ^ 3 := by rel [h11]
+        _ = 27 := by ring
+    have h13:=
+      calc 27
+        _ > a ^ 3 := h12
+        _ ≥ 30 := h2
+    numbers at h13
+
+
 
 example : ¬ Int.Even 7 := by
-  sorry
+  -- Since 7 is odd it can't be even.
+  have h1: Int.Odd 7 := by use 3; ring
+  rw [odd_iff_not_even 7] at h1
+  apply h1
 
 example {n : ℤ} (hn : n + 3 = 7) : ¬ (Int.Even n ∧ n ^ 2 = 10) := by
-  sorry
+  intro h
+  obtain ⟨h1, h2⟩ := h
+  have h3: n = 4 := by addarith [hn]
+  have h4:=
+    calc 10
+      _ = n ^ 2 := by rw [h2]
+      _ = 4 ^ 2 := by rw [h3]
+      _ = 16 := by numbers
+  numbers at h4
 
 example {x : ℝ} (hx : x ^ 2 < 9) : ¬ (x ≤ -3 ∨ x ≥ 3) := by
   sorry
-
 example : ¬ (∃ N : ℕ, ∀ k > N, Nat.Even k) := by
   sorry
 
