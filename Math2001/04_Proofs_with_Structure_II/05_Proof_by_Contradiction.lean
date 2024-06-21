@@ -329,10 +329,53 @@ example {n : ℤ} (hn : n + 3 = 7) : ¬ (Int.Even n ∧ n ^ 2 = 10) := by
   numbers at h4
 
 example {x : ℝ} (hx : x ^ 2 < 9) : ¬ (x ≤ -3 ∨ x ≥ 3) := by
-  sorry
-example : ¬ (∃ N : ℕ, ∀ k > N, Nat.Even k) := by
-  sorry
+  intro h
+  obtain h1 | h1 := h
+  · -- Suppose x ≤ -3, then -x ≥ 3 and x² ≥ 9 which contradicts hx
+    rw [le_neg] at h1 -- 3 ≤ -x
+    have h2:=
+      calc (9: ℝ)
+        _ = 3 * 3 := by numbers
+        _ ≤ (-x)  * (-x) := by rel [h1]
+        _ = x ^ 2 := by ring
+    rw[←not_lt] at h2
+    contradiction
+  · -- suppose x ≥ 3. Then x² ≥ 9, which contradicts hx
+    have h3:=
+      calc x ^ 2
+        _ = x * x := by ring
+        _ ≥ 3 * 3 := by rel [h1]
+        _ = 9 := by numbers
 
+    have h4: ¬ x ^ 2 < 9 := not_lt.mpr h3
+    contradiction
+
+
+
+example : ¬ (∃ N : ℕ, ∀ k > N, Nat.Even k) := by
+  intro h
+  obtain ⟨n, hn⟩ := h
+  obtain h1 | h1 := Nat.even_or_odd n
+  · -- suppose n is even
+    obtain ⟨k, hk⟩ := h1
+    -- Then n + 1 is odd
+    have h2: Nat.Odd (n + 1) := by use k; rw [hk]
+    -- But by our assumption that ∀k > n, k is even, and n + 1 > n, thus n + 1 is even
+    have h3: Nat.Even (n + 1) := by apply hn (n + 1) (Nat.lt.base n)
+    -- So we have n + 1 is odd and not odd
+    have h4: ¬ Nat.Odd (n + 1) := (Nat.even_iff_not_odd (n + 1)).mp h3
+    contradiction
+  · -- Suppose n is odd.
+    obtain ⟨k, hk⟩ := h1
+    -- Then n + 2 is also odd
+    have h5: Nat.Odd (n + 2) := by use k + 1; rw [hk]; ring
+    -- But by hn, since n + 2 > n, n + 2 is even
+    have h6: Nat.Even (n + 2) := by exact hn (n + 2) (Nat.lt_add_of_pos_right (by numbers))
+    have h7: ¬Nat.Even (n + 2) := (Nat.odd_iff_not_even (n + 2)).mp h5
+    contradiction
+
+
+/-
 example (n : ℤ) : ¬(n ^ 2 ≡ 2 [ZMOD 4]) := by
   sorry
 
@@ -341,3 +384,4 @@ example : ¬ Prime 1 := by
 
 example : Prime 97 := by
   sorry
+-/
