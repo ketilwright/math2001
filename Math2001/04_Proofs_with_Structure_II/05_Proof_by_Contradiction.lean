@@ -413,7 +413,6 @@ example (n : ℤ) : ¬(n ^ 2 ≡ 2 [ZMOD 4]) := by
     --    But we reach a contradiction, since ¬ 4 ∣ 4d² + 4d - 1
     have h12: ¬ 4 ∣ 4 * d ^ 2 + 4 * d - 1 := by
       apply Int.not_dvd_of_exists_lt_and_lt
-      -- ∃ q, 4 * q < 4 * d ^ 2 + 4 * d - 1 ∧ 4 * d ^ 2 + 4 * d - 1 < 4 * (q + 1)
       use d ^ 2 + d - 1
       constructor
       ·
