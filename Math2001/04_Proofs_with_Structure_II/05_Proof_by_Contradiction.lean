@@ -267,16 +267,13 @@ example : ¬ (∃ a : ℝ, a ^ 2 ≤ 8 ∧ a ^ 3 ≥ 30) := by
   intro h
   obtain ⟨a, ha⟩ := h
   obtain ⟨h1, h2⟩ := ha
-
   obtain h4 | h4 := lt_or_ge a 0
   · -- Suppose a < 0.
-
     have h5: a ^ 2 > 0 := sq_pos_of_neg h4
     have h6:=
       calc a
         _ < 0 := h4
         _ < 1 := by numbers
-
     have h7:=
       calc a ^ 3
         _ = a * a ^ 2 := by ring
@@ -287,11 +284,8 @@ example : ¬ (∃ a : ℝ, a ^ 2 ≤ 8 ∧ a ^ 3 ≥ 30) := by
         _ ≥ a ^ 2 := h1
         _ > a ^ 3 := h7
         _ ≥ 30 := h2
-
     numbers at h8
-
   · -- suppose a ≥ 0
-
     have h9:=
       calc a * a
         _ = a ^ 2 := by ring
@@ -308,8 +302,6 @@ example : ¬ (∃ a : ℝ, a ^ 2 ≤ 8 ∧ a ^ 3 ≥ 30) := by
         _ > a ^ 3 := h12
         _ ≥ 30 := h2
     numbers at h13
-
-
 
 example : ¬ Int.Even 7 := by
   -- Since 7 is odd it can't be even.
@@ -375,13 +367,89 @@ example : ¬ (∃ N : ℕ, ∀ k > N, Nat.Even k) := by
     contradiction
 
 
-/-
 example (n : ℤ) : ¬(n ^ 2 ≡ 2 [ZMOD 4]) := by
-  sorry
+  -- suppose n² ≡₄ 2
+  intro h
+  have h0: 4 ∣ n ^ 2 - 2 := h
+  --  Then there's c ∈ ℤ with n² - 2 = 4 ⬝ c
+  obtain ⟨c, hc⟩ := h
+  --   We address the cases (1) n is even and (2) n is odd
+  obtain h_even | h_odd := Int.even_or_odd n
+  · -- Case 1: suppose n is even
+    --    Then there is d ∈ ℤ with n = 2 ⬝ d
+    obtain ⟨d, hd⟩ := h_even
+    --    We can substitute 2 ⬝ d in n² - 2 and have 4 ∣ 4d² - 2
+    have h1: n ^ 2 - 2 = 4 * d ^ 2 - 2 := by rw[hd]; ring
+    rw [h1] at h0
+    --    But it's easy to see that ¬ 4 ∣ 4d² - 2
+    have h7: ¬ 4 ∣ 4 * d ^ 2 - 2 := by
+      apply Int.not_dvd_of_exists_lt_and_lt
+      use d ^ 2 - 1
+      constructor
+      ·
+        have h8: -4 < -2 := by numbers
+        calc 4 * (d ^ 2 - 1)
+          _ = 4 * d ^ 2 + (- 4) := by ring
+          _ < 4 * d ^ 2 + (- 2) := by rel [h8]
+          _ = 4 * d ^ 2 - 2 := by ring
+      ·
+        have h9: -2 < 0 := by numbers
+        calc 4 * d ^ 2 - 2
+          _ = 4 * d ^ 2 + (- 2) := by ring
+          _ < 4 * d ^ 2 + 0 := by rel [h9]
+          _ = 4 * (d ^ 2 - 1 + 1) := by ring
+    -- So we have a contradiction that 4 does and does not divide
+    -- 4d² - 2.
+    contradiction
+    -- Therefore if n is even, ¬ n² ≡₄ 2
+  ·
+    -- Case 2: suppose n is odd
+    --    Then there is d ∈ ℤ with n = 2 ⬝ d + 1
+    obtain ⟨d, hd⟩ := h_odd
+    --    And, since n² ≡₄ 2 it follows that (2d + 1)² ≡₄ 2
+    --    which means that 4 ∣ 4 * d ^ 2 + 4 * d - 1
+    have h11: n ^ 2 - 2 = 4 * d ^ 2 + 4 * d - 1 := by rw [hd]; ring
+    rw [h11] at h0
+    --    But we reach a contradiction, since ¬ 4 ∣ 4d² + 4d - 1
+    have h12: ¬ 4 ∣ 4 * d ^ 2 + 4 * d - 1 := by
+      apply Int.not_dvd_of_exists_lt_and_lt
+      -- ∃ q, 4 * q < 4 * d ^ 2 + 4 * d - 1 ∧ 4 * d ^ 2 + 4 * d - 1 < 4 * (q + 1)
+      use d ^ 2 + d - 1
+      constructor
+      ·
+        have h13: -4 < -1 := by numbers -- the silver bullets: numbers, extra don't work :-(
+        calc 4 * (d ^ 2 + d - 1)
+          _ = 4 * d ^ 2 + 4 * d + (- 4) := by ring
+          _ < 4 * d ^ 2 + 4 * d + (- 1) := by rel [h13]
+          _ = 4 * d ^ 2 + 4 * d - 1 := by ring
+      ·
+        calc 4 * d ^ 2 + 4 * d - 1
+          _ = 4 * (d ^ 2 + d) - 1 := by ring
+          _ < 4 * (d ^ 2 + d) - 0 := by extra
+          _ = 4 * (d ^ 2 + d - 1 + 1) := by ring
+    contradiction
+    -- Therefore if n is odd, ¬ n² ≡₄ 2
 
 example : ¬ Prime 1 := by
-  sorry
+  -- Suppose 1 is prime
+  intro h
+  -- Then by our definition of a prime number, in particular 2 ≤ 1, which is a contradiction
+  obtain ⟨h1, h2⟩ := h
+  have h3: ¬ 2 ≤ 1 := Nat.not_succ_le_self 1
+  contradiction
 
 example : Prime 97 := by
-  sorry
--/
+  apply better_prime_test (T := 10)
+  · numbers -- 2 ≤ 97
+  . numbers -- 97 < 100
+  intro n h1 h2
+  apply Nat.not_dvd_of_exists_lt_and_lt
+  interval_cases n
+  · use 48; constructor <;> numbers
+  · use 32; constructor <;> numbers
+  · use 24; constructor <;> numbers
+  · use 19; constructor <;> numbers
+  · use 16; constructor <;> numbers
+  · use 13; constructor <;> numbers
+  · use 12; constructor <;> numbers
+  · use 10; constructor <;> numbers
