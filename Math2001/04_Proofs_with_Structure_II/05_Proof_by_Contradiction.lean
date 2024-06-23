@@ -366,7 +366,6 @@ example : ¬ (∃ N : ℕ, ∀ k > N, Nat.Even k) := by
     have h7: ¬Nat.Even (n + 2) := (Nat.odd_iff_not_even (n + 2)).mp h5
     contradiction
 
-
 example (n : ℤ) : ¬(n ^ 2 ≡ 2 [ZMOD 4]) := by
   -- suppose n² ≡₄ 2
   intro h
