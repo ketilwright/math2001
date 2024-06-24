@@ -87,39 +87,38 @@ example {P : Prop} (hP : ¬¬P) : P := by
 
 
 def Tribalanced (x : ℝ) : Prop := ∀ n : ℕ, (1 + x / n) ^ n < 3
-
 example : ∃ x : ℝ, Tribalanced x ∧ ¬ Tribalanced (x + 1) := by
+  -- 1 is either tribalanced or it is not.
   by_cases h0: Tribalanced 1
-  ·
+  · -- Suppose that 1 is tribalanced
     use 1
     constructor
     ·
       apply h0
     ·
       have h2: ¬ Tribalanced (1 + 1) := by
-        dsimp [Tribalanced]
+      -- Suppose 2 is tribalanced, ie ∀n ∈ N (1 + 2/n)ⁿ < 3
         intro h3 -- ∀ (n : ℕ), (1 + 2 / ↑n) ^ n < 3
+      --  Thus we have  (1 + 2 / 2)² < 3, which is nonsense.
         have h4: (1 + (1 + 1) / (2: ℝ)) ^ 2 < 3 := by apply h3 (1 + 1)
         have h5: ¬ ((1: ℝ) + (1 + 1) / 2) ^ 2 < 3 := by numbers
+      -- Therefore 2 is not tribalanced
         contradiction
       apply h2
-  ·
+  · -- Suppose that 1 is not tribalanced
+    -- Then since ∀n ∈ ℕ, (1 + 0 / n)ⁿ = 1 < 3, we know that 0 is tribalanced
     use 0
     constructor
     ·
-      dsimp [Tribalanced]
       intro n
       calc ((1: ℝ) + 0 / ↑n) ^ n
         _ = (1: ℝ) ^ n := by ring
         _ = 1 := by exact one_pow n
         _ < 3 := by numbers
-
     ·
       have h3: (0: ℝ) + 1 = 1 := by numbers
       rw [h3];
       apply h0
-
-
 
 
 example (P Q : Prop) : (¬P → ¬Q) ↔ (Q → P) := by
