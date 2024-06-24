@@ -179,6 +179,7 @@ example (P Q : Prop) : (P ∨ Q) ↔ (Q ∨ P) := by
     · left; apply h2
 
 
+-- I suppose we could do a branch of cases on p, ¬p etc. Boring.
 example (P Q : Prop) : ¬(P ∨ Q) ↔ (¬P ∧ ¬Q) := by exact not_or
 
 example {P Q : α → Prop} (h1 : ∀ x, P x → Q x) (h2 : ∀ x, P x) : ∀ x, Q x := by
