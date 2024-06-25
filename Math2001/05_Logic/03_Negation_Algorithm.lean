@@ -20,19 +20,37 @@ example (P Q : Prop) : ¬ (P ∧ Q) ↔ (¬ P ∨ ¬ Q) := by
       contradiction
     · left
       apply hP
-  · sorry
+  ·
+    intro h
+    obtain h1 | h1 := h
+    ·
+      intro h2
+      obtain ⟨h3, h4⟩ := h2
+      contradiction
+
+    ·
+      intro h5
+      obtain ⟨h6, h7⟩ := h5
+      contradiction
+
+
 
 example :
     ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m) ↔ ∃ m : ℤ, m ≠ 2 ∧ ∀ n : ℤ, n ^ 2 ≠ m :=
   calc ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m)
       ↔ ∃ m : ℤ, ¬(m ≠ 2 → ∃ n : ℤ, n ^ 2 = m) := by rel [not_forall]
     _ ↔ ∃ m : ℤ, m ≠ 2 ∧ ¬(∃ n : ℤ, n ^ 2 = m) := by rel [not_imp]
-    _ ↔ ∃ m : ℤ, m ≠ 2 ∧ ∀ n : ℤ, n ^ 2 ≠ m := by rel [not_exists]
+    _ ↔ ∃ m : ℤ, m ≠ 2 ∧ ∀ n : ℤ, n ^ 2 ≠ m :=    by rel [not_exists]
 
 
 example : ¬(∀ n : ℤ, ∃ m : ℤ, n ^ 2 < m ∧ m < (n + 1) ^ 2)
     ↔ ∃ n : ℤ, ∀ m : ℤ, n ^ 2 ≥ m ∨ m ≥ (n + 1) ^ 2 :=
-  sorry
+
+  calc ¬(∀ n : ℤ, ∃ m : ℤ, n ^ 2 < m ∧ m < (n + 1) ^ 2)
+    _ ↔ ∃ n : ℤ, ¬ ∃ m : ℤ, n ^ 2 < m ∧ m < (n + 1) ^ 2 :=    by rel [not_forall]
+    _ ↔ ∃ n : ℤ, ∀ m : ℤ, ¬(n ^ 2 < m ∧ m < (n + 1) ^ 2) :=   by rel [not_exists]
+    _ ↔ ∃ n : ℤ, ∀ m : ℤ, ¬ n ^ 2 < m ∨ ¬ m < (n + 1) ^ 2 :=  by rel [not_and_or]
+    _ ↔ ∃ n : ℤ, ∀ m : ℤ, n ^ 2 ≥ m ∨ m ≥ (n + 1) ^ 2 :=      by rel[not_lt]
 
 #push_neg ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m)
   -- ∃ m : ℤ, m ≠ 2 ∧ ∀ (n : ℤ), n ^ 2 ≠ m
@@ -40,22 +58,54 @@ example : ¬(∀ n : ℤ, ∃ m : ℤ, n ^ 2 < m ∧ m < (n + 1) ^ 2)
 #push_neg ¬(∀ n : ℤ, ∃ m : ℤ, n ^ 2 < m ∧ m < (n + 1) ^ 2)
   -- ∃ n : ℤ, ∀ m : ℤ, m ≤ n ^ 2 ∨ (n + 1) ^ 2 ≤ m
 
-
+-- ∀ m n: ℤ ¬∀ t : ℝ, m < t ∧ t < n
+-- ∀ m n: ℤ, ∃ t : ℝ, ¬ (m < t ∧ t < n)
+-- ∀ m n: ℤ, ∃ t : ℝ, m ≥ t ∨ t ≥ n -- close but lean reverse t ≤ m ∨ n ≤ t for some reason
 #push_neg ¬(∃ m n : ℤ, ∀ t : ℝ, m < t ∧ t < n)
+-- ∃ a: ℕ, ∀ x y: ℕ, ¬ (x * y ∣ a → x ∣ a ∧ y ∣ a)
+-- ∃ a: ℕ, ∀ x y: ℕ, ¬ x * y ∣ a ∨ ¬ y ∣ a
 #push_neg ¬(∀ a : ℕ, ∃ x y : ℕ, x * y ∣ a → x ∣ a ∧ y ∣ a)
+-- ∃ m : ℤ ¬ (m ≠ 2 → ∃ n : ℤ, n ^ 2 = m)
+-- ∃ m : ℤ ¬ (m ≠ 2) ∨ ¬ ∃ n: ℤ, n ^ 2 = m NOPE!
+-- ∃ m : ℤ, m = 2 ∨ ∀ n: ℤ, n² ≠ m
 #push_neg ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m)
+-- got the one above wrong, so by hand:
+example: ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m) ↔ ∃ (m : ℤ), m ≠ 2 ∧ ∀ (n : ℤ), n ^ 2 ≠ m := by
+  calc ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m)
+    _ ↔ ∃ m : ℤ,  ¬ (m ≠ 2 → ∃ n : ℤ, n ^ 2 = m) := by rel[not_forall]
+    _ ↔ ∃ m : ℤ,  m ≠ 2 ∧  ¬ ∃ n : ℤ, n ^ 2 = m := by rel[not_imp] -- <--!
+    _ ↔ ∃ m : ℤ,  m ≠ 2 ∧ ∀ n : ℤ, ¬ n ^ 2 = m := by rel[not_exists]
+    _ ↔ ∃ (m : ℤ), m ≠ 2 ∧ ∀ (n : ℤ), n ^ 2 ≠ m := by rfl
+
+
 
 
 example : ¬ (∃ n : ℕ, n ^ 2 = 2) := by
+  -- It suffices to prove that for any n ∈ N, n² ≠ 2
   push_neg
+  -- Let n be arbitrary
   intro n
+  -- Consider the cases n ≤ 1 and 2 ≤ n
   have hn := le_or_succ_le n 1
   obtain hn | hn := hn
-  · apply ne_of_lt
+  ·
+    -- suppose n ≤ 1. It suffices to prove that n² < 2
+    apply ne_of_lt
+    -- Since n ≤ 1, n² ≤ 1² < 2
     calc
       n ^ 2 ≤ 1 ^ 2 := by rel [hn]
       _ < 2 := by numbers
-  · sorry
+  ·
+    -- suppose n ≥ 2. It suffices to prove that n² ≥ 4
+    apply ne_of_gt
+    -- Since n ≥ 2, n > 1
+    have h1: n > 1 := hn
+    calc n ^ 2
+      _ = n * n := by ring
+      _ ≥ 2 * n := by rel [hn]
+      _ > 2 * 1:= by rel [h1]
+      _ = 2 := by ring
+
 
 /-! # Exercises -/
 
