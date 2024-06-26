@@ -154,45 +154,72 @@ example (P Q : Prop) : ¬ (P → Q) ↔ (P ∧ ¬ Q) := by
       contradiction
     apply h1
 
--- TODO: come back & see if all these double negations can be avoided
+-- TODO: come back & see if some of these double negations can be avoided
 example (P : α → Prop) : ¬ (∀ x, P x) ↔ ∃ x, ¬ P x := by
+  -- We consider the cases of (1) ∃ x ¬ P(x) or (2) ¬ ∃ x ¬ P(x)
   by_cases h1: ∃ x, ¬ P x
-  · -- Suppose there is x with ¬ P x
+  · -- Case (1) Suppose ∃ x ¬ P(x)
     constructor
     ·
+    -- (→) Then ∃ x ¬ P(x)
       intro _; apply h1
     ·
+    -- (←) Proof that ∃x ¬P(x) → ¬ ∀x P(x)
       intro _;
+    -- Since ∃ x ¬ P(x), choose x such that ¬P(x)
       obtain ⟨x, hx⟩ := h1
+    -- Suppose for a contradiction that ∀ x P(x)
       intro hContra
+    --  Since ∀ x P(x), P(x)
       have h2: P x := hContra x
+    -- Thus we reach the contradiction P(x) and ¬ P(x),
       contradiction
-  · -- Suppose there doesn't exist x with ¬ P x
+    -- Since ∀ x P(x) leads to a contradiction, ¬ ∀ x P(x)
+  -- Therefore ∃ x, ¬ P x → ¬ ∀ x P(x)
+  · -- Case (2) Suppose ¬ ∃ x ¬ P(x)
     constructor
-    ·
+    · -- (→) Proof that ¬∀xP(x) → ∃x¬P(x)
+      -- Suppose ¬ ∀ x P(x).
       intro h3
+      -- We will show this cannot happen:
       have h4: ∀ x, P x := by
+      --  Let x be arbitrary, and consider the cases (2.1) P(x) or (2.2) ¬P(x)
         intro x
         by_cases h5: P x
-        ·
+        · --  Case (2.1). Suppose P(x). Then P(x) is true
           apply h5
-        ·
+        · -- Case (2.2). Suppose ¬P(x). This case cannot happen since
+          -- then x is a witness for ∃x ¬P(x), which contradicts ¬∃x¬P(x)
           have h6: ∃ x, ¬ P x := by use x; apply h5
           contradiction
+      -- Therefore ∀xP(x) leads to a contradiction
       contradiction
     ·
+    -- Suppose ∃x ¬P(x)
       intro h7
+    --  Then we can choose x with ¬ P(x)
       obtain ⟨x, hx⟩ := h7
+    --  Since ¬P(x), it follows that ¬∀xP(x)
       have h8: ¬ ∀ x, P x := by
         intro h9
         have h10: P x := h9 x
         contradiction
       apply h8
+    -- Since ∃ x, ¬ P x → ¬ ∀ x P(x) and ¬ ∀ x P(x) → ∃ x, ¬ P x
+    -- thus ¬ [∀ x, P(x)] ↔ [∃ x, ¬ P(x)]
 
 
 example : (¬ ∀ a b : ℤ, a * b = 1 → a = 1 ∨ b = 1)
     ↔ ∃ a b : ℤ, a * b = 1 ∧ a ≠ 1 ∧ b ≠ 1 :=
-  sorry
+
+  calc (¬ ∀ a b : ℤ, a * b = 1 → a = 1 ∨ b = 1)
+    _ ↔ ¬ ∀ a b : ℤ, (a * b = 1 → (a = 1 ∨ b = 1)) := by rfl -- for precedence clarification
+    _ ↔ ∃ a: ℤ, (¬ ∀ b: ℤ, (a * b = 1 → (a = 1 ∨ b = 1))) := by rel [not_forall]
+    _ ↔ ∃ a: ℤ, (∃ b: ℤ, ¬ (a * b = 1 → (a = 1 ∨ b = 1))) := by rel [not_forall] -- can this be consolidated?
+    _ ↔ ∃ a b : ℤ, ¬(a * b = 1 → (a = 1 ∨ b = 1)) := by rfl
+    _ ↔ ∃ a b : ℤ, (a * b = 1 ∧ ¬(a = 1 ∨ b = 1)) := by rel [not_imp]
+    _ ↔ ∃ a b : ℤ, a * b = 1 ∧ a ≠ 1 ∧ b ≠ 1 := by rel [not_or]
+
 
 example : (¬ ∃ x : ℝ, ∀ y : ℝ, y ≤ x) ↔ (∀ x : ℝ, ∃ y : ℝ, y > x) :=
   sorry
