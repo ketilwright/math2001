@@ -111,13 +111,84 @@ example : ¬ (∃ n : ℕ, n ^ 2 = 2) := by
 
 
 example (P : Prop) : ¬ (¬ P) ↔ P := by
-  sorry
+  by_cases hp : P
+  · constructor
+    · intro _; apply hp
+    · intro _; intro h; contradiction
+  · constructor
+    · intro _; contradiction
+    · intro _; intro h; contradiction
+
 
 example (P Q : Prop) : ¬ (P → Q) ↔ (P ∧ ¬ Q) := by
-  sorry
+  constructor
+  ·
+    intro h
+    constructor
+    ·
+      by_cases hp: P
+      · apply hp
+      ·
+        by_cases hq: Q
+        · have hp_imp_q: P → Q := by intro _; apply hq
+          contradiction
+        · have hp_imp_q: P → Q := by intro hp2; contradiction
+          contradiction
+    ·
+      by_cases hq: Q
+      ·
+        by_cases hp: P
+        · have hp_imp_q: P → Q := by intro _; apply hq
+          contradiction
+        · have hp_imp_q: P → Q := by intro hp2; contradiction
+          contradiction
+      ·
+        apply hq
+  ·
+    intro h
+    obtain ⟨hp, hq⟩ := h
+    have h1: ¬(P → Q) := by
+      intro hContra
+      have h2: P → Q := by intro _; apply hContra hp
+      have h3: Q := h2 hp
+      contradiction
+    apply h1
 
+-- TODO: come back & see if all these double negations can be avoided
 example (P : α → Prop) : ¬ (∀ x, P x) ↔ ∃ x, ¬ P x := by
-  sorry
+  by_cases h1: ∃ x, ¬ P x
+  · -- Suppose there is x with ¬ P x
+    constructor
+    ·
+      intro _; apply h1
+    ·
+      intro _;
+      obtain ⟨x, hx⟩ := h1
+      intro hContra
+      have h2: P x := hContra x
+      contradiction
+  · -- Suppose there doesn't exist x with ¬ P x
+    constructor
+    ·
+      intro h3
+      have h4: ∀ x, P x := by
+        intro x
+        by_cases h5: P x
+        ·
+          apply h5
+        ·
+          have h6: ∃ x, ¬ P x := by use x; apply h5
+          contradiction
+      contradiction
+    ·
+      intro h7
+      obtain ⟨x, hx⟩ := h7
+      have h8: ¬ ∀ x, P x := by
+        intro h9
+        have h10: P x := h9 x
+        contradiction
+      apply h8
+
 
 example : (¬ ∀ a b : ℤ, a * b = 1 → a = 1 ∨ b = 1)
     ↔ ∃ a b : ℤ, a * b = 1 ∧ a ≠ 1 ∧ b ≠ 1 :=

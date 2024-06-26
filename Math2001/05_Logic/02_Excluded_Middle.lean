@@ -140,7 +140,6 @@ example (P Q : Prop) : (¬P → ¬Q) ↔ (Q → P) := by
       contradiction
     ·
       apply hq
-
 example : ∃ k : ℕ, Superpowered k ∧ ¬ Superpowered (k + 1) := by
   use 1
   constructor
@@ -148,13 +147,13 @@ example : ∃ k : ℕ, Superpowered k ∧ ¬ Superpowered (k + 1) := by
   ·
     -- Suppose 2 is super powered
     intro h --  ∀ (n : ℕ), Prime ((1 + 1) ^ (1 + 1) ^ n + 1)
-    -- Then (2⁵)⁵ + 1 is prime
+    -- Then 2 ^ (2 ^ 5) + 1 is prime
     have h3: Prime (4294967297) := by apply h 5
-    -- But (2⁵)⁵ + 1 is not prime
+    -- But 2 ^ (2 ^ 5) + 1 = 641 * 6700417, so it is not prime
     have h4: ¬ Prime (4294967297) := by
       intro h5
       obtain ⟨h6, h7⟩ := h5
-      -- ∀ (m : ℕ), m ∣ 4294967297 → m = 1 ∨ m = 4294967297
+
       have h8: 641 ∣ 4294967297 := by use 6700417; numbers
       obtain h9 | h9 := by apply h7 641 h8
       · numbers at h9
