@@ -215,8 +215,7 @@ example : (¬ ∀ a b : ℤ, a * b = 1 → a = 1 ∨ b = 1)
   calc (¬ ∀ a b : ℤ, a * b = 1 → a = 1 ∨ b = 1)
     _ ↔ ¬ ∀ a b : ℤ, (a * b = 1 → (a = 1 ∨ b = 1)) := by rfl -- for precedence clarification
     _ ↔ ∃ a: ℤ, (¬ ∀ b: ℤ, (a * b = 1 → (a = 1 ∨ b = 1))) := by rel [not_forall]
-    _ ↔ ∃ a: ℤ, (∃ b: ℤ, ¬ (a * b = 1 → (a = 1 ∨ b = 1))) := by rel [not_forall] -- can this be consolidated?
-    _ ↔ ∃ a b : ℤ, ¬(a * b = 1 → (a = 1 ∨ b = 1)) := by rfl
+    _ ↔ ∃ a b : ℤ, ¬(a * b = 1 → (a = 1 ∨ b = 1)) := by rel [not_forall]
     _ ↔ ∃ a b : ℤ, (a * b = 1 ∧ ¬(a = 1 ∨ b = 1)) := by rel [not_imp]
     _ ↔ ∃ a b : ℤ, a * b = 1 ∧ a ≠ 1 ∧ b ≠ 1 := by rel [not_or]
 
