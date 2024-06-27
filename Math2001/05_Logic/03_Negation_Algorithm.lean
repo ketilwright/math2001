@@ -154,9 +154,8 @@ example (P Q : Prop) : ¬ (P → Q) ↔ (P ∧ ¬ Q) := by
       contradiction
     apply h1
 
--- TODO: come back & see if some of these double negations can be avoided
 example (P : α → Prop) : ¬ (∀ x, P x) ↔ ∃ x, ¬ P x := by
-  -- We consider the cases of (1) ∃ x ¬ P(x) or (2) ¬ ∃ x ¬ P(x)
+  -- Consider the cases of (1) ∃ x ¬ P(x) or (2) ¬ ∃ x ¬ P(x):
   by_cases h1: ∃ x, ¬ P x
   · -- Case (1) Suppose ∃ x ¬ P(x)
     constructor
@@ -220,37 +219,102 @@ example : (¬ ∀ a b : ℤ, a * b = 1 → a = 1 ∨ b = 1)
     _ ↔ ∃ a b : ℤ, a * b = 1 ∧ a ≠ 1 ∧ b ≠ 1 := by rel [not_or]
 
 
+
 example : (¬ ∃ x : ℝ, ∀ y : ℝ, y ≤ x) ↔ (∀ x : ℝ, ∃ y : ℝ, y > x) :=
-  sorry
+  calc (¬ ∃ x : ℝ, ∀ y : ℝ, y ≤ x)
+    _ ↔ ∀ x: ℝ, ¬∀ y: ℝ, y ≤ x := by rel [not_exists]
+    _ ↔ ∀ x: ℝ, ∃ y: ℝ, ¬ y ≤ x := by rel [not_forall]
+    _ ↔ (∀ x : ℝ, ∃ y : ℝ, y > x) := by rel [not_le]
 
 example : ¬ (∃ m : ℤ, ∀ n : ℤ, m = n + 5) ↔ ∀ m : ℤ, ∃ n : ℤ, m ≠ n + 5 :=
-  sorry
+  calc ¬ (∃ m : ℤ, ∀ n : ℤ, m = n + 5)
+    _ ↔ ∀ m: ℤ, (¬ ∀ n : ℤ, m = n + 5) := by rel[not_exists]
+    _ ↔ ∀ m : ℤ, ∃ n : ℤ, m ≠ n + 5 := by rel [not_forall]
 
 #push_neg ¬(∀ n : ℕ, n > 0 → ∃ k l : ℕ, k < n ∧ l < n ∧ k ≠ l)
+/-
+  ∃ n: ℕ, ¬(n > 0 → ∃ k l : ℕ, k < n ∧ l < n ∧ k ≠ l)) -- negate for all
+  ∃ n: ℕ, (n > 0 ∧  ¬ ∃ k l : ℕ, k < n ∧ l < n ∧ k ≠ l)) -- negate implication
+  ∃ n: ℕ, (n > 0 ∧  ∀ k l : ℕ, ¬ (k < n ∧ l < n ∧ k ≠ l))) -- negate exists
+  ∃ n: ℕ, (n > 0 ∧  ∀ k l : ℕ, (k ≥ n ∨  l ≥ n ∨ k = l))) -- negate and
+-/
 #push_neg ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m)
-#push_neg ¬(∃ x : ℝ, ∀ y : ℝ, ∃ m : ℤ, x < y * m ∧ y * m < m)
-#push_neg ¬(∃ x : ℝ, ∀ q : ℝ, q > x → ∃ m : ℕ, q ^ m > x)
+/-Let's try a proof of this one -/
 
+example: ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m) ↔ ∃ (m : ℤ), m ≠ 2 ∧ ∀ (n : ℤ), n ^ 2 ≠ m := by
+  calc ¬(∀ m : ℤ, m ≠ 2 → ∃ n : ℤ, n ^ 2 = m)
+    _ ↔ ∃ m: ℤ, ¬ (m ≠ 2 → ∃ n : ℤ, n ^ 2 = m) := by rel [not_forall]
+    _ ↔ ∃ m: ℤ, m ≠ 2 ∧ ¬ ∃ n : ℤ, n ^ 2 = m := by rel [not_imp]
+    _ ↔ ∃ m: ℤ, m ≠ 2 ∧ ∀ n: ℤ, n  ^ 2 ≠ m := by rel [not_exists]
+
+
+
+#push_neg ¬(∃ x : ℝ, ∀ y : ℝ, ∃ m : ℤ, x < y * m ∧ y * m < m)
+/-
+  ∀ x: ℝ, ¬∀ y: ℝ, ∃ m : ℤ, x < y * m ∧ y * m < m
+  ∀ x: ℝ, ∃ y: ℝ, ¬ ∃ m: ℤ,  x < y * m ∧ y * m < m
+  ∀ x: ℝ, ∃ y: ℝ, ∀ m: ℤ, ¬(x < y * m ∧ y * m < m)
+  ∀ x: ℝ, ∃ y: ℝ, ∀ m: ℤ, x ≥ y * m ∨  y * m ≥ m) OK
+-/
+#push_neg ¬(∃ x : ℝ, ∀ q : ℝ, q > x → ∃ m : ℕ, q ^ m > x)
+/-
+  ∀ x: ℝ, ¬∀ q : ℝ, q > x → ∃ m : ℕ, q ^ m > x
+  ∀ x: ℝ, ∃ q : ℝ, ¬(q > x → ∃ m : ℕ, q ^ m > x)
+  ∀ x: ℝ, ∃ q : ℝ, q > x ∧ ¬ ∃ m : ℕ, q ^ m > x
+  ∀ x: ℝ, ∃ q : ℝ, q > x ∧ ∀ m : ℕ, q ^ m ≤ x PL
+-/
 
 example : ¬ (∀ x : ℝ, x ^ 2 ≥ x) := by
   push_neg
-  sorry
+  use 0.5
+  numbers
+
 
 example : ¬ (∃ t : ℝ, t ≤ 4 ∧ t ≥ 5) := by
   push_neg
-  sorry
+  intro t
+  obtain h1 | h1 := le_or_gt t 4
+  ·
+    right
+    calc t
+      _ ≤ 4 := h1
+      _ < 5 := by numbers
+  ·
+    left;
+    apply h1
+
+
 
 example : ¬ Int.Even 7 := by
   dsimp [Int.Even]
   push_neg
-  sorry
+  intro k
+  intro h
+  have h1: (2: ℤ) ∣ 7 := by use k; apply h
+  have h2: ¬(2: ℤ) ∣ 7 := by
+    apply Int.not_dvd_of_exists_lt_and_lt
+    use 3
+    constructor
+    · numbers
+    . numbers
+  contradiction
 
 example {p : ℕ} (k : ℕ) (hk1 : k ≠ 1) (hkp : k ≠ p) (hk : k ∣ p) : ¬ Prime p := by
   dsimp [Prime]
   push_neg
-  sorry
+  right
+  use k
+  constructor
+  ·
+    apply hk
+  · constructor; apply hk1; apply hkp
+
 
 example : ¬ ∃ a : ℤ, ∀ n : ℤ, 2 * a ^ 3 ≥ n * a + 7 := by
+  push_neg --  ∀ (a : ℤ), ∃ (n : ℤ), 2 * a ^ 3 < n * a + 7
+  intro a
+
+
   sorry
 
 example {p : ℕ} (hp : ¬ Prime p) (hp2 : 2 ≤ p) : ∃ m, 2 ≤ m ∧ m < p ∧ m ∣ p := by
