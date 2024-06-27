@@ -308,14 +308,65 @@ example {p : ℕ} (k : ℕ) (hk1 : k ≠ 1) (hkp : k ≠ p) (hk : k ∣ p) : ¬ 
   ·
     apply hk
   · constructor; apply hk1; apply hkp
+/-
+  Comparing the following exercise to exercise 8 back in section 2.5:
 
+     {n : ℤ} : ∃ a, 2 * a ^ 3 ≥ n * a + 7
 
+  I believe there was an implicit ∀n ∈ Z, making the fully
+  expressed statement:
+
+    ∀n: ℤ, ∃a: Z, 2 * a ^ 3 ≥ n * a + 7
+
+  Thus changing the order of ∃ and ∀ changes the meaning
+
+-/
 example : ¬ ∃ a : ℤ, ∀ n : ℤ, 2 * a ^ 3 ≥ n * a + 7 := by
   push_neg --  ∀ (a : ℤ), ∃ (n : ℤ), 2 * a ^ 3 < n * a + 7
   intro a
+  -- Since we can't know if a ≤ 0 or a > 0, we address each case
+  obtain ha | ha := le_or_succ_le a 0
+  · -- Suppose a ≤ 0
+    -- Then either a < 0 or a = 0
+    obtain ha | ha := eq_or_lt_of_le ha
+    · -- suppose a = 0. Then we're done since 2a³ = 0 < 7
+      use 1
+      calc 2 * a ^ 3
+        _ = 2 * 0 ^ 3 := by rw [ha]
+        _ = 1 * 0 + 0:= by numbers
+        _ = 1 * a + 0:= by rw [ha]
+        _ < 1 * a + 7 := by extra
+
+    · -- suppose a < 0
+      -- let n = -a²
+      use -(a ^ 2)
+      -- Note that with a < 0, we have
+      --   n = -(a²) < 0
+      --    2a² > 0
+      --    2a³ < 0
+      have h3: 2 * (a ^ 2) > 0 := Int.mul_pos (by numbers) (sq_pos_of_neg ha)
+      have h4: - (a ^ 2) < 0 := by exact Int.neg_neg_of_pos (sq_pos_of_neg ha)
+      -- And of course 7 is positive
+      have h5: (0: ℤ) < (7: ℤ) := by numbers
+          -- And since 7 > 0, it follows 2a³ > -2a³ + 7
+      calc 2 * a ^ 3
+        _ < 0 := by
+          calc 2 * a ^ 3
+          _ = (2 * a ^ 2) * a := by ring
+          _ < 0 * a := Int.mul_lt_mul_of_neg_right h3 ha
+          _ = 0 := by ring
+        _ < -a ^ 2 * a := Int.mul_pos_of_neg_of_neg h4 ha
+        _ = -a ^ 2 * a + 0 := by ring
+        _ < -a ^ 2 * a + 7 := by rel [h5]
+  ·
+    -- Suppose a ≥ 1
+    -- The let n = 2a² and we are done.
+    use 2 * a ^ 2
+    calc  2 * a ^ 3
+      _ = 2 * a ^ 2 * a + 0 := by ring
+      _ < 2 * a ^ 2 * a + 7 := by extra
 
 
-  sorry
 
 example {p : ℕ} (hp : ¬ Prime p) (hp2 : 2 ≤ p) : ∃ m, 2 ≤ m ∧ m < p ∧ m ∣ p := by
   have H : ¬ (∀ (m : ℕ), 2 ≤ m → m < p → ¬m ∣ p)
