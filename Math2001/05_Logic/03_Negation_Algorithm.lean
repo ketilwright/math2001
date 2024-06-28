@@ -367,9 +367,60 @@ example : ¬ ∃ a : ℤ, ∀ n : ℤ, 2 * a ^ 3 ≥ n * a + 7 := by
       _ < 2 * a ^ 2 * a + 7 := by extra
 
 
+/-
+  let p ≥ 2 be a non prime number. Prove p has some factor m s.t. 2 ≤ m < p
+-/
 
 example {p : ℕ} (hp : ¬ Prime p) (hp2 : 2 ≤ p) : ∃ m, 2 ≤ m ∧ m < p ∧ m ∣ p := by
+
   have H : ¬ (∀ (m : ℕ), 2 ≤ m → m < p → ¬m ∣ p)
-  · intro H
-    sorry
-  sorry
+  · intro H -- proof by contradiction:
+    -- Suppose ∀m ∈ N, 2 ≤ m < p → ¬ m | p
+    --  Since p is not prime, either
+    --    (1) p < 2 or
+    --    (2) ∃m ∈ N with m | p ∧ m ≠ 1 ∧ m ≠ p
+    --  and address each case:
+    dsimp [Prime] at hp; push_neg at hp
+    obtain h1 | h1 := hp -- _requires_ dsimp above!
+    ·
+      -- (1) Suppose p < 2. (seems like this immediately contradicts 2 ≤ p, but gotta convince lean)
+      -- Since 2 ≤ p, either p = 2 or p < 2
+      obtain ha | ha := eq_or_lt_of_le hp2
+      · -- In the case p = 2, we have a contradiction with p < 2
+        apply symm at ha
+        apply ne_of_lt at h1
+        contradiction
+      · -- Suppose 2 < p. But this can't happen since 2 > p
+        apply lt_asymm at h1
+        contradiction
+    ·
+      -- (2) Suppose there is m ∈ N with m | p ∧ m ≠ 1 ∧ m ≠ p
+      obtain ⟨m, h2, h3, h4⟩ := h1
+      --  Since m ∣ p, m ≤ p
+      have h5: m ≤ p := Nat.le_of_dvd (Nat.zero_lt_of_lt hp2) h2
+      have h6: m < p := Nat.lt_of_le_of_ne h5 h4
+      -- And since, m ∣ p, clearly m ≠ 0
+      have h7: m ≠ 0 := by
+        intro h8
+        rw [h8] at h2
+        have h9: ¬ 0 ∣ p := by
+          intro h10
+          obtain ⟨c, hc⟩ := h10
+          --rw [hc] at hp2
+          have h11: 0 * c = 0 := by ring
+          rw [h11] at hc
+          rw [hc] at hp2
+          have h12: ¬ 2 ≤ 0 := by numbers
+          contradiction -- ouch: AWFUL proof!
+        contradiction
+      -- Since m ≠ 0 and m ≠ 1, clearly m ≥ 2
+      have h13: m ≥ 2 := by
+        apply Nat.not_lt.mp; intro _; interval_cases m; contradiction; contradiction
+      -- Finally, since ∀m ∈ N, 2 ≤ m < p → ¬ m | p and 2 ≤ m < p, m doesn't divide p
+      have h14: ¬ m ∣ p := (H m) h13 h6
+      -- But this contradictions our assumption that m ∣ p
+      contradiction
+      -- This exhausts all cases, each of which result in a contradiction
+  push_neg at H
+  -- Therefore if p ≥ 2 is not prime, p has some factor m| 2 ≤ m < p
+  apply H
