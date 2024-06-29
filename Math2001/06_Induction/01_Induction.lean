@@ -91,13 +91,18 @@ example {a b d : ℤ} (h : a ≡ b [ZMOD d]) (n : ℕ) : a ^ n ≡ b ^ n [ZMOD d
     _ = (d * x) * y := hy
     _ = d * (x * y) := Int.mul_assoc d x y
 
-
+/-
+  let n ∈ ℕ. Show that 4ⁿ ≡₁₅ 1 or 4ⁿ ≡₁₅ 4
+-/
 example (n : ℕ) : 4 ^ n ≡ 1 [ZMOD 15] ∨ 4 ^ n ≡ 4 [ZMOD 15] := by
   simple_induction n with k IH
   · -- base case
+    -- 4⁰ = 1 which is congruent to 1 mod 15
     left
     numbers
   · -- inductive step
+    -- Suppose 4ᵏ ≡₁₅ 1 or Suppose 4ᵏ ≡₁₅ 4.
+    -- Prove that 4ᵏ⁺¹ ≡₁₅ 1 or 4ᵏ⁺¹ ≡₁₅ 4
     obtain hk | hk := IH
     · right
       calc (4:ℤ) ^ (k + 1) = 4 * 4 ^ k := by ring
@@ -120,6 +125,9 @@ example {n : ℕ} (hn : 2 ≤ n) : (3:ℤ) ^ n ≥ 2 ^ n + 5 := by
       _ = 2 ^ (k + 1) + 5 + (5 + 3 ^ k) := by ring
       _ ≥ 2 ^ (k + 1) + 5 := by extra
 
+/-
+  for all sufficiently large numbers n, 2ⁿ ≥ n²
+-/
 
 example : forall_sufficiently_large n : ℕ, 2 ^ n ≥ n ^ 2 := by
   dsimp
@@ -127,9 +135,20 @@ example : forall_sufficiently_large n : ℕ, 2 ^ n ≥ n ^ 2 := by
   intro n hn
   induction_from_starting_point n, hn with k hk IH
   · -- base case
-    sorry
+    -- 2⁴ ≥ 4².
+    numbers
   · -- inductive step
-    sorry
+    -- suppose 2ᵏ ≥ k²
+    calc 2 ^ (k + 1)
+      _ = 2 * 2 ^ k := by ring
+      _ ≥ 2 * k ^ 2 := by rel [IH]
+      _ = k ^ 2 + k * k := by ring
+      _ ≥ k ^ 2 + 4 * k := by rel [hk]
+      _ = k ^ 2 + 2 * k + 2 * k := by ring
+      _ ≥ k ^ 2 + 2 * k + 2 * 4 := by rel [hk]
+      _ = (k + 1) ^ 2 + 7 := by ring
+      _ ≥ (k + 1) ^ 2 := by extra
+
 
 
 /-! # Exercises -/
