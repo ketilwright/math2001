@@ -22,14 +22,75 @@ example (n : ℕ) : 2 ^ n ≥ n + 1 := by
 example (n : ℕ) : Even n ∨ Odd n := by
   simple_induction n with k IH
   · -- base case
-    sorry
+    left; use 0; numbers
   · -- inductive step
     obtain ⟨x, hx⟩ | ⟨x, hx⟩ := IH
-    · sorry
-    · sorry
+    · -- suppose k is even
+      right;
+      use x
+      calc k + 1
+        _ = 2 * x + 1 := by rw [hx];
+    · -- suppose k is odd
+      left;
+      use x + 1
+      calc k + 1
+        _ = 2 * x + 1 + 1 := by rw [hx]
+        _ = 2 * (x + 1) := by ring
+
+-- Same as theorem 7.3.16 in HTPI, which uses Exercise 6.1.13
+example {a b d : ℤ} (h : a ≡ b [ZMOD d]) (n : ℕ) : a ^ n ≡ b ^ n [ZMOD d] := by
+  simple_induction n with k IH
+  · -- base case
+    use 0
+    calc a ^ 0 - b ^ 0
+      _ = 1 - 1 := by rfl
+      _ = d * 0 :=  by ring
+  · -- induction step
+    -- Suppose aᵏ ≡ bᵏ mod d. then ∃ x | aᵏ - bᵏ = d x
+    obtain ⟨x, hx⟩ := IH
+    -- Since a ≡ₘ b, ∃ y | a - b = d y
+    obtain ⟨y, hy⟩ := h
+    -- goal: a ^ (k + 1) ≡ b ^ (k + 1) [ZMOD d]
+    use a * x + (b ^ k) * y
+    calc a ^ (k + 1) - b ^ (k + 1)
+      _ = a * (a ^ k - b ^ k) + (b ^ k) * (a - b) := by ring
+      _ = a * (d * x) + (b ^ k) * (d * y) := by rw [hx, hy]
+      _ = d * (a * x + b ^ k * y) := by ring
+
+/-
+  Another approach; based on something from HTPIwL
+-/
+
+theorem HTPI.Exercise_6_1_13
+  :
+  ∀ (a b : Int) (n : ℕ), (a - b) ∣ (a ^ n - b ^ n) := by
+    intro a b n
+    simple_induction n with k IH
+    ·
+      use 0
+      calc a ^ 0 - b ^ 0
+      _ = 1 - 1 := by rfl
+      _ = (a - b) * 0 :=  by ring
+    ·
+      obtain ⟨c, hc⟩ := IH
+      -- hc: a ^ k - b ^ k = (a - b) * c
+      use a * c + b ^ k
+      calc  a ^ (k + 1) - b ^ (k + 1)
+        _ = a * (a ^ k - b ^ k) + (a - b) * b ^ k := by ring
+        _ = a * ((a - b) * c) + (a - b) * b ^ k := by rw [hc]
+        _ = (a - b) * (a * c + b ^ k) := by ring
 
 example {a b d : ℤ} (h : a ≡ b [ZMOD d]) (n : ℕ) : a ^ n ≡ b ^ n [ZMOD d] := by
-  sorry
+  -- Since a ≡ b mod d, there is x with a - b = d x
+  obtain ⟨x, hx⟩ := h
+  -- From 6.1.13 above, there is y with a ^ n - b ^ n = y (a - b)
+  obtain ⟨y, hy⟩ := HTPI.Exercise_6_1_13 a b n
+  rw [hx] at hy
+  use x * y
+  calc a ^ n - b ^ n
+    _ = (d * x) * y := hy
+    _ = d * (x * y) := Int.mul_assoc d x y
+
 
 example (n : ℕ) : 4 ^ n ≡ 1 [ZMOD 15] ∨ 4 ^ n ≡ 4 [ZMOD 15] := by
   simple_induction n with k IH
