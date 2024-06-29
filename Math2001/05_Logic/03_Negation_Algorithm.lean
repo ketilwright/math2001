@@ -366,6 +366,16 @@ example : ¬ ∃ a : ℤ, ∀ n : ℤ, 2 * a ^ 3 ≥ n * a + 7 := by
       _ = 2 * a ^ 2 * a + 0 := by ring
       _ < 2 * a ^ 2 * a + 7 := by extra
 
+/-
+  That previous proof seems awfully convoluted. Let's try again
+-/
+example : ¬ ∃ a : ℤ, ∀ n : ℤ, 2 * a ^ 3 ≥ n * a + 7 := by
+  push_neg
+  intro a
+  use 2 * a ^ 2
+  calc 2 * a ^ 3
+    _ = 2 * a ^ 2 * a := by ring
+    _ < 2 * a ^ 2 * a + 7 := by extra
 
 /-
   let p ≥ 2 be a non prime number. Prove p has some factor m s.t. 2 ≤ m < p
@@ -423,4 +433,17 @@ example {p : ℕ} (hp : ¬ Prime p) (hp2 : 2 ≤ p) : ∃ m, 2 ≤ m ∧ m < p �
       -- This exhausts all cases, each of which result in a contradiction
   push_neg at H
   -- Therefore if p ≥ 2 is not prime, p has some factor m| 2 ≤ m < p
+  apply H
+
+/-
+  Again, the previous proof is perhaps unnecesarily long. Trying again:
+-/
+
+example {p : ℕ} (hp : ¬ Prime p) (hp2 : 2 ≤ p) : ∃ m, 2 ≤ m ∧ m < p ∧ m ∣ p := by
+  have H : ¬ (∀ (m : ℕ), 2 ≤ m → m < p → ¬m ∣ p)
+  · intro H
+    have h2: (∀ (m : ℕ), 1 < m → m < p → ¬m ∣ p) → Prime p := prime_test hp2
+    have h3: _ := h2 H -- looks like lean is smart enough to accept 1 < m for 2 ≤ m
+    contradiction
+  push_neg at H
   apply H
