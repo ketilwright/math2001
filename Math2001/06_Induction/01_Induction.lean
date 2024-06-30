@@ -153,12 +153,34 @@ example : forall_sufficiently_large n : ℕ, 2 ^ n ≥ n ^ 2 := by
 
 /-! # Exercises -/
 
-
 example (n : ℕ) : 3 ^ n ≥ n ^ 2 + n + 1 := by
-  sorry
+  simple_induction n with k hk
+  ·
+    numbers
+  ·
+    -- Suppose 3 ^ k ≥ k ^ 2 + k + 1
+    calc  3 ^ (k + 1)
+      _ = (3 ^ k) * 3 := by ring
+      _ ≥ (k ^ 2 + k + 1) * 3 := by rel [hk]
+      _ = (k + 1) ^ 2 + 2 * k ^ 2 + k + 2 := by ring
+      _ ≥  (k + 1) ^ 2 + k + 2 := by extra
+      _ = (k + 1) ^ 2 + (k + 1) + 1 :=  by ring
 
+-- Bernoulli's inequality
 example {a : ℝ} (ha : -1 ≤ a) (n : ℕ) : (1 + a) ^ n ≥ 1 + n * a := by
-  sorry
+  simple_induction n with k hk
+  ·
+    calc (1 + a) ^ 0
+      _ ≥ 1 + 0 * a := by apply Eq.ge; ring
+  · -- Induction step. Suppose  (1 + a)ᵏ ≥ 1 + k ⬝ a
+    -- Since a ≥ -1, 1 + a is non negative (needed for rel [hk] below)
+    have h1: 1 + a ≥ 0 := by addarith [ha]
+    calc (1 + a) ^ (k + 1)
+      _ = (1 + a) * ((1 + a) ^ k) := by ring
+      _ ≥ (1 + a) * (1 + ↑k * a) := by rel [hk] --  Since (1 + a)ᵏ ≥ 1 + k ⬝ a,
+      _ = 1 + ↑k * a + a + ↑k * a ^ 2 := by ring
+      _ ≥ 1 + ↑k * a + a := by extra  -- k ⬝ a² ≥ 0
+      _ = 1 + (↑k + 1) * a := by ring
 
 example (n : ℕ) : 5 ^ n ≡ 1 [ZMOD 8] ∨ 5 ^ n ≡ 5 [ZMOD 8] := by
   sorry
