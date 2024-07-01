@@ -208,14 +208,14 @@ example (n : ℕ) : 5 ^ n ≡ 1 [ZMOD 8] ∨ 5 ^ n ≡ 5 [ZMOD 8] := by
       left
       -- Since 5ᵏ ≡₈ 5, we can choose c with 5ᵏ = 8 ⬝ c + 5
       obtain ⟨c, hc⟩ := h1
-      have h10: 5 ^ k = 8 * c + 5 := by addarith [hc]
+      have h2: 5 ^ k = 8 * c + 5 := by addarith [hc]
       -- let d = 5 ⬝ c + 3
       use 5 * c + 3
       calc (5: ℤ) ^ (k + 1) - 1
       --    Since we can rewrite 5⁽ᵏ⁺¹⁾ as 5 ⬝ 5ᵏ
         _ = 5 * (5 ^ k) - 1 := by ring
       --    and can substitute 8 ⬝ c + 5 for 5ᵏ,
-        _ = 5 * (8 * c + 5) - 1 := by rw [h10]
+        _ = 5 * (8 * c + 5) - 1 := by rw [h2]
       --    we have 5⁽ᵏ⁺¹⁾ = 40 ⬝ c + 24, which is divisible by 8
         _ = 8 * (5 * c + 3) := by ring
       --  Thus 5⁽ᵏ⁺¹⁾ ≡₈ 1
