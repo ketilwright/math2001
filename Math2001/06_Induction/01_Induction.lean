@@ -2,7 +2,7 @@
 import Mathlib.Data.Real.Basic
 import Library.Basic
 import Library.Tactic.ModEq
-
+set_option maxHeartbeats 1000000
 math2001_init
 
 namespace Nat
@@ -183,7 +183,45 @@ example {a : ℝ} (ha : -1 ≤ a) (n : ℕ) : (1 + a) ^ n ≥ 1 + n * a := by
       _ = 1 + (↑k + 1) * a := by ring
 
 example (n : ℕ) : 5 ^ n ≡ 1 [ZMOD 8] ∨ 5 ^ n ≡ 5 [ZMOD 8] := by
-  sorry
+  simple_induction n with k hk
+  ·
+    left; numbers
+  ·
+    obtain h1 | h1 := hk
+    · -- Suppose 5ᵏ ≡₈ 1. It will be sufficient to prove 5⁽ᵏ⁺¹⁾ ≡₈ 5
+      right
+      dsimp [Int.ModEq, . ∣ .] at h1
+      --  Since 5ᵏ ≡₈ 1, we can choose c with 5ᵏ - 1 = 8 ⬝ c
+      obtain ⟨c, hc⟩ := h1
+      --    Let d = 5 ⬝ c
+      use 5 * c
+      calc (5: ℤ)  ^ (k + 1) - 5
+      --     We can rewrite 5⁽ᵏ⁺¹⁾ - 5 as 5 ⬝ (5ᵏ - 1)
+        _ = 5 * (5 ^ k) - 5 * 1 := by ring
+      --     But since 5ᵏ - 1 = 8 ⬝ c = d,
+        _ = 5 * (5 ^ k - 1) := by rw[Int.mul_sub 5 (5 ^ k) 1]
+        _ = 5 * (8 * c) := by rw [hc]
+      --     we see that 5⁽ᵏ⁺¹⁾ - 5 is divisible by 8
+        _ = 8 * (5 * c) := by ring
+      -- Thus 5⁽ᵏ⁺¹⁾ ≡₈ 5
+    · -- suppose 5ᵏ ≡₈ 5. It will be sufficient to prove 5⁽ᵏ⁺¹⁾ ≡₈ 1
+      left
+      -- Since 5ᵏ ≡₈ 5, we can choose c with 5ᵏ = 8 ⬝ c + 5
+      obtain ⟨c, hc⟩ := h1
+      have h10: 5 ^ k = 8 * c + 5 := by addarith [hc]
+      -- let d = 5 ⬝ c + 3
+      use 5 * c + 3
+      calc (5: ℤ) ^ (k + 1) - 1
+      --    Since we can rewrite 5⁽ᵏ⁺¹⁾ as 5 ⬝ 5ᵏ
+        _ = 5 * (5 ^ k) - 1 := by ring
+      --    and can substitute 8 ⬝ c + 5 for 5ᵏ,
+        _ = 5 * (8 * c + 5) - 1 := by rw [h10]
+      --    we have 5⁽ᵏ⁺¹⁾ = 40 ⬝ c + 24, which is divisible by 8
+        _ = 8 * (5 * c + 3) := by ring
+      --  Thus 5⁽ᵏ⁺¹⁾ ≡₈ 1
+
+
+
 
 example (n : ℕ) : 6 ^ n ≡ 1 [ZMOD 7] ∨ 6 ^ n ≡ 6 [ZMOD 7] := by
   sorry
