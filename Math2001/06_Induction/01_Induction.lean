@@ -193,15 +193,14 @@ example (n : ℕ) : 5 ^ n ≡ 1 [ZMOD 8] ∨ 5 ^ n ≡ 5 [ZMOD 8] := by
       dsimp [Int.ModEq, . ∣ .] at h1
       --  Since 5ᵏ ≡₈ 1, we can choose c with 5ᵏ - 1 = 8 ⬝ c
       obtain ⟨c, hc⟩ := h1
-      --    Let d = 5 ⬝ c
       use 5 * c
       calc (5: ℤ)  ^ (k + 1) - 5
       --     We can rewrite 5⁽ᵏ⁺¹⁾ - 5 as 5 ⬝ (5ᵏ - 1)
         _ = 5 * (5 ^ k) - 5 * 1 := by ring
-      --     But since 5ᵏ - 1 = 8 ⬝ c = d,
+      --      and, since 5ᵏ - 1 = 8 ⬝ c, we have 5⁽ᵏ⁺¹⁾ - 5 = 40 ⬝ c
         _ = 5 * (5 ^ k - 1) := by rw[Int.mul_sub 5 (5 ^ k) 1]
         _ = 5 * (8 * c) := by rw [hc]
-      --     we see that 5⁽ᵏ⁺¹⁾ - 5 is divisible by 8
+      --      which is divisible by 8
         _ = 8 * (5 * c) := by ring
       -- Thus 5⁽ᵏ⁺¹⁾ ≡₈ 5
     · -- suppose 5ᵏ ≡₈ 5. It will be sufficient to prove 5⁽ᵏ⁺¹⁾ ≡₈ 1
@@ -209,10 +208,9 @@ example (n : ℕ) : 5 ^ n ≡ 1 [ZMOD 8] ∨ 5 ^ n ≡ 5 [ZMOD 8] := by
       -- Since 5ᵏ ≡₈ 5, we can choose c with 5ᵏ = 8 ⬝ c + 5
       obtain ⟨c, hc⟩ := h1
       have h2: 5 ^ k = 8 * c + 5 := by addarith [hc]
-      -- let d = 5 ⬝ c + 3
       use 5 * c + 3
       calc (5: ℤ) ^ (k + 1) - 1
-      --    Since we can rewrite 5⁽ᵏ⁺¹⁾ as 5 ⬝ 5ᵏ
+      --    Since we can rewrite 5⁽ᵏ⁺¹⁾ as 5 ⬝ 5ᵏ,
         _ = 5 * (5 ^ k) - 1 := by ring
       --    and can substitute 8 ⬝ c + 5 for 5ᵏ,
         _ = 5 * (8 * c + 5) - 1 := by rw [h2]
@@ -224,7 +222,42 @@ example (n : ℕ) : 5 ^ n ≡ 1 [ZMOD 8] ∨ 5 ^ n ≡ 5 [ZMOD 8] := by
 
 
 example (n : ℕ) : 6 ^ n ≡ 1 [ZMOD 7] ∨ 6 ^ n ≡ 6 [ZMOD 7] := by
-  sorry
+  simple_induction n with k hk
+  · -- base case
+    left; numbers
+  · -- inductive step
+    obtain h1 | h1 := hk
+    ·
+      -- Suppose 6ᵏ ≡₇ 1.
+      -- It will be sufficient to prove 6ᵏ⁺¹ ≡₇ 6
+      right
+      -- Since 6ᵏ ≡₇ 1, we can choose c with 6ᵏ = 7 ⬝ c + 1
+      obtain ⟨c, hc⟩ := h1
+      have h2: 6 ^ k = 7 * c + 1 := by addarith [hc]
+      use 6 * c
+      -- Since 6ᵏ⁺¹ - 6 = 6 ⬝ (6ᵏ - 1),
+      calc  (6: ℤ) ^ (k + 1) - 6
+        _ = 6 * (6 ^ k) - 6 * 1 := by ring
+      -- we can substitute 7 ⬝ c + 1 for 6ᵏ
+        _ = 6 * (7 * c + 1) - 6 * 1 := by rw [h2]
+      -- Thus 6ᵏ⁺¹ - 6 = 42 ⬝ c, so 6ᵏ⁺¹ ≡₇ 6
+        _ = 42 * c := by ring
+        _ = 7 * (6 * c) := by ring
+    ·
+    -- Suppose 6ᵏ ≡₇ 6.
+    -- It will be sufficient to prove 6ᵏ⁺¹ ≡₇ 1
+      left
+      -- Since 6ᵏ ≡₇ 6, we can choose c such that 6ᵏ = 7 ⬝ c + 6
+      obtain ⟨c, hc⟩ := h1
+      have h3: 6 ^ k = 7 * c + 6 := by addarith [hc]
+      use 6 * c + 5
+      -- Since 6ᵏ⁺¹ - 1 = 6 ⬝ (7 ⬝ c + 6) - 1 = 42 ⬝ c + 35, = 7 ⬝ (6 ⬝ c + 5)
+      -- we see that 6ᵏ⁺¹ ≡₇ 1
+      calc (6: ℤ) ^ (k + 1) - 1
+        _ = 6 * (6 ^ k) - 1 := by ring
+        _ = 6 * (7 * c + 6) - 1 := by rw [h3]
+        _ = 42 * c + 35 := by ring
+        _ = 7 * (6 * c + 5) := by ring
 
 example (n : ℕ) :
     4 ^ n ≡ 1 [ZMOD 7] ∨ 4 ^ n ≡ 2 [ZMOD 7] ∨ 4 ^ n ≡ 4 [ZMOD 7] := by
