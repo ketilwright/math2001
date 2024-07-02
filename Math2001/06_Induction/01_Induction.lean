@@ -328,19 +328,25 @@ example (n : ℕ) : 6 ^ n ≡ 1 [ZMOD 7] ∨ 6 ^ n ≡ 6 [ZMOD 7] := by
   · -- base case
     left; numbers
   · -- inductive step
+    have h0: 6 ≡ 6 [ZMOD 7] := by extra
     obtain h1 | h1 := hk
-    · -- suppose 6 ^ k ≡ 1 [ZMOD 7]
-      right
-      have h2: 6 ≡ 6 [ZMOD 7] := by extra
+    · -- suppose 6ᵏ ≡₇ 1
+      right -- sufficient to prove 6ᵏ⁺¹ ≡₇ 6
+      -- Since 6ᵏ⁺¹ = 6 ⬝ 6ᵏ, 6ᵏ ≡₇ 1 and 6 ≡₇ 6
+      -- an appeal to a ≡ₙ b ∧ c ≡ₙ d → a ⬝ c ≡ₙ b ⬝ d
+      -- proves that 6ᵏ⁺¹ ≡₇ 6
       calc (6: ℤ) ^ (k + 1)
         _ = (6 ^ k) * 6:= by ring
-        _ ≡ 6 [ZMOD 7] := Int.ModEq.mul h1 h2
-    · -- suppose 6 ^ k ≡ 6 [ZMOD 7]
-      left
-      have h3: 6 ≡ 6 [ZMOD 7] := by numbers
+        _ ≡ 6 [ZMOD 7] := Int.ModEq.mul h1 h0
+    · -- suppose 6ᵏ ≡₇ 6
+      left -- sufficient to prove 6ᵏ⁺¹ ≡₇ 1
+      -- Since 6ᵏ⁺¹ = 6 ⬝ 6ᵏ, 6ᵏ ≡₇ 6 and 6 ≡₇ 6
+      -- an appeal to a ≡ₙ b ∧ c ≡ₙ d → a ⬝ c ≡ₙ b ⬝ d
+      -- tells us that 6ᵏ⁺¹ ≡₇ 36
+      -- Since 36 = 5 * 7 + 1, we have 6ᵏ⁺¹ ≡₇ 1
       calc (6: ℤ) ^ (k + 1)
         _ = (6 ^ k) * 6:= by ring
-        _ ≡ 6 * 6 [ZMOD 7] := Int.ModEq.mul h1 h3
+        _ ≡ 6 * 6 [ZMOD 7] := Int.ModEq.mul h1 h0
         _ ≡ 1 [ZMOD 7] := by use 5; ring
 
 
