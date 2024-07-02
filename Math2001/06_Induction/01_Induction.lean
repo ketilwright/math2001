@@ -259,6 +259,91 @@ example (n : ℕ) : 6 ^ n ≡ 1 [ZMOD 7] ∨ 6 ^ n ≡ 6 [ZMOD 7] := by
         _ = 42 * c + 35 := by ring
         _ = 7 * (6 * c + 5) := by ring
 
+/-
+  The 2 preceding proofs suggest I can benefit from reviewing some of
+  the mod arith theorems from a few chapters ago
+-/
+--#check Int.add_mul -- (a + b) * c = a * c + b * c
+
+example /-Int.ModEq.add-/ {n a b c d : ℤ} (h1 : a ≡ b [ZMOD n]) (h2 : c ≡ d [ZMOD n]) :  a + c ≡ b + d [ZMOD n] := by
+  -- suppose a ≡ₘ b and c ≡ₘ d.
+  obtain ⟨x, hx⟩ := h1 -- a - b = n * x
+  obtain ⟨y, hy⟩ := h2 -- c - d = n * y
+  -- x + y = z is a witness that ∃ z | (a + c) ≡ₘ (b + d)
+  use x + y
+  calc (a + c) - (b + d)
+    _ = (a - b) + (c - d) := by ring
+    _ = n * x + n * y := by rw [hx, hy]
+    _ = n * (x + y) := by ring
+
+example /-Int.ModEq.sub-/ {n a b c d : ℤ} (h1 : a ≡ b [ZMOD n]) (h2 : c ≡ d [ZMOD n]) :  a - c ≡ b - d [ZMOD n] := by
+  -- suppose a ≡ₘ b and c ≡ₘ d.
+  obtain ⟨x, hx⟩ := h1
+  obtain ⟨y, hy⟩ := h2
+  -- We have x - y = z as witness that ∃ z | (a - c) ≡ₘ (b - d)
+  use x - y
+  calc a - c - (b - d)
+    _ = (a - b) - (c - d) := by ring
+    _ = n * x - n * y := by rw [hx, hy]
+    _ = n * (x - y) := by ring
+
+example /-Int.ModEq.neg-/ {n a b : ℤ} (h1 : a ≡ b [ZMOD n]) : -a ≡ -b [ZMOD n] := by
+  obtain ⟨x, hx⟩ := h1      -- a - b = n * x
+  dsimp [Int.ModEq, · ∣ .]  -- ∃ c, -a - -b = n * c
+  use - x
+  calc -a - -b
+    _ = -(a - b) := by ring
+    _ = - (n * x) := by rw [hx]
+    _ = n * -x := by ring
+
+-- This is the one I keep forgetting to apply
+
+example /-Int.ModEq.mul-/ {n a b c d : ℤ} (h1 : a ≡ b [ZMOD n]) (h2 : c ≡ d [ZMOD n]) :  a * c ≡ b * d [ZMOD n] := by
+  -- suppose a ≡ₘ b and c ≡ₘ d.
+  obtain ⟨x, hx⟩ := h1 -- a - b = n * x
+  obtain ⟨y, hy⟩ := h2 -- c - d = n * y
+  -- c ⬝ x + b ⬝ y is witness for n ∣ a ⬝ c - b ⬝ d
+  use c * x + b * y
+  calc a * c - b * d
+    -- add and subtract b ⬝ c
+    _ = a * c - b * d + b * c - b * c := eq_sub_of_add_eq rfl
+    -- rearrange
+    _ = c * (a - b) + b * (c - d):= by ring
+    -- substitute nx = a - b, ny = c - d
+    _ = c * (n * x) + b * (n * y) := by rw [hx, hy]
+    -- and rearrange making divisibility by n clear
+    _ = n * (c * x + b * y) := by ring
+
+-- the next 2 are just special cases of pow, which was proved earlier in this file
+-- Int.ModEq.pow_two (h : a ≡ b [ZMOD n]) : a ^ 2 ≡ b ^ 2 [ZMOD n]
+-- Int.ModEq.pow_three (h : a ≡ b [ZMOD n]) : a ^ 3 ≡ b ^ 3 [ZMOD n]
+-- Int.ModEq.pow  (k : ℕ) (h : a ≡ b [ZMOD n]) : a ^ k ≡ b ^ k [ZMOD n]
+-- Int.ModEq.refl (a : ℤ) : a ≡ a [ZMOD n]
+-- Int.ModEq.symm (h : a ≡ b [ZMOD n]) : b ≡ a [ZMOD n]
+-- Int.ModEq.trans (h1 : a ≡ b [ZMOD n]) (h2 : b ≡ c [ZMOD n]) : a ≡ c [ZMOD n]
+
+
+example (n : ℕ) : 6 ^ n ≡ 1 [ZMOD 7] ∨ 6 ^ n ≡ 6 [ZMOD 7] := by
+  simple_induction n with k hk
+  · -- base case
+    left; numbers
+  · -- inductive step
+    obtain h1 | h1 := hk
+    · -- suppose 6 ^ k ≡ 1 [ZMOD 7]
+      right
+      have h2: 6 ≡ 6 [ZMOD 7] := by extra
+      calc (6: ℤ) ^ (k + 1)
+        _ = (6 ^ k) * 6:= by ring
+        _ ≡ 6 [ZMOD 7] := Int.ModEq.mul h1 h2
+    · -- suppose 6 ^ k ≡ 6 [ZMOD 7]
+      left
+      have h3: 6 ≡ 6 [ZMOD 7] := by numbers
+      calc (6: ℤ) ^ (k + 1)
+        _ = (6 ^ k) * 6:= by ring
+        _ ≡ 6 * 6 [ZMOD 7] := Int.ModEq.mul h1 h3
+        _ ≡ 1 [ZMOD 7] := by use 5; ring
+
+
 example (n : ℕ) :
     4 ^ n ≡ 1 [ZMOD 7] ∨ 4 ^ n ≡ 2 [ZMOD 7] ∨ 4 ^ n ≡ 4 [ZMOD 7] := by
   sorry
