@@ -323,6 +323,28 @@ example /-Int.ModEq.mul-/ {n a b c d : ℤ} (h1 : a ≡ b [ZMOD n]) (h2 : c ≡ 
 -- Int.ModEq.trans (h1 : a ≡ b [ZMOD n]) (h2 : b ≡ c [ZMOD n]) : a ≡ c [ZMOD n]
 
 
+-- Suppose a, b, c, d ∈ ℤ with a ≡ₙ b and c ≡ₙ d. Show that a ⬝ c ≡ₙ b ⬝ d
+example (a b c d n: ℤ) (h1: a ≡ b [ZMOD n]) (h2: c ≡ d [ZMOD n]) : a * c ≡ b * d [ZMOD n] := by
+  -- Since a ≡ₙ b we can choose x with a - b = n ⬝ x
+  obtain ⟨x, hx⟩ := h1
+  -- Since c ≡ₙ d we can choose y with c - d = n ⬝ y
+  obtain ⟨y, hy⟩ := h2
+  -- Let z = c ⬝ x + b ⬝ y
+  use c * x + b * y
+  --  Since a ⬝ c - b ⬝ d = a ⬝ c - b ⬝ d + b ⬝ c - b ⬝ c
+  calc a * c - b * d
+    _ = a * c - b * c - b * d + b * c := by ring
+  --    = c ⬝ (a - b) + b ⬝ (c - d)
+    _ = c * (a - b)  + b * (c - d) := by ring
+  --    We can substitute n ⬝ x for a - b and n ⬝ y for c - d
+    _ = c * (n * x) + b * (n * y) := by rw [hx, hy]
+  --    yielding c ⬝ n ⬝ x + b ⬝ n ⬝ y, showing that
+  --    ∃ z ∈ Z such that a ⬝ c = b ⬝ d = n ⬝ z
+    _ = n * (c * x + b * y) := by ring
+  -- Thus a ≡ₙ b ∧ c ≡ₙ d → a ⬝ c ≡ₙ b ⬝ d
+
+
+
 example (n : ℕ) : 6 ^ n ≡ 1 [ZMOD 7] ∨ 6 ^ n ≡ 6 [ZMOD 7] := by
   simple_induction n with k hk
   · -- base case
@@ -352,7 +374,52 @@ example (n : ℕ) : 6 ^ n ≡ 1 [ZMOD 7] ∨ 6 ^ n ≡ 6 [ZMOD 7] := by
 
 example (n : ℕ) :
     4 ^ n ≡ 1 [ZMOD 7] ∨ 4 ^ n ≡ 2 [ZMOD 7] ∨ 4 ^ n ≡ 4 [ZMOD 7] := by
-  sorry
+    simple_induction n with k hk
+    ·
+      left; numbers
+    ·
+      have h0 : 4 ≡ 4 [ZMOD 7] := by numbers
+      obtain h1 | h1 | h1:= hk
+      · -- suppose 4ᵏ ≡₇ 1
+        right; right -- Sufficient to prove 4⁽ᵏ⁺¹⁾ ≡₇ 4
+        calc (4: ℤ) ^ (k + 1)
+          _ = 4 * (4 ^ k) := by ring
+          _ ≡ 4 [ZMOD 7] := Int.ModEq.mul h0 h1
+      · -- Suppose 4ᵏ ≡₇ 2
+        left
+        calc (4: ℤ) ^ (k + 1)
+          _ = 4 * 4 ^ k := by ring
+          _ ≡ 4 * 2 [ZMOD 7] := Int.ModEq.mul h0 h1
+          _ ≡ 1 [ZMOD 7] := by use 1; ring
+        /-
+        --or without lemmas:
+        obtain ⟨x, hx⟩ := h1 -- 4 ^ k - 2 = 7 * x
+        have h2: 4 ^ k = 7 * x + 2 := by addarith [hx]
+        use 4 * x + 1
+        calc (4: ℤ) ^ (k + 1) - 1
+          _ = 4 * (4 ^ k) - 1 := by ring
+          _ = 4 * (7 * x + 2) - 1  := by rw [h2]
+          _ = 7 * (4 * x + 1) := by ring
+        -- TODO: come back and see if any of the ModEq lemmata apply
+        -/
+      · -- Suppose 4ᵏ ≡₇ 4
+        right; left
+        calc (4: ℤ) ^ (k + 1)
+          _ = 4 * 4 ^ k := by ring
+          _ ≡ 4 * 4 [ZMOD 7] := Int.ModEq.mul h0 h1
+          _ ≡ 2 [ZMOD 7] := by  use 2; ring
+
+        /-
+        --without lemmas:
+        obtain ⟨x, hx⟩ := h1 -- 4 ^ k - 4 = 7 * x
+        have h3: 4 ^ k = 7 * x + 4 := by addarith [hx]
+        use 4 * x + 2
+        calc (4: ℤ) ^ (k + 1) - 2
+          _ = 4 * (4 ^ k) - 2 := by ring
+          _ = 4 * (7 * x + 4) - 2  := by rw [h3]
+          _ = 7 * (4 * x + 2) := by ring
+        -/
+
 
 example : forall_sufficiently_large n : ℕ, (3:ℤ) ^ n ≥ 2 ^ n + 100 := by
   dsimp
