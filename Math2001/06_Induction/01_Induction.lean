@@ -423,15 +423,79 @@ example (n : ℕ) :
 
 example : forall_sufficiently_large n : ℕ, (3:ℤ) ^ n ≥ 2 ^ n + 100 := by
   dsimp
-  sorry
+  use 5
+  intro x hx
+  induction_from_starting_point x, hx with k hk IH
+  ·
+    numbers
+  · -- suppose 3 ^ k ≥ 2 ^ k + 100
+    calc (3: ℤ) ^ (k + 1)
+      _ = 3 * 3 ^ k := by ring
+      _ ≥ 3 * (2 ^ k + 100) := by rel [IH]
+      _ = (1 + 2) * (2 ^ k + 100) := by ring
+      _ = 2 ^ (k + 1) + 100 + 2 ^ k + 200 := by ring
+      _ ≥ 2 ^ (k + 1) + 100 + 2 ^ k + 0 := by extra;
+      _ ≥ 2 ^ (k + 1) + 100 + 0 + 0 := by extra;
+      _ = 2 ^ (k + 1) + 100 := by ring
 
 example : forall_sufficiently_large n : ℕ, 2 ^ n ≥ n ^ 2 + 4 := by
   dsimp
-  sorry
+  use 5
+  intro x hx
+  induction_from_starting_point x, hx with k hk IH
+  ·
+    numbers
+  · -- suppose  2 ^ k ≥ k ^ 2 + 4
+    have h1: 2 < 5 := by numbers
+    have h2:=
+      calc k ^ 2
+        _ = k * k := by ring
+        _ ≥ 5 * k := by rel [hk]
+        _ ≥ 2 * k := by rel [h1]
+    calc 2 ^ (k + 1)
+      _ = 2 * 2 ^ k := by ring
+      _ ≥ 2 * (k ^ 2 + 4) := by rel [IH]
+      _ = k ^ 2 + k ^ 2 + 8 := by ring
+      _ ≥ k ^ 2 + 2 * k + 8 := by rel [h2]
+      _ = (k ^ 2 + 2 * k + 1) + 7 := by ring
+      _ = (k + 1) ^ 2 + 4 + 3 := by ring
+      _ ≥ (k + 1) ^ 2 + 4 := by extra
 
+-- Todo: make this pretty
 example : forall_sufficiently_large n : ℕ, 2 ^ n ≥ n ^ 3 := by
   dsimp
-  sorry
+  use 10
+  intro x hx -- x ≥ 10
+  induction_from_starting_point x, hx with k hk IH
+  ·
+    numbers
+  · -- suppose 2 ^ k ≥ k ^ 3
+    have h1: (k + 1) ^ 3 = k ^ 3 + 3 * k ^ 2 + 3 * k + 1 := by ring
+    have h2 :=
+      calc 70 * k
+        _ = 3 * k + 67 * k := by ring
+        _ ≥ 3 * k + 67 * 10 := by rel [hk]
+        _ = 3 * k + 1 + 669 := by ring
+        _ > 3 * k + 1 := by extra
+    have h3 :=
+      calc 7 * k ^ 2
+        _ = 7 * k * k := by ring
+        _ ≥ 7 * 10 * k := by rel [hk]
+        _ ≥ 3 * k + 1 := by rel [h2]
+    have h4:=
+      calc k ^ 3
+        _ = k * k ^ 2 := by ring
+        _ ≥ 10 * k ^ 2 := by rel [hk]
+        _ = 3 * k ^ 2 + 7 * k ^ 2 := by ring
+        _ ≥ 3 * k ^ 2 + (3 * k + 1) := by rel [h3]
+        _ = 3 * k ^ 2 + 3 * k + 1 := by ring
+    calc 2 ^ (k + 1)
+      _ = 2 * 2 ^ k := by ring
+      _ ≥ 2 * k ^ 3 := by rel [IH]
+      _ = k ^ 3 + k ^ 3 := by ring
+      _ ≥ k ^ 3 + (3 * k ^ 2 + 3 * k + 1) := by rel [h4]
+      _ = (k + 1) ^ 3 := by ring
+
 
 theorem Odd.pow {a : ℕ} (ha : Odd a) (n : ℕ) : Odd (a ^ n) := by
   sorry
