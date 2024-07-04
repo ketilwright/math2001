@@ -496,9 +496,30 @@ example : forall_sufficiently_large n : ℕ, 2 ^ n ≥ n ^ 3 := by
       _ ≥ k ^ 3 + (3 * k ^ 2 + 3 * k + 1) := by rel [h4]
       _ = (k + 1) ^ 3 := by ring
 
+-- we already solved Odd.pow in exercise 11 of 03_Parity_and_divisbility
+lemma odd_of_odd_mul_odd {x y : ℕ} (hx : Odd x) (hy : Odd y) : Odd (x * y) := by
+  dsimp [Odd] at *
+  obtain ⟨a, ha⟩ := hx
+  obtain ⟨b, hb⟩ := hy
+  rewrite [ha, hb]
+  use 2 * a * b + a + b
+  ring
 
 theorem Odd.pow {a : ℕ} (ha : Odd a) (n : ℕ) : Odd (a ^ n) := by
-  sorry
+  simple_induction n with j hj
+  · -- base case: a⁰ = 1 is odd
+    use 0; ring
+  · -- inductive step: assume aᵏ is odd
+    -- Then since a is odd, an appeal to exercise 11 in section 3.1
+    -- establishes that a⁽ᵏ⁺¹⁾ is odd
+    rw [pow_succ']; apply odd_of_odd_mul_odd ha hj
 
 theorem Nat.even_of_pow_even {a n : ℕ} (ha : Even (a ^ n)) : Even a := by
-  sorry
+  -- Seems like there ought to be a prettier way
+  obtain hEven | hOdd := even_or_odd a
+  ·
+    apply hEven
+  ·
+    have h1: Odd (a ^ n) := Odd.pow hOdd n
+    rw [even_iff_not_odd (a ^ n)] at ha
+    contradiction
