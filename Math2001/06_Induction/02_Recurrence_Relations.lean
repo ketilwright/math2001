@@ -114,7 +114,6 @@ notation:10000 n "!" => factorial n
 /-
   Show that every natural number d with 1 ≤ d < n is a factor of n!
 -/
--- protected theorem pos_iff_ne_zero : 0 < n ↔ n ≠ 0 := ⟨ne_of_gt, Nat.pos_of_ne_zero⟩
 
 example (n : ℕ) : ∀ d, 1 ≤ d → d ≤ n → d ∣ n ! := by
   simple_induction n with k IH
@@ -177,37 +176,104 @@ def c : ℕ → ℤ
   | n + 1 => 3 * c n - 10
 
 example (n : ℕ) : Odd (c n) := by
-  sorry
+  simple_induction n with x hx
+  ·
+    rewrite [c]; use 3; numbers
+  ·
+    obtain ⟨y, hy⟩ := hx
+    rw [c]
+    dsimp [Odd]
+    use 3 * y - 4
+    calc 3 * c x - 10
+      _ = 3 * (2 * y + 1) - 10 := by rw [hy]
+      _ = 2 * (3 * y - 4) + 1 := by ring
 
 example (n : ℕ) : c n = 2 * 3 ^ n + 5 := by
-  sorry
+  simple_induction n with a ha
+  ·
+    rewrite [c]; ring
+  ·
+    calc  c (a + 1)
+      _ = 3 * (c a) - 10 := by rw [c]
+      _ = 3 * (2 * 3 ^ a + 5) - 10 := by rw [ha]
+      _ = 2 * 3 ^ (a + 1) + 5 := by ring
+
 
 def y : ℕ → ℕ
   | 0 => 2
   | n + 1 => (y n) ^ 2
 
 example (n : ℕ) : y n = 2 ^ (2 ^ n) := by
-  sorry
+  simple_induction n with x hx
+  ·
+    rw [y]; ring
+  ·
+    calc y (x + 1)
+      _ = (y x) ^ 2 := by rw [y]
+      _ = (2 ^ 2 ^ x) ^ 2 := by rw [hx]
+      _ = 2 ^ 2 ^ (x + 1) := by ring
 
 def B : ℕ → ℚ
   | 0 => 0
   | n + 1 => B n + (n + 1 : ℚ) ^ 2
 
+
 example (n : ℕ) : B n = n * (n + 1) * (2 * n + 1) / 6 := by
-  sorry
+  simple_induction n with x hx
+  ·
+    rw [B]; numbers
+  · -- hx: B x = ↑x * (↑x + 1) * (2 * ↑x + 1) / 6
+    calc  B (x + 1)
+      _ = B x + (x + 1 : ℚ) ^ 2 := by rw [B]
+      _ = x * (x + 1) * (2 * x + 1) / 6 + (x + 1: ℚ) ^ 2 := by rw [hx]
+      -- Lean is better at algebra than I: it canskip all the steps except
+      -- the final one
+      _ = x * (x + 1) * (2 * x + 1) / 6 + (6 * (x + 1: ℚ) ^ 2) / 6 := by ring
+      _ = x * (x + 1) * (2 * x + 1) / 6 + (6 * (x ^ 2 + 2 * x + 1)) / 6 := by ring
+      _ = (x ^ 2 + x) * (2 * x + 1) / 6 + (6 * (x ^ 2 + 2 * x + 1)) / 6 := by ring
+      _ = (2 * x ^ 3 + 9 * x ^ 2 + 13 * x + 6) / 6 := by ring
+      _ = (x + 1) * (2 * x ^ 2 + 7 * x + 6) / 6 := by ring
+      _ = (x + 1) * (2 * x + 3) * (x + 2)/ 6 := by ring
+      _ = (x + 1) * (x + 1 + 1) * (2 * (x + 1) + 1) / 6 := by ring
 
 def S : ℕ → ℚ
   | 0 => 1
   | n + 1 => S n + 1 / 2 ^ (n + 1)
 
 example (n : ℕ) : S n = 2 - 1 / 2 ^ n := by
-  sorry
+  simple_induction n with x hx
+  ·
+    rw [S]; numbers
+  ·
+    calc S (x + 1)
+      _ = 2 - 1 / 2 ^ x + 1 / 2 ^ (x + 1) := by rw[S, hx]
+      _ = 2 - 1 / 2 ^ (x + 1) := by ring
+-- might be useful
+lemma factorial_positive /-example-/ (n : ℕ) : 0 < n ! := by
+  simple_induction n with x hx
+  · -- Base case is true by definition
+    dsimp [factorial]; numbers
+  · -- Inductive step: suppose x ! > 0
+    -- Then since x + 1 ≥ 1, we have
+    -- 0 < x! ≤ (x + 1) ⬝ (x !) = (x + 1)!
+    calc  0
+      _ < x ! := hx
+      _ ≤ (x + 1) * (x !)  := by exact Nat.le_mul_of_pos_left (Nat.succ_pos x)
+      _ = (x + 1)! := by rw [factorial]
 
-example (n : ℕ) : 0 < n ! := by
-  sorry
 
 example {n : ℕ} (hn : 2 ≤ n) : Nat.Even (n !) := by
-  sorry
+  induction_from_starting_point n, hn with x hx ih
+  ·
+    dsimp [Nat.Even, factorial]; use 1; ring
+  · -- suppose x ! is even
+    dsimp [Nat.Even, factorial]
+    -- Then there is c with x! = 2 ⬝ c
+    obtain ⟨c, hc⟩ := ih
+    use c * (x + 1)
+    calc (x + 1) * (x !)
+      _ = (x + 1) * (2 * c) := by rw [hc]
+      _ = 2 * (c * (x + 1)) := by ring
 
 example (n : ℕ) : (n + 1) ! ≤ (n + 1) ^ n := by
   sorry
