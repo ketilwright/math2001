@@ -155,7 +155,7 @@ example (n : ℕ) : ∀ d, 1 ≤ d → d ≤ n → d ∣ n ! := by
 
 -- this theorem is dvd_factorial
 
-example (n : ℕ) : (n + 1)! ≥ 2 ^ n := by
+lemma example_6_2_6 (n : ℕ) : (n + 1)! ≥ 2 ^ n := by
   simple_induction n with k hk
   · -- base case: n = 0
     -- we have (0 + 1)! = (0 + 1) ⬝ 0! = 1 ≥ 2⁰ = 1
@@ -275,5 +275,71 @@ example {n : ℕ} (hn : 2 ≤ n) : Nat.Even (n !) := by
       _ = (x + 1) * (2 * c) := by rw [hc]
       _ = 2 * (c * (x + 1)) := by ring
 
+--#eval 1 !
+
+--#check Nat.lt.base
+lemma factorial_non_decreasing (n: ℕ) : (n + 1) ! ≥ n ! := by
+  --have h0: n ≥ n := by exact Nat.le_refl n
+
+  simple_induction n with x hx
+  · -- Base case: let n = 0
+    --rw [factorial];
+    --have h1: 1 ≥ 1 := by exact Nat.factorial_eq_one.mp rfl
+    calc (0 + 1)!
+      _ = 1 ! := by rw [factorial]
+      _ = 1  := by rfl
+      _ ≥ 1 := Nat.le_refl 1
+  ·
+    have h0: x ! > 0 := by exact factorial_positive x
+    have h1: x + 1 > 0 := by exact Nat.succ_pos x
+
+    have h2: x + 2 > 0 := by exact Nat.succ_pos (x + 1)
+    have h3: (x + 1) * (x !) > 0 := by exact Nat.mul_pos h1 h0
+    have h4: (x + 2) * ((x + 1) * (x !)) > 0 := Nat.mul_pos h2 h3
+    --have h5: (x + 2) * ((x + 1) * (x !)) = (x + 2) * (x + 1) * (x !) := by apply?
+    --rw [←mul_assoc] at h4
+    have h5: x + 1 + 1 = x + 2 := by ring
+    have h6: x + 2 > x + 1 :=  Nat.lt.base (x + 1)
+    have h7: x + 2 > 1 := by exact Nat.one_lt_succ_succ x
+
+    rw [factorial, factorial, h5]
+    have h100:=
+      calc (x + 2) * ((x + 1) * x !)
+        _ > 1 * ((x + 1) * x !) := by rel [h7]
+        _ = (x + 1) * x ! := by ring
+    apply le_of_lt -- apparently there is not ge_of_gt
+    apply h100
+
 example (n : ℕ) : (n + 1) ! ≤ (n + 1) ^ n := by
-  sorry
+  simple_induction n with x hx
+  ·
+    dsimp [factorial]; extra
+  · -- suppose (x + 1)! ≤ (x + 1) ^ x
+    have h0: x + 1 + 1 = x + 2 := by ring;
+    rw [h0]
+    have h1: (x + 1) ! = (x + 1) * (x !) := by rw [factorial]
+    have h2: (x + 2) ! = (x + 2) * (x + 1) ! := by rw [factorial]
+    rw [h1] at h2
+    have h3: x ! > 0 := factorial_positive x
+    have h4: 0 ! = 1 := by rfl -- rw [factorial]
+    have h5: 1 ! = 1 := by rfl -- exact h4
+    have h6: 2 ! = 2 := by rfl
+    --have h7: (x + 1) * x ! ≥ 2 ^ x := by example
+
+    have h8: x + 1 < x + 2 := by exact Nat.lt.base (x + 1)
+    have h8a: x + 1 ≤ x + 2 := by exact Nat.le_succ (x + 1)
+    have h9: (x + 2) ^ (x + 1) = (x + 2) * (x + 2) ^ x := by ring
+    -- rw [h9]
+    have h10: x + 1 > 0 := by exact Nat.succ_pos x
+
+    have h11: (x + 1) ^ x ≤ (x + 2) ^ x := by exact Nat.pow_le_pow_of_le_left h8a x
+
+    have h100 :=
+      calc (x + 2)!
+        _ = (x + 2) * (x + 1) ! := by rw [factorial]
+        _ ≤ (x + 2) * (x + 1) ^ x := by rel [hx]
+        --_ ≤
+        --_ ≤ (x + 2) ^ (x + 1) := sorry
+        _ ≤ (x + 2) * (x + 2) ^ x := by rel [h11]
+        _ = (x + 2) ^ (x + 1) := by rw [h9]
+    apply h100
