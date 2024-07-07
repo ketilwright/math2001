@@ -226,14 +226,37 @@ example (n : ℕ) : t n = 2 * n + 5 := by
       _ = 2 * (2 * (k + 1) + 5) - (2 * k + 5) := by rw [ih1, ih2]
       _ = 2 * (k + 2) + 5 := by ring
     -- I understand the infoview has a coercion to Z on the 2nd
-    -- since t is N → Z. But why is it not needed in that calc statement?
+    -- since t is N → Z. But why is it not needed in the calc block?
+
 def q : ℕ → ℤ
   | 0 => 1
   | 1 => 2
   | n + 2 => 2 * q (n + 1) - q n + 6 * n + 6
 
+-- #eval [q 0, q 1, q 2, q 3, q 4, q 5, q 6]
+--          [1,  2,   9,  28,  65, 126, 217]
 example (n : ℕ) : q n = (n:ℤ) ^ 3 + 1 := by
-  sorry
+  two_step_induction n with k ih1 ih2
+  · -- Base case 1
+    calc q 0
+      _ = 1 := by rw [q]
+      _ = 0 ^ 3 + 1 := by numbers
+  · -- Base case 2
+    calc q 1
+      _ = 2 := by rw [q]
+      _ = 1 ^ 3 + 1 := by numbers
+  · -- Inductive step
+    -- suppose qₖ = k³ + 1 and qₖ₊₁ = (k + 1)³
+    -- prove that qₖ₊₂ = (k + 2)³
+    have h: k + 1 + 1 = k + 2 := by ring
+    have h': (↑k: ℤ) + 1 + 1 = (↑k: ℤ) + 2 := by ring
+    rw [h, h'] -- clean up infoview k + 1 + 1 stuff
+    calc q (k + 2)
+      _ = 2 * (q (k + 1)) - (q k) + 6 * k + 6 := by rw [q]
+      _ = 2 * ((k + 1) ^ 3 + 1) - (k ^ 3 + 1) + 6 * k + 6 := by rw [ih1, ih2]
+      _ = 2 * (k ^ 3 + 3 * k ^ 2 + 3 * k + 2) - (k ^ 3 + 1) + 6 * k + 6:= by ring
+      _ = k ^ 3 + 6 * k ^ 2 + 12 * k + 8 + 1 := by ring
+      _ = (↑k + 2) ^ 3 + 1 := by ring
 
 def s : ℕ → ℤ
   | 0 => 2
