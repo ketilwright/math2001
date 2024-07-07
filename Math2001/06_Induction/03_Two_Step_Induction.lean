@@ -263,8 +263,64 @@ def s : ℕ → ℤ
   | 1 => 3
   | n + 2 => 2 * s (n + 1) + 3 * s n
 
+-- #eval [s 0, s 1, s 2, s 3, s 4, s 5, s 6]
+--       [  2,   3,  12,  33, 102, 303, 912]
+-- looks like
+-- even s(m) ≡₅ 2
+-- odd s(m) ≡₅ 3
+
 example (m : ℕ) : s m ≡ 2 [ZMOD 5] ∨ s m ≡ 3 [ZMOD 5] := by
-  sorry
+  -- very similar to preceding example
+  have H : ∀ n: ℕ,
+      (s n ≡ 2 [ZMOD 5] ∧ s (n + 1) ≡ 3 [ZMOD 5])
+    ∨ (s n ≡ 3 [ZMOD 5] ∧ s (n + 1) ≡ 2 [ZMOD 5]) := by
+      intro n
+      simple_induction n with k hk
+      ·
+        left
+        constructor
+        ·
+          calc s 0
+            _ = 2 := by rw [s]
+            _ ≡ 2 [ZMOD 5] := by numbers
+        ·
+          calc s (1)
+            _ = 3 := by rw [s]
+            _ ≡ 3 [ZMOD 5] := by numbers
+      ·
+        have h₀: k + 1 + 1 = k + 2 := by ring
+        rw [h₀]
+        obtain ⟨ih1, ih2⟩ | ⟨ih1, ih2⟩ := hk
+        · -- suppose sₖ ≡₅ 2 and sₖ₊₁ ≡₅ 3
+          right
+          constructor
+          ·
+            apply ih2
+          ·
+            calc s (k + 2)
+              _ = 2 * s (k + 1) + 3 * s k := by rw [s]
+              _ ≡ 2 * 3 + 3 * 2 [ZMOD 5] := by rel [ih1, ih2]
+              _ ≡ (2 * 5 + 2) [ZMOD 5] := by numbers
+              _ ≡ 2 [ZMOD 5] := by extra
+        · -- suppose sₖ ≡₅ 3 and sₖ₊₁ ≡₅ 2
+          left
+          constructor
+          ·
+            apply ih2
+          ·
+            calc s (k + 2)
+              _ = 2 * s (k + 1) + 3 * s k := by rw [s]
+              _ ≡ 2 * 2 + 3 * 3 [ZMOD 5] := by rel [ih2, ih1]
+              _ ≡ (2 * 5 + 3) [ZMOD 5] := by numbers
+              _ ≡ 3 [ZMOD 5] := by extra
+
+
+  obtain ⟨H1, H2⟩ | ⟨H1, H2⟩ := H m
+  · left
+    apply H1
+  · right
+    apply H1
+
 
 def p : ℕ → ℤ
   | 0 => 2
