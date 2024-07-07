@@ -14,7 +14,7 @@ def a : ℕ → ℤ
   | n + 2 => a (n + 1) + 2 * a n
 
 
-#eval a 5 -- infoview displays `31`
+--#eval a 5 -- infoview displays `31`
 
 
 example (n : ℕ) : a n = 2 ^ n + (-1) ^ n := by
@@ -29,14 +29,19 @@ example (n : ℕ) : a n = 2 ^ n + (-1) ^ n := by
     _ = (2 ^ (k + 1) + (-1) ^ (k + 1)) + 2 * (2 ^ k + (-1) ^ k) := by rw [IH1, IH2]
     _ = (2 : ℤ) ^ (k + 2) + (-1) ^ (k + 2) := by ring
 
+/-
+  Prove that ∀ m ∈ ℕ ≥ 1, aₘ ≡₆ 1 ∨ aₘ ≡₆ 5
 
+  This actually proves (aₘ ≡₆ 1 ∧ aₘ₊₁ ≡₆ 5) ∨ (aₘ ≡₆ 5 ∧ aₘ₊₁ ≡₆ 1)
+-/
 example {m : ℕ} (hm : 1 ≤ m) : a m ≡ 1 [ZMOD 6] ∨ a m ≡ 5 [ZMOD 6] := by
   have H : ∀ n : ℕ, 1 ≤ n →
       (a n ≡ 1 [ZMOD 6] ∧ a (n + 1) ≡ 5 [ZMOD 6])
     ∨ (a n ≡ 5 [ZMOD 6] ∧ a (n + 1) ≡ 1 [ZMOD 6])
   · intro n hn
     induction_from_starting_point n, hn with k hk IH
-    · left
+    · -- Base case: suppose  n = 1
+      left
       constructor
       calc a 1 = 1 := by rw [a]
         _ ≡ 1 [ZMOD 6] := by extra
@@ -100,7 +105,7 @@ def d : ℕ → ℤ
   | 1 => 1
   | k + 2 => 3 * d (k + 1) + 5 * d k
 
-
+/-
 #eval d 2 -- infoview displays `18`
 #eval d 3 -- infoview displays `59`
 #eval d 4 -- infoview displays `267`
@@ -115,7 +120,7 @@ def d : ℕ → ℤ
 #eval 4 ^ 5 -- infoview displays `1024`
 #eval 4 ^ 6 -- infoview displays `4096`
 #eval 4 ^ 7 -- infoview displays `16384`
-
+-/
 
 example : forall_sufficiently_large n : ℕ, d n ≥ 4 ^ n := by
   dsimp
@@ -141,24 +146,87 @@ def b : ℕ → ℤ
   | n + 2 => 5 * b (n + 1) - 6 * b n
 
 example (n : ℕ) : b n = 3 ^ n - 2 ^ n := by
-  sorry
+  two_step_induction n with k ih1 ih2
+  · -- Base case 1
+    rw [b]; numbers
+  · -- Base case 2
+    rw [b]; numbers
+  · -- Inductive step:
+    -- Suppose bᵏ = 3ᵏ - 2ᵏ and bᵏ⁺¹ = 3ᵏ⁺¹ - 2ᵏ⁺¹
+    -- Prove that bᵏ⁺² = 3ᵏ⁺² - 2ᵏ⁺²
+    have h: k + 1 + 1 = k + 2 := by ring
+    rw [h]
+    calc  b (k + 2)
+      _ = 5 * b (k + 1) - 6 * (b (k)) := by rw [b]
+      _ = 5 * (3 ^ (k + 1) - 2 ^ (k + 1) ) - 6 * (3 ^ k - 2 ^ k ) := by rw [ih1, ih2]
+      _ = 5 * ((3 ^ k * 3) - 2 ^ k  * 2) - 6 * (3 ^ k - 2 ^ k ) := by ring
+      _ = 15 * 3 ^ k - 10 * 2 ^ k - 6 * 3 ^ k + 6 * 2 ^ k := by ring
+      _ = 3 ^ 2 * 3 ^ k - 2 ^ 2 * 2 ^ k := by ring
+      _ = 3 ^ (k + 2) - 2 ^ (k + 2) := by ring
+
 
 def c : ℕ → ℤ
   | 0 => 3
   | 1 => 2
   | n + 2 => 4 * c n
 
+-- #eval [c 0, c 1, c 2, c 3, c 4, c 5, c 6]
+--         [3,   2,   12,  8,  48,  32, 192]
+
 example (n : ℕ) : c n = 2 * 2 ^ n + (-2) ^ n := by
-  sorry
+  two_step_induction n with k ih1 ih2
+  · -- Base case 1
+    calc c 0
+      _ = 3 := by rw [c]
+      _ = 2 * 2 ^ 0 + (-2) ^ 0 := by numbers
+  · -- Base case 2
+    calc c 1
+      _ = 2 := by rw [c]
+      _ = 2 * 2 ^ 1 + (-2) ^ 1 := by numbers
+  · -- Inductive step
+    -- Suppose cₖ - 2 ⬝ 2ᵏ + (-2)ᵏ and cₖ₊₁ = 2 ⬝ 2ᵏ⁺¹ + (-2)ᵏ⁺¹
+    have h: k + 1 + 1 = k + 2 := by ring
+    rw [h]
+    -- Prove that cₖ₊₂ = 2 ⬝ 2ᵏ⁺² + (-2)ᵏ⁺²
+    calc c (k + 2)
+      _ = 4 * (c k) := by rw [c]
+      _ = 4 * (2 * 2 ^ k + (-2) ^ k) := by rw [ih1]
+      _ = 2 * 2 ^ (k + 2) + (-2) ^ (k + 2) := by ring
+    -- hmm, didn't use the 2nd inductive hypothesis
+    -- (although it doesn't differ much from the 1st)
+    -- I think 2step induction is needed though, since
+    -- there is no definition for cₙ₊₁
 
 def t : ℕ → ℤ
   | 0 => 5
   | 1 => 7
   | n + 2 => 2 * t (n + 1) - t n
 
-example (n : ℕ) : t n = 2 * n + 5 := by
-  sorry
+-- #eval [t 0, t 1, t 2, t 3, t 4, t 5, t 6]
+--         [5,   7,   9,  11,  13,  15,  17]
 
+example (n : ℕ) : t n = 2 * n + 5 := by
+  two_step_induction n with k ih1 ih2
+  · -- Base case 1
+    calc t 0
+      _ = 5 := by rw [t]
+      _ = 2 * 0 + 5 := by numbers
+  · -- Base case 2
+    calc t 1
+      _ = 7 := by rw [t]
+      _ = 2 * 1 + 5 := by numbers
+  · -- Inductive step
+    -- Suppose tₖ = 2 ⬝ k + 5 and tₖ₊₁ = 2 ⬝ (k + 1) + 5
+    -- Prove that tₖ₊₂ = 2 ⬝ (k + 2) + 5
+    have h: k + 1 + 1 = k + 2 := by ring
+    have h': (↑k: ℤ) + 1 + 1 = (↑k: ℤ) + 2 := by ring
+    rw [h, h'] -- clean up infoview k + 1 + 1 stuff
+    calc t (k + 2)
+      _ = 2 * t (k + 1) - (t k) := by rw [t]
+      _ = 2 * (2 * (k + 1) + 5) - (2 * k + 5) := by rw [ih1, ih2]
+      _ = 2 * (k + 2) + 5 := by ring
+    -- I understand the infoview has a coercion to Z on the 2nd
+    -- since t is N → Z. But why is it not needed in that calc statement?
 def q : ℕ → ℤ
   | 0 => 1
   | 1 => 2
