@@ -270,7 +270,7 @@ def s : ℕ → ℤ
 -- odd s(m) ≡₅ 3
 
 example (m : ℕ) : s m ≡ 2 [ZMOD 5] ∨ s m ≡ 3 [ZMOD 5] := by
-  -- very similar to preceding example
+  -- very similar to preceding example: ∀ m ∈ ℕ ≥ 1, aₘ ≡₆ 1 ∨ aₘ ≡₆ 5
   have H : ∀ n: ℕ,
       (s n ≡ 2 [ZMOD 5] ∧ s (n + 1) ≡ 3 [ZMOD 5])
     ∨ (s n ≡ 3 [ZMOD 5] ∧ s (n + 1) ≡ 2 [ZMOD 5]) := by
