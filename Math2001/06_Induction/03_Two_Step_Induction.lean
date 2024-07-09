@@ -2,7 +2,7 @@
 import Mathlib.Tactic.GCongr
 import Library.Basic
 import Library.Tactic.ModEq
-
+set_option maxHeartbeats 0
 math2001_init
 
 open Int
@@ -327,8 +327,210 @@ def p : ℕ → ℤ
   | 1 => 3
   | n + 2 => 6 * p (n + 1) - p n
 
+--#eval [p 0, p 1, p 2, p 3, p 4,  p 5,   p 6,    p 7,    p 8,     p 9      p 10]
+--      [  2,   3,  16,  93, 542, 3159, 18412, 107313, 625466, 3645483, 21247432]
+--             ^              ^                   ^                          ^
+#eval [  2 % 7,   3 % 7,  16 % 7,  93 % 7, 542 % 7, 3159 % 7, 18412 % 7, 107313 % 7, 625466 % 7, 3645483 % 7, 21247432 % 7]
+--    [      2,       3,       2,       2,       3,        2,         2,          3,          2,           2,            3]
+--    case   2        0        1        2        0,        1,         1,          0,          1,           0
+--#eval 77 * 7 + 3 -- 542
+--#eval 542 % 7 -- 3
+
+--#check Int.not_dvd_of_exists_lt_and_lt
+--#check Nat.le_of_dvd
+-- #check Nat.dvd_mod_iff
+
+
 example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
-  sorry
+
+  have h: ∀ n: ℕ, (p n ≡ 2 [ZMOD 7] ∧  p (n + 1) ≡ 3 [ZMOD 7] ∧ p (n + 2) ≡ 2 [ZMOD 7]) -- 2, 3, 2
+                ∨ (p n ≡ 3 [ZMOD 7] ∧  p (n + 1) ≡ 2 [ZMOD 7] ∧ p (n + 2) ≡ 2 [ZMOD 7]) -- 3, 2, 2
+                ∨ (p n ≡ 2 [ZMOD 7] ∧  p (n + 1) ≡ 2 [ZMOD 7] ∧ p (n + 2) ≡ 3 [ZMOD 7]) -- 2, 2, 3
+                := by
+      intro n
+      two_step_induction n with k hk1 hk2
+      · -- Base case 1
+        left
+        constructor
+        · rw [p]; extra
+        · constructor
+          · rw [p]; extra
+          · rw [p, p, p];
+            calc (6: ℤ) * 3 - 2
+              _ = 2 * 7 + 2 := by numbers
+              _ ≡ 2 [ZMOD 7] := by extra
+      · -- Base case 2
+        right; left; constructor
+        · rw [p]; numbers
+        · constructor
+          · rw [p, p, p]
+            calc (6: ℤ) * 3 - 2
+              _ = 2 * 7 + 2 := by numbers
+              _ ≡ 2 [ZMOD 7] := by extra
+          · rw [p, p, p, p, p]
+            calc  (6: ℤ) * (6 * 3 - 2) - 3
+              _ = 7 * 13 + 2 := by numbers
+              _ ≡ 2 [ZMOD 7] := by extra
+      · -- Inductive step
+
+        have cleanup1: k + 1 + 1 = k + 2 := by ring
+        have cleanup2: k + 2 + 1 = k + 3 := by ring
+        rw [cleanup1, cleanup2]
+        rw [cleanup1] at hk1
+        rw [cleanup1, cleanup2] at hk2
+        obtain ⟨ha1, ha2, ha3⟩ | ⟨ha1, ha2, ha3⟩ | ⟨ha1, ha2, ha3⟩ := hk1
+        ·
+          obtain ⟨hb1, hb2, hb3⟩ | ⟨hb1, hb2, hb3⟩ | ⟨hb1, hb2, hb3⟩ := hk2
+          ·
+            right; right
+            constructor
+            · apply ha3 -- in reality, this case can't happen: ha1, hb1
+            · constructor
+              · apply hb3 -- sorry
+              · -- This case cannot happen: hb2 and ha3 contradict each other
+                -- let z = pₖ₊₂
+                set z: ℤ := p (k + 2)
+                obtain ⟨x, hx⟩ := ha3
+                obtain ⟨y, hy⟩ := hb2
+                -- Since z - 2 = 7 ⬝ x and z - 3 = 7 ⬝ y we have 7y + 1 = 7 x
+                have h102:=
+                  calc 7 * y + 1
+                    _ = (7 * y + 3) - 2 := by ring
+                    _ = z - 2 := by addarith [hy]
+                    _ = 7 * x := by addarith [hx]
+                -- Since 7 ∣ 7x and 7x = 7y + 1 we arrive at the contradiction
+                -- that 7 ∣ 7y + 1
+                have h104: 7 ∣ 7 * y + 1 := by rw [h102]; use x; ring
+                have h108: ¬ 7 ∣ 7 * y + 1 := by
+                  apply Int.not_dvd_of_exists_lt_and_lt
+                  use y
+                  constructor
+                  · extra
+                  · calc 7 * y + 1
+                      _ < 7 * y + 1 + 6 := by extra
+                      _ = 7 * (y + 1) := by ring
+
+                contradiction -- I get the feeling I did this the hard way
+          · right; right
+            constructor
+            · apply ha3
+            · constructor
+              · apply hb3
+              ·
+                calc p (k + 4)
+                  _ = 6 * p (k + 3) - p (k + 2) := by rw [p]
+                  _ ≡ 6 * 2 - 2 [ZMOD 7] := by rel [hb3, hb2]
+                  _ ≡ 7 + 3 [ZMOD 7] := by numbers
+                  _ ≡ 3 [ZMOD 7] := by use 1; ring
+          ·
+            left
+            constructor
+            · apply hb2
+            · constructor
+              · apply hb3
+              · calc p (k + 4)
+                  _ = 6 * p (k + 3) - p (k + 2) := by rw [p]
+                  _ ≡ 6 * 3 - 2 [ZMOD 7] := by rel [hb3, ha3]
+                  _ ≡ 7 * 2 + 2 [ZMOD 7] := by numbers
+                  _ ≡ 2 [ZMOD 7] := by use 2; ring
+        ·
+          obtain ⟨hb1, hb2, hb3⟩ | ⟨hb1, hb2, hb3⟩ | ⟨hb1, hb2, hb3⟩ := hk2
+          ·
+            right; left
+            constructor
+            · apply hb2
+            · constructor
+              · apply hb3
+              · calc p (k + 4)
+                  _ = 6 * p (k + 3) - p (k + 2) := by rw [p]
+                  _ ≡ 6 * 2 - 3 [ZMOD 7] := by rel [hb3, hb2]
+                  _ ≡ 7 + 2 [ZMOD 7] := by numbers
+                  _ ≡ 2 [ZMOD 7] := by use 1; ring
+          · right; right
+            constructor
+            · apply ha3
+            · constructor
+              · apply hb3
+              ·
+                calc p (k + 4)
+                  _ = 6 * p (k + 3) - p (k + 2) := by rw [p]
+                  _ ≡ 6 * 2 - 2 [ZMOD 7] := by rel [hb3, hb2]
+                  _ ≡ 7 + 3 [ZMOD 7] := by numbers
+                  _ ≡ 3 [ZMOD 7] := by use 1; ring
+
+          · left
+            constructor
+            · apply ha3
+            · constructor
+              · apply hb3
+              ·
+                calc p (k + 4)
+                  _ = 6 * p (k + 3) - p (k + 2) := by rw [p]
+                  _ ≡ 6 * 3 - 2 [ZMOD 7] := by rel [hb3, hb2]
+                  _ ≡ 2 * 7 + 2 [ZMOD 7] := by numbers
+                  _ ≡ 2 [ZMOD 7] := by use 2; ring
+        ·
+          obtain ⟨hb1, hb2, hb3⟩ | ⟨hb1, hb2, hb3⟩ | ⟨hb1, hb2, hb3⟩ := hk2
+          · right; left
+            constructor
+            · apply ha3
+            · constructor
+              · apply hb3
+              ·
+                calc p (k + 4)
+                  _ = 6 * p (k + 3) - p (k + 2) := by rw [p]
+                  _ ≡ 6 * 2 - 3 [ZMOD 7] := by rel [hb3, hb2]
+                  _ ≡ 7 + 2 [ZMOD 7] := by numbers
+                  _ ≡ 2 [ZMOD 7] := by use 1; ring
+          · right; left
+            constructor
+            · apply ha3
+            · constructor
+              · apply hb3
+              ·
+                calc p (k + 4)
+                  _ = 6 * p (k + 3) - p (k + 2) := by rw [p]
+                  _ ≡ 6 * 2 - 3 [ZMOD 7] := by rel [hb3, ha3]
+                  _ ≡ 7 + 2 [ZMOD 7] := by numbers
+                  _ ≡ 2 [ZMOD 7] := by use 1; ring
+          · left
+            constructor
+            · apply hb2
+            · constructor
+              · apply hb3
+              ·
+                calc p (k + 4)
+                  _ = 6 * p (k + 3) - p (k + 2) := by rw [p]
+                  _ ≡ 6 * 3 - 2 [ZMOD 7] := by rel [hb3, hb2]
+                  _ ≡ 2 * 7 + 2 [ZMOD 7] := by numbers
+                  _ ≡ 2 [ZMOD 7] := by use 2; ring
+
+
+
+  obtain ⟨h1, h2, h3⟩ | ⟨h1, h2, h3⟩ | ⟨h1, h2, h3⟩ := h m
+  ·
+    -- suppose:
+    /-
+      h1 : p m ≡ 2 [ZMOD 7]
+      h2 : p (m + 1) ≡ 3 [ZMOD 7]
+      h3 : p (m + 2) ≡ 2 [ZMOD 7]
+    -/
+    left; apply h1
+  · -- suppose:
+    /-
+      h1 : p m ≡ 3 [ZMOD 7]
+      h2 : p (m + 1) ≡ 2 [ZMOD 7]
+      h3 : p (m + 2) ≡ 2 [ZMOD 7]
+    -/
+    right; apply h1
+  · -- suppose:
+    /-
+      h1 : p m ≡ 2 [ZMOD 7]
+      h2 : p (m + 1) ≡ 2 [ZMOD 7]
+      h3 : p (m + 2) ≡ 3 [ZMOD 7]
+    -/
+    left; apply h1
+
 
 def r : ℕ → ℤ
   | 0 => 2
