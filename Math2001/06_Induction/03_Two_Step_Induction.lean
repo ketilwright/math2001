@@ -333,12 +333,6 @@ def p : ℕ → ℤ
 #eval [  2 % 7,   3 % 7,  16 % 7,  93 % 7, 542 % 7, 3159 % 7, 18412 % 7, 107313 % 7, 625466 % 7, 3645483 % 7, 21247432 % 7]
 --    [      2,       3,       2,       2,       3,        2,         2,          3,          2,           2,            3]
 --    case   2        0        1        2        0,        1,         1,          0,          1,           0
---#eval 77 * 7 + 3 -- 542
---#eval 542 % 7 -- 3
-
---#check Int.not_dvd_of_exists_lt_and_lt
---#check Nat.le_of_dvd
--- #check Nat.dvd_mod_iff
 
 
 example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
@@ -529,6 +523,196 @@ example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
       h2 : p (m + 1) ≡ 2 [ZMOD 7]
       h3 : p (m + 2) ≡ 3 [ZMOD 7]
     -/
+    left; apply h1
+
+/-
+-- a bit more thought reveals we don't need a 3 conjuncts within the 3 disjuncts.
+-- The form is completely expressed by a disjunction of:
+  case 1) pₙ ≡₇ 2 ∧ p₍ₙ₊₁₎ ≡₇ 3
+  case 2) pₙ ≡₇ 3 ∧ p₍ₙ₊₁₎ ≡₇ 2
+  case 3) pₙ ≡₇ 2 ∧ p₍ₙ₊₁₎ ≡₇ 2
+
+#eval [  2 % 7,   3 % 7,  16 % 7,  93 % 7, 542 % 7, 3159 % 7, 18412 % 7, 107313 % 7, 625466 % 7, 3645483 % 7, 21247432 % 7]
+--    [      2,       3,       2,       2,       3,        2,         2,          3,          2,           2,            3]
+--    case   2        0        1        2        0,        1,         1,          0,          1,           0
+
+-/
+example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
+  have h: ∀ n: ℕ, (p n ≡ 2 [ZMOD 7] ∧ p (n + 1) ≡ 3 [ZMOD 7]) ∨
+                  (p n ≡ 3 [ZMOD 7] ∧ p (n + 1) ≡ 2 [ZMOD 7])  ∨
+                  (p n ≡ 2 [ZMOD 7] ∧ p (n + 1) ≡ 2 [ZMOD 7]) := by
+
+    intro n
+    two_step_induction n with k hk1 hk2
+    ·
+      left
+      constructor
+      · -- Base 1 case
+        calc p 0
+          _ = 2 := by rw [p]
+          _ ≡ 2 [ZMOD 7] := by use 0; ring
+      ·
+        calc p 1
+          _ = 3 := by rw [p]
+          _ ≡ 3 [ZMOD 7] := by use 0; ring
+    · -- Base 2 case
+      right; left;
+      constructor
+      · calc p 1
+          _ = 3 := by rw [p]
+          _ ≡ 3 [ZMOD 7] := by use 0; ring
+      ·
+        have h1: p 2 = 6 * (p 1) - p 0 := by exact rfl
+        calc p 2
+          _ = 6 * (p 1) - p 0 := by exact rfl
+          _ = 6 * 3 - 2 := by rw [p, p]
+          _ = 2 * 7 + 2 := by numbers
+          _ ≡ 2 [ZMOD 7] := by use 2; numbers
+    · -- Inductive step
+      obtain ⟨ha1, ha2⟩ | ⟨ha1, ha2⟩ | ⟨ha1, ha2⟩ := hk1
+      ·
+        obtain ⟨hb1, hb2⟩ | ⟨hb1, hb2⟩ | ⟨hb1, hb2⟩ := hk2
+        · -- This case can't happen since we have both
+          -- pₖ₊₁ ≡₇ 2 and pₖ₊₁ ≡₇ 3
+          set z: ℤ := p (k + 1)
+          obtain ⟨x, hx⟩ := hb1
+          obtain ⟨y, hy⟩ := ha2
+          -- Which leads us to the dubious 7 ∣ 7 ⬝ y + 1
+          have h3:=
+            calc 7 * y + 1
+              _ = 7 * y + 3 - 2 := by ring
+              _ = z - 2 := by addarith [hy]
+              _ = 7 * x := by addarith [hx]
+          have h4: 7 ∣ 7 * y + 1 := by rw [h3]; use x; ring
+          -- But 7 cannot divide 7y + 1
+          have h5: ¬7 ∣ 7 * y + 1 := by
+            apply Int.not_dvd_of_exists_lt_and_lt
+            use y
+            constructor
+            · extra
+            · calc 7 * y + 1
+                _ < 7 * y + 1 + 6 := by extra
+                _ = 7 * (y + 1) := by ring
+          contradiction
+        ·
+          right; right
+
+          constructor; apply hb2
+          calc p (k + 3)
+            _ = 6 * p ( k + 2) - p (k + 1) := by rw[p, p]
+            _ ≡ 6 * 2 - 3 [ZMOD 7] := by rel [hb2, hb1]
+            _ ≡ 1 * 7 + 2 [ZMOD 7] := by numbers
+            _ ≡ 2 [ZMOD 7] := by use 1; ring
+        · -- This case can't happen since we have
+          -- pₖ₊₁ ≡₇ 2 and pₖ₊₁ ≡₇ 3
+          set z: ℤ := p (k + 1)
+          obtain ⟨x, hx⟩ := hb1
+          obtain ⟨y, hy⟩ := ha2
+          -- Which leads us to the dubious 7 ∣ 7 ⬝ y + 1
+          have h6:=
+            calc 7 * y + 1
+              _ = 7 * y + 3 - 2 := by ring
+              _ = z - 2 := by addarith [hy]
+              _ = 7 * x := by addarith [hx]
+          have h7: 7 ∣ 7 * y + 1 := by rw [h6]; use x; ring
+          -- But 7 cannot divide 7y + 1
+          have h8: ¬7 ∣ 7 * y + 1 := by
+            apply Int.not_dvd_of_exists_lt_and_lt
+            use y
+            constructor
+            · extra
+            · calc 7 * y + 1
+                _ < 7 * y + 1 + 6 := by extra
+                _ = 7 * (y + 1) := by ring
+          contradiction
+      · obtain ⟨hb1, hb2⟩ | ⟨hb1, hb2⟩ | ⟨hb1, hb2⟩ := hk2
+        · right; left
+          constructor
+          · apply hb2
+          · calc p (k + 3)
+              _ = 6 * p ( k + 2) - p (k + 1) := by rw[p, p]
+              _ ≡ 6 * 3 - 2 [ZMOD 7] := by rel [hb2, hb1]
+              _ ≡ 2 * 7 + 2 [ZMOD 7] := by numbers
+              _ ≡ 2 [ZMOD 7] := by use 2; ring
+        ·
+          -- This case can't happen since we have
+          -- pₖ₊₁ ≡₇ 2 and pₖ₊₁ ≡₇ 3
+          set z: ℤ := p (k + 1)
+          obtain ⟨x, hx⟩ := ha2
+          obtain ⟨y, hy⟩ := hb1
+          have h9:=
+            calc 7 * y + 1
+              _ = 7 * y + 3 - 2 := by ring
+              _ = z - 2 := by addarith [hy]
+              _ = 7 * x := by addarith [hx]
+          have h10: 7 ∣ 7 * y + 1 := by rw [h9]; use x; ring
+          have h11: ¬7 ∣ 7 * y + 1 := by
+            apply Int.not_dvd_of_exists_lt_and_lt
+            use y
+            constructor
+            · extra
+            · calc 7 * y + 1
+                _ < 7 * y + 1 + 6 := by extra
+                _ = 7 * (y + 1) := by ring
+          contradiction
+        · left
+          constructor
+          · apply hb2
+          ·
+            calc p (k + 3)
+              _ = 6 * p ( k + 2) - p (k + 1) := by rw[p, p]
+              _ ≡ 6 * 2 - 2 [ZMOD 7] := by rel [hb2, hb1]
+              _ ≡ 1 * 7 + 3 [ZMOD 7] := by numbers
+              _ ≡ 3 [ZMOD 7] := by use 1; ring
+
+      ·
+        obtain ⟨hb1, hb2⟩ | ⟨hb1, hb2⟩ | ⟨hb1, hb2⟩ := hk2
+        · right; left
+          constructor
+          · apply hb2
+          ·
+            calc p (k + 3)
+              _ = 6 * p ( k + 2) - p (k + 1) := by rw[p, p]
+              _ ≡ 6 * 3 - 2 [ZMOD 7]:= by rel [hb2, hb1]
+              _ ≡ 2 * 7 + 2 [ZMOD 7]:= by numbers
+              _ ≡ 2 [ZMOD 7] := by use 2; ring
+        · -- This case can't happen since we have
+          -- pₖ₊₁ ≡₇ 2 and pₖ₊₁ ≡₇ 3
+          set z: ℤ := p (k + 1)
+          obtain ⟨x, hx⟩ := ha2
+          obtain ⟨y, hy⟩ := hb1
+          have h12:=
+            calc 7 * y + 1
+              _ = 7 * y + 3 - 2 := by ring
+              _ = z - 2 := by addarith [hy]
+              _ = 7 * x := by addarith [hx]
+          have h13: 7 ∣ 7 * y + 1 := by rw [h12]; use x; ring
+          have h14: ¬7 ∣ 7 * y + 1 := by
+            apply Int.not_dvd_of_exists_lt_and_lt
+            use y
+            constructor
+            · extra
+            · calc 7 * y + 1
+                _ < 7 * y + 1 + 6 := by extra
+                _ = 7 * (y + 1) := by ring
+          contradiction
+        · left;
+          constructor
+          · apply hb2
+          ·
+            calc p (k + 3)
+              _ = 6 * p ( k + 2) - p (k + 1) := by rw[p, p]
+              _ ≡ 6 * 2 - 2 [ZMOD 7] := by rel [hb2, hb1]
+              _ ≡ 1 * 7 + 3 [ZMOD 7] := by numbers
+              _ ≡ 3 [ZMOD 7] := by use 1; ring
+
+
+  obtain ⟨h1, h2⟩ | ⟨h1, h2⟩ | ⟨h1, h2⟩  := h m
+  ·
+    left; apply h1
+  ·
+    right; apply h1
+  ·
     left; apply h1
 
 
