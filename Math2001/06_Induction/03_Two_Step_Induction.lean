@@ -538,6 +538,7 @@ example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
 
 -/
 example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
+
   have h: ∀ n: ℕ, (p n ≡ 2 [ZMOD 7] ∧ p (n + 1) ≡ 3 [ZMOD 7]) ∨
                   (p n ≡ 3 [ZMOD 7] ∧ p (n + 1) ≡ 2 [ZMOD 7])  ∨
                   (p n ≡ 2 [ZMOD 7] ∧ p (n + 1) ≡ 2 [ZMOD 7]) := by
@@ -593,7 +594,10 @@ example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
             · calc 7 * y + 1
                 _ < 7 * y + 1 + 6 := by extra
                 _ = 7 * (y + 1) := by ring
-          contradiction
+          contradiction -- TODO (maybe) This contradiction happens
+                        -- 3 times in this proof & could be wrapped
+                        -- into a lemma. But it turns out simple_induction
+                        -- avoids the problem entirely
         ·
           right; right
 
@@ -777,8 +781,26 @@ def r : ℕ → ℤ
   | 1 => 0
   | n + 2 => 2 * r (n + 1) + r n
 
+
 example : forall_sufficiently_large n : ℕ, r n ≥ 2 ^ n := by
-  sorry
+  use 10
+  intro x hx
+  two_step_induction_from_starting_point x, hx with k hk ih1 ih2
+  · -- base case 1
+    calc r 10
+      _ = 1970 := by rfl
+      _ ≥ 2 ^ 10 := by numbers
+  · -- base case 2
+    calc r 11
+      _ = 4756 := by rfl
+      _ ≥ 2 ^ 11 := by numbers
+  · -- induction step
+    calc r (k + 2)
+      _ = 2 * r (k + 1) + r k := by rw [r]
+      _ ≥ 2 * 2 ^ (k + 1) + 2 ^ k := by rel [ih1, ih2]
+      _ = 2 ^ (k + 2) + 2 ^ k := by ring
+      _ ≥ 2 ^ (k + 2) := by extra
+
 
 example : forall_sufficiently_large n : ℕ,
     (0.4:ℚ) * 1.6 ^ n < F n ∧ F n < (0.5:ℚ) * 1.7 ^ n := by
