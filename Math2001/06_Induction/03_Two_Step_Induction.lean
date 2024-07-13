@@ -715,6 +715,62 @@ example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
   ·
     left; apply h1
 
+/-
+  3rd attempt: It looks like this can be done with simple_induction
+  So why's it in the 2 step induction chapter?
+-/
+example (m : ℕ) : p m ≡ 2 [ZMOD 7] ∨ p m ≡ 3 [ZMOD 7] := by
+  have h: ∀ n: ℕ, (p n ≡ 2 [ZMOD 7] ∧ p (n + 1) ≡ 3 [ZMOD 7]) ∨
+                  (p n ≡ 3 [ZMOD 7] ∧ p (n + 1) ≡ 2 [ZMOD 7])  ∨
+                  (p n ≡ 2 [ZMOD 7] ∧ p (n + 1) ≡ 2 [ZMOD 7]) := by
+    intro n
+    simple_induction n with k hk
+    · -- Base case
+      left
+      constructor
+      · calc p 0
+          _ = 2 := by rw [p]
+          _ ≡ 2 [ZMOD 7] := by numbers
+      · calc p 1
+        _ = 3 := by rw [p]
+        _ ≡ 3 [ZMOD 7] :=  by numbers
+    ·
+      obtain ⟨h1, h2⟩  | ⟨h1, h2⟩  | ⟨h1, h2⟩  := hk
+      · right; left;
+        constructor
+        · apply h2
+        · calc p (k + 2)
+            _ = 6 * p (k + 1) - p k := by rw [p]
+            _ ≡ 6 * 3 - 2 [ZMOD 7] := by rel [h2, h1]
+            _ ≡ 2 * 7 + 2 [ZMOD 7] := by numbers
+            _ ≡ 2 [ZMOD 7] := by use 2; numbers
+      · right; right
+        constructor
+        · apply h2
+        · calc p (k + 2)
+            _ = 6 * p (k + 1) - p k := by rw [p]
+            _ ≡ 6 * 2 - 3 [ZMOD 7] := by rel [h2, h1]
+            _ ≡ 1 * 7 + 2 [ZMOD 7] := by numbers
+            _ ≡ 2 [ZMOD 7] := by use 1; numbers
+      ·
+        left
+        constructor
+        · apply h2
+        · calc  p (k + 2)
+            _ = 6 * p (k + 1) - p k := by rw [p]
+            _ ≡ 6 * 2 - 2 [ZMOD 7] := by rel[h2, h1]
+            _ ≡ 1 * 7 + 3 [ZMOD 7] := by numbers
+            _ ≡ 3 [ZMOD 7] := by use 1; numbers
+
+  obtain ⟨h3, h4⟩ | ⟨h3, h4⟩ | ⟨h3, h4⟩  := h m
+  ·
+    left; apply h3
+  ·
+    right; apply h3
+  ·
+    left; apply h3
+
+
 
 def r : ℕ → ℤ
   | 0 => 2
