@@ -801,10 +801,13 @@ example : forall_sufficiently_large n : ℕ, r n ≥ 2 ^ n := by
       _ = 2 ^ (k + 2) + 2 ^ k := by ring
       _ ≥ 2 ^ (k + 2) := by extra
 
+/-
+∃ C, ∀ x ≥ C, 0.4 * 1.6 ^ x < ↑(F x) ∧ ↑(F x) < 0.5 * 1.7 ^ x
+∃c∀k≥c, 0.4 ⬝ 1.6ᵏ < Fₖ < 0.5 ⬝ 1.7ᵏ
+-/
 
 example : forall_sufficiently_large n : ℕ,
     (0.4:ℚ) * 1.6 ^ n < F n ∧ F n < (0.5:ℚ) * 1.7 ^ n := by
-
   use 8
   intro x hx
   two_step_induction_from_starting_point x, hx with k hk ih1 ih2
@@ -833,16 +836,24 @@ example : forall_sufficiently_large n : ℕ,
 
     constructor
     ·
+    -- Left half of the inequality:
+    -- Since 1.6² < (1 + 1.6), and k ≥ 1
+    -- and since 0.4 ⬝ 1.6ᵏ⁺² = 0.4 ⬝ 1.6ᵏ ⬝ 1.6²,
+    -- we know that 0.4 ⬝ 1.6ᵏ⁺² < 0.4 ⬝ (1.6ᵏ⁺¹ + 1.6ᵏ)
+    -- which from our inductive hypothesis is less than
+    -- Fₖ₊₁ + Fₖ, which is Fₖ₊₂
       calc (0.4: ℚ) * 1.6 ^ (k + 2)
         _ = (0.4: ℚ) * (1.6 ^ k * (1.6 ^ 2)) := by ring
-        _ < (0.4: ℚ) * (1.6 ^ k * 2.6) := by
-          have h3: (2.6: ℚ) > 1.6 ^ 2 := by numbers
+        _ < (0.4: ℚ) * (1.6 ^ k * (1 + 1.6)) := by
+          have h3: (1 + 1.6: ℚ) > 1.6 ^ 2 := by numbers
           rel [h3]
         _ = (0.4: ℚ) * 1.6 ^ (k + 1) + (0.4: ℚ) * 1.6 ^ k := by ring
         _ < ↑( F ( k + 1)) + ↑ (F k) := by rel [ih2l, ih1l]
         _ =  ↑ (F ( k + 1) + F k)   := by rw [Rat.intCast_add (F ( k + 1)) (F k) ]
         _ = ↑ (F (k + 2)) := by rw [F]
     ·
+    -- Right half of the inequality:
+    -- similar reasoning can be applied using 1.7² = 2.89 > 1 + 1.7:
       have h4: (2.7: ℚ) < 2.89 := by numbers
       have h5: (1.7: ℚ) ^ k * 1.7 ^ 2 = 1.7 ^ (k + 2) := by ring
       calc ↑(F (k + 2))
