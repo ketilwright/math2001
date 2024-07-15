@@ -802,121 +802,6 @@ example : forall_sufficiently_large n : ℕ, r n ≥ 2 ^ n := by
       _ ≥ 2 ^ (k + 2) := by extra
 
 
--- #eval (0.4:ℚ) * 1.6 ^ 5 -- 4.19
--- #eval F 5 -- 8
--- #eval ((0.5:ℚ) * 1.7 ^ 5) -- 7.1
-
--- #eval (0.4:ℚ) * 1.6 ^ 6 -- 6.71
--- #eval F 6 -- 13
--- #eval ((0.5:ℚ) * 1.7 ^ 6) -- 12.07
-
--- #eval (0.4:ℚ) * 1.6 ^ 7 -- 10.74
--- #eval F 7 -- 21
--- #eval ((0.5:ℚ) * 1.7 ^ 7) -- 20.51
-
--- #eval (0.4:ℚ) * 1.6 ^ 8 -- 17.17
--- #eval F 8 -- 34
--- #eval (0.5:ℚ) * 1.7 ^ 8 -- 34.88
-
--- #eval (0.4:ℚ) * 1.6 ^ 9 -- 27.49
--- #eval F 9 -- 55
--- #eval (0.5:ℚ) * 1.7 ^ 9 -- 59.29
-
-/-
-def F : ℕ → ℤ
-  | 0 => 1
-  | 1 => 1
-  | n + 2 => F (n + 1) + F n
-
--/
-
-example: ∀ n: ℕ, (0.4: ℚ) * 1.6 ^ n < (0.5: ℚ) * 1.6 ^ n := by
-  intro n
-  simple_induction n with k hk
-  ·
-    numbers
-  · -- suppose 0.4 * 1.6 ^ k < 0.5 * 1.6 ^ k
-    calc (0.4: ℚ) * 1.6 ^ (k + 1)
-      _ = (0.4: ℚ) * 1.6 ^ k * 1.6 := by ring
-      _ < (0.5 * 1.6 ^ k) * 1.6 := by rel [hk]
-      _ = 0.5 * 1.6 ^ (k + 1) := by ring
-
-
---#eval F 4
-lemma fibonacci_increasing_n_ge_2 : ∀ n: ℕ, 2 ≤ n → F n < F (n + 1) := by
-  intro n hn
-
-  two_step_induction_from_starting_point n, hn with k hk ih1 ih2
-  ·
-    calc F 2
-      _ = 2 := by rfl
-      _ < 3 := by numbers
-      _ = F 3 := by rfl
-  ·
-    calc F 3
-      _ = 3 := by rfl
-      _ < 5 := by numbers
-      _ = F 4 := by rfl
-  ·
-    calc F (k + 2)
-      _ = F (k + 1) + F k := by rw [F]
-      _ < F (k + 2) + F (k + 1) := by rel [ih2, ih1]
-      _ = F (k + 3) :=  by rfl
-
-lemma fibonacci_pos : ∀ n: ℕ, F n > 0 := by
-  intro n
-  two_step_induction n with k hk1 hk2
-  · calc F 0
-      _ = 1 := by rfl
-      _ > 0 := by numbers
-  ·
-    calc F 1
-      _ = 1 := by rfl
-      _ > 0 := by numbers
-  ·
-
-    calc F (k + 2)
-      _ = F (k + 1) + F k := by rw [F]
-      _ > 0 + 0 := by rel [hk1, hk2]
-      _ = 0 := by numbers
-
---#eval 1.6
---#eval (1.6: ℚ)
---#eval (8 : Rat)/5
---#eval (16: Rat) / 10
---#eval F 4
--- #eval ((F 4): ℚ) / 1 -- Just 5
-
-#eval 0.4 * 1.6 ^ 5 -- 4.194304
-#eval (0.4: ℚ) * 1.6 ^ 5 -- (65536 : Rat)/15625
-#eval 0.4 * (1.6: ℚ) ^ (5: ℕ)
-
-example : (1: ℚ) / 2 < (3: ℚ) / 1 := by numbers
---#eval F 5 -- 8
-example : (1: ℚ) / 2 < F 5 := by
-  calc (1: ℚ) / 2
-    _ < 8 := by numbers
-    _ = F 5 := by rfl
-
---example: ∀ q: ℚ, ∃ r: ℝ, r = (↑q: Real) := sorry
-
---#eval (1: ℚ) ≤ (1.6: ℚ) -- true, but why?
---example: (1: ℚ) < (8: ℚ) / 5 := by exact (one_lt_div rfl).mpr rfl
-#check one_lt_div
-#check div_le_of_nonneg_of_le_mul
--- example: (1: ℚ) < (8: ℚ) / 5 := by
---   --apply one_lt_div
---   --have h1: 5 < 8 := by numbers
---   have h1: (1: ℚ) * 5 < 8 := by numbers
---   --exact (one_lt_div rfl).mpr rfl
---   --exact (one_lt_div rfl).mpr rfl
---   -- apply lt_div_iff
---   have h2: 0 < 5 := by numbers
---   --have h3: 1 < (8: ℚ) / 5 := by apply?--exact (one_lt_div rfl).mpr rfl-- exact (one_lt_div rfl).mpr rfl
---   --apply div_le_of_nonneg_of_le_mul
---   --apply Rat.le_iff_Nonneg
---   sorry
-
 example : forall_sufficiently_large n : ℕ,
     (0.4:ℚ) * 1.6 ^ n < F n ∧ F n < (0.5:ℚ) * 1.7 ^ n := by
 
@@ -925,7 +810,7 @@ example : forall_sufficiently_large n : ℕ,
   two_step_induction_from_starting_point x, hx with k hk ih1 ih2
   · constructor
     · calc (0.4:ℚ) * 1.6 ^ 8
-        _ < (34: ℚ) / 1 := by numbers
+        _ < 34 := by numbers
         _ = F 8 :=  by rfl
     · calc ((F 8) : ℚ)
         _ = 34 := by rfl
@@ -941,141 +826,31 @@ example : forall_sufficiently_large n : ℕ,
         _ = (55: ℚ) := by rfl
         _ < (0.5: ℚ) * 1.7 ^ (9) := by numbers
   ·
-    /-
-    ih1 : 0.4 * 1.6 ^ k < ↑(F k) ∧
-                          ↑(F k) < 0.5 * 1.7 ^ k
-    ih2 : 0.4 * 1.6 ^ (k + 1) < ↑(F (k + 1)) ∧
-                                ↑(F (k + 1)) < 0.5 * 1.7 ^ (k + 1)
-    -/
+    -- suppose 0.4 ⬝ 1.6ᵏ < Fₖ < 0.5 ⬝ 1.7ᵏ and
+    -- suppose 0.4 ⬝ 1.6ᵏ⁺¹ < Fₖ₊₁ < 0.5 ⬝ 1.7ᵏ⁺¹
     obtain ⟨ih1l, ih1r⟩ := ih1
     obtain ⟨ih2l, ih2r⟩ := ih2
 
-    have h3: F k < F (k + 1) := fibonacci_increasing_n_ge_2 k (by addarith [hk])
-    have h4: (↑(F k): ℚ) < (↑(F (k + 1)): ℚ) := cast_lt.mpr h3
-
-    have h5: F (k + 1) < F (k + 2) := fibonacci_increasing_n_ge_2 (k + 1) (by addarith [hk])
-    have h6: (↑(F (k + 1)): ℚ) < (↑(F (k + 2)): ℚ) := cast_lt.mpr h5
-
-    have h7: (1.0:ℚ) < 1.6 := by numbers
-    have h7a: (1.0:ℚ) < 1.7 := by numbers
-    have h8: 1.7 * (0.5: ℚ) > 1.6 * (0.4: ℚ) := by numbers
-
-    have h9: (1.6: ℚ) < (1.7: ℚ) := by numbers
-
-
-    --let z: ℚ := F (k + 1)
-    have h10: F (k + 1) ≥ 1 := fibonacci_pos (k + 1)
-    --have h11: F (k + 1) > F k := fibonacci_increasing_n_ge_2 k (by addarith [hk])
-    --have h12: F (k + 1) ≥ 1 := by apply?
-
-    --have h10: (1.6: ℚ) * z  < (1.7: ℚ) * z := by apply?
-    --have h11: ↑(F (k + 1)) * (1.6: ℚ) < ↑(F (k + 1)) * (1.7: ℚ) := by apply?
-    have h11: (1.6: ℚ) = 16 / 10 := by rfl
-    have h12: (1.7: ℚ) = 17 /10 := by rfl
-    have h13: 0.4 * (1.6: ℚ) < 0.5 * (1.6: ℚ) := by numbers
-
-    -- have h14: 0.4 * 1.6 < 0.5 * 1.6 := by apply?
-    -- have h11:=
-    --   calc ↑(F (k + 1)) * (1.6: ℚ)
-    --     --_ < ↑(F (k + 1)) * (1.7: ℚ + 0.1: ℚ) := by numbers
-    --     _ < ↑(F (k + 1)) * (1.7: ℚ) := sorry
-    /-
-    ih1l : 0.4 * 1.6 ^ k < ↑(F k)
-
-    ih1r : ↑(F k) < 0.5 * 1.7 ^ k
-    ih2l : 0.4 * 1.6 ^ (k + 1) < ↑(F (k + 1))
-    ih2r : ↑(F (k + 1)) < 0.5 * 1.7 ^ (k + 1)
-
-    -/
-    -- goal
-    /-
-
-     0.4 * 1.6 ^ (k + 1 + 1) < ↑(F (k + 1 + 1))
-                  ∧
-    ↑(F (k + 1 + 1)) < 0.5 * 1.7 ^ (k + 1 + 1)
-    -/
-    -- have h1000: ∀ x : ℕ, F (x + 1) > F x
-
-    have h14:  (0.4: ℚ) * 1.6 ^ k < ↑(F k) := by exact ih1l
-    have h15: 1 < 8 := by numbers
-    have h16: (1.7: ℚ) ^ 1 < (1.7: ℚ) ^ 8 := by numbers
-    have h17:=
-      calc 1
-        _ < 8 := by numbers
-        _ ≤ k := by rel [hk]
-
-    --have h18: (1: ℚ) ≤ (1.7: ℚ) := by numbers
-    --have h18: 1 ≤ (1.7: ℚ) := sorry
-    --have h19: (1.7: ℚ) ^ 8 ≤ (1.7: ℚ) ^ k := by rel [h18, hk]
-    -- have h19:=
-    --   calc (1.7: ℚ) ^ 8
-    --     --_ < (1.7: ℚ) ^ 9 := by numbers
-    --     _ ≤ (1.7: ℚ) ^ k := by rel [hk, h18]
-    --have h18: 2 ^ 8 ≤ 2 ^ k := by rel [hk]
-
     constructor
     ·
-      --have h43: (1: ℚ) ≤ (1.6: ℚ) := by apply?
-      have h19: (2.6: ℚ) > 2.56 := by numbers
-      calc ↑(F (k + 2))
-        _ = ↑( F ( k + 1) + F k) := by rw [F]
-        _ = ↑( F ( k + 1)) + ↑ (F k) := by exact Rat.intCast_add (F (k + 1)) (F k)
-        _ > (0.4: ℚ)  * 1.6 ^ (k + 1) + (0.4: ℚ) * 1.6 ^ k := by rel [ih2l, ih1l]
-        _ = (0.4: ℚ) * (1.6 ^ (k + 1) + 1.6 ^ k) := by ring
-        _ = (0.4: ℚ) * (1.6 ^ k * (2.6)) := by ring
-        _ > (0.4: ℚ) * (1.6 ^ k * (2.56)) := by rel [h19]
-        _ = (0.4: ℚ) * 1.6 ^ (k + 2) := by ring -- 1.6² = 2.56
-
+      calc (0.4: ℚ) * 1.6 ^ (k + 2)
+        _ = (0.4: ℚ) * (1.6 ^ k * (1.6 ^ 2)) := by ring
+        _ < (0.4: ℚ) * (1.6 ^ k * 2.6) := by
+          have h3: (2.6: ℚ) > 1.6 ^ 2 := by numbers
+          rel [h3]
+        _ = (0.4: ℚ) * 1.6 ^ (k + 1) + (0.4: ℚ) * 1.6 ^ k := by ring
+        _ < ↑( F ( k + 1)) + ↑ (F k) := by rel [ih2l, ih1l]
+        _ =  ↑ (F ( k + 1) + F k)   := by rw [Rat.intCast_add (F ( k + 1)) (F k) ]
+        _ = ↑ (F (k + 2)) := by rw [F]
     ·
-      have h20: (2.7: ℚ) < 2.89 := by numbers
-      have h21: (1.7: ℚ) ^ k * 1.7 ^ 2 = 1.7 ^ (k + 2) := by ring
+      have h4: (2.7: ℚ) < 2.89 := by numbers
+      have h5: (1.7: ℚ) ^ k * 1.7 ^ 2 = 1.7 ^ (k + 2) := by ring
       calc ↑(F (k + 2))
         _ = ↑( F ( k + 1) + F k) := by rw [F]
         _ = ↑( F ( k + 1)) + ↑ (F k) := by exact Rat.intCast_add (F (k + 1)) (F k)
         _ <  (0.5: ℚ) * 1.7 ^ (k + 1) + 0.5 * 1.7 ^ k := by rel [ih2r, ih1r]
         _ = (0.5: ℚ) * (1.7 ^ (k + 1) + 1.7 ^ k) := by ring
         _ = (0.5: ℚ) * 1.7 ^ k * (2.7) := by ring
-        _ < (0.5: ℚ) * 1.7 ^ k * (2.89) := by rel [h20]
+        _ < (0.5: ℚ) * 1.7 ^ k * (2.89) := by rel [h4]
         _ = (0.5: ℚ) * ((1.7: ℚ) ^ k * (1.7 ^ 2)) := by ring
-        _ = (0.5: ℚ) * (1.7: ℚ) ^ (k + 2) := by rw [h21]
-      -- calc ↑(F (k + 1 + 1))
-      --   _ < (0.5: ℚ) * 1.7 ^ (k + 1 + 1) := sorry
-
-
-/-
-
-example : forall_sufficiently_large n : ℕ,
-    (0.4:ℚ) * 1.6 ^ n < F n ∧ F n < (0.5:ℚ) * 1.7 ^ n := by
-
-  use 8
-  intro x hx
-  induction_from_starting_point x, hx with k hk ih
-  ·
-    constructor
-    ·
-      calc (0.4:ℚ) * 1.6 ^ 8
-        _ < 34 := by numbers
-        _ = F 8 :=  by rfl
-    ·
-
-      calc ((F 8) : ℚ)
-        _ = (34: ℚ) := by rfl
-        _ < (0.5:ℚ) * 1.7 ^ 8 := by numbers
-
-  ·  -- ih:  0.4 * 1.6 ^ k < ↑(F k) ∧ ↑(F k) < 0.5 * 1.7 ^ k
-    obtain ⟨ih1, ih2⟩ := ih
-    /-
-    ih1 : 0.4 * 1.6 ^ k < ↑(F k)
-    ih2 : ↑(F k) < 0.5 * 1.7 ^ k
-    -/
-    constructor
-    ·
-      calc (0.4:ℚ) * 1.6 ^ (k + 1)
-        _ = ((0.4:ℚ) * (1.6 ^ k)) * 1.6 := by ring
-        _ < ↑(F k) * 1.6 := by rel [ih1]
-        _ < F (k + 1) :=  sorry
-    ·
-      have h100: F (k + 1) < (0.5:ℚ) * 1.7 ^ (k + 1) := sorry
-      apply h100
-      --calc F (k + 1) < (0.5:ℚ) * 1.7 ^ (k + 1) := sorry
--/
+        _ = (0.5: ℚ) * (1.7: ℚ) ^ (k + 2) := by rw [h5]
