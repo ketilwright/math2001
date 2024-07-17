@@ -60,26 +60,27 @@ theorem exists_prime_factor {n : ℕ} (hn2 : 2 ≤ n) : ∃ p : ℕ, Prime p ∧
 -- Doesn't this just follow almost immediately from the fundamental theorem of arithmetic?
 
 theorem extract_pow_two (n : ℕ) (hn : 0 < n) : ∃ a x, Odd x ∧ n = 2 ^ a * x := by
-  -- Proof by (silent strong induction)
+  -- Proof by (strong silent type induction)
   by_cases nParity : Odd n
-  · -- let a = 0 and x = n
+  · -- Suppose n is odd. Then it has no factors of 2,
+    -- so let a = 0 and x = n & we are done
     use 0, n; constructor; apply nParity; ring
-  ·
+  · -- Suppose n is even.
     rw [←even_iff_not_odd] at nParity
-    -- Since n is even choose c with n = 2 ⬝ c
+    -- Then we can choose c with n = 2 ⬝ c
     obtain ⟨c, hc⟩ := nParity
     -- Since n > 0 and n = 2 ⬝ c thus c > 0
     have h1: c > 0 := by rw [hc] at hn; cancel 2 at hn
-    -- Since 0 < c < n, by strong induction choose a, x s.t. x is off
-    -- and c = 2ᵃ ⬝ x
+    -- Since 0 < c < n, we can appeal to the induction hypothesis and
+    -- choose a, x ∈ N with x odd and c = 2ᵃ ⬝ x
     have ih: ∃ a x, Odd x ∧ c = 2 ^ a * x := extract_pow_two c h1
     obtain ⟨a, x, h2, h3⟩ := ih
-    -- Then since n = 2 * c, a + 1 and x are out witness
+    -- Then since n = 2 ⬝ c ∧ c = 2ᵃ ⬝ x, we have
+    -- n = 2ᵃ⁺¹ ⬝ x so a + 1 and x are our witnesses.
     use a + 1, x
     constructor
     · apply h2
-    ·
-      calc n
+    · calc n
         _ = 2 * c := hc
         _ = 2 * (2 ^ a * x) := by rw [h3]
         _ = 2 ^ (a + 1) * x := by ring
