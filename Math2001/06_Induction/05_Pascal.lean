@@ -16,9 +16,10 @@ termination_by _ a b => a + b
 
 
 #eval pascal 2 4 -- infoview displays `15`
-
+#eval pascal 3 4 -- 35
 
 theorem pascal_le (a b : ℕ) : pascal a b ≤ (a + b)! := by
+  -- Strong induction relative to a + b
   match a, b with
   | a, 0 =>
       calc pascal a 0 = 1 := by rw [pascal]
@@ -41,6 +42,7 @@ termination_by _ a b => a + b
 theorem pascal_eq (a b : ℕ) : pascal a b * a ! * b ! = (a + b)! := by
   match a, b with
   | a, 0 =>
+    -- it appears _ is just a. Why?
     calc pascal _ 0 * a ! * 0! = 1 * a ! * 0! := by rw [pascal]
       _ = 1 * a ! * 1 := by rw [factorial]
       _ = (a + 0)! := by ring
@@ -81,10 +83,28 @@ example (a b : ℕ) : (pascal a b : ℚ) = (a + b)! / (a ! * b !) := by
 
 theorem pascal_symm (m n : ℕ) : pascal m n = pascal n m := by
   match m, n with
-  | 0, 0 => sorry
-  | a + 1, 0 => sorry
-  | 0, b + 1 => sorry
-  | a + 1, b + 1 => sorry
+  | 0, 0 =>
+    rw [pascal];
+  | a + 1, 0 =>
+    rw [pascal, pascal]
+  | 0, b + 1 =>
+    rw [pascal, pascal]
+  | a + 1, b + 1 =>
+    -- pascal (a + 1) b + pascal a (b + 1)
+    -- ihs not used :(. Does this qualify
+    -- as an inductive proof?
+    --have ih1: _ := pascal_symm (a + 1) 0
+    --have ih2: _ := pascal_symm 0 ( b + 1)
+    have h1:=
+      calc (pascal (a + 1) (b + 1)) * ((a + 1) !) * ((b + 1) !)
+        _ = ((a + 1) + (b + 1)) ! := pascal_eq (a + 1) (b + 1)
+        _ = ((b + 1) + (a + 1)) ! := by ring
+        _ = (pascal (b + 1) (a + 1)) * ((b + 1) !) * ((a + 1) !) := by rw [pascal_eq]
+        _ = (pascal (b + 1) (a + 1)) * ((a + 1) !) * ((b + 1) !) := by ring
+
+    cancel ((b + 1) !) at h1
+    cancel ((a + 1) !) at h1
+
 termination_by _ a b => a + b
 
 
