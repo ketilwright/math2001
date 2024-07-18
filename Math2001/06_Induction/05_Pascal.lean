@@ -109,4 +109,7 @@ termination_by _ a b => a + b
 
 
 example (a : ℕ) : pascal a 1 = a + 1 := by
-  sorry
+  simple_induction a with j hj
+  · rw [pascal];
+  · rw [pascal, pascal, ←hj]
+    ring
