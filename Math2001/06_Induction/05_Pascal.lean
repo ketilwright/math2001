@@ -71,12 +71,14 @@ termination_by _ a b => a + b
 
 
 example (a b : ℕ) : (pascal a b : ℚ) = (a + b)! / (a ! * b !) := by
-  have ha := factorial_pos a
+  have ha := factorial_pos a -- this is an integer theorem, and a ∈ Q
   have hb := factorial_pos b
   field_simp [ha, hb]
   norm_cast
   calc pascal a b * (a ! * b !) = pascal a b * a ! * b ! := by ring
     _ = (a + b)! := by apply pascal_eq
+
+-- #eval (pascal 6 4 : ℚ) = (10 !) / (6 ! * 4 !) -- true
 
 /-! # Exercises -/
 
@@ -93,8 +95,8 @@ theorem pascal_symm (m n : ℕ) : pascal m n = pascal n m := by
     -- pascal (a + 1) b + pascal a (b + 1)
     -- ihs not used :(. Does this qualify
     -- as an inductive proof?
-    --have ih1: _ := pascal_symm (a + 1) 0
-    --have ih2: _ := pascal_symm 0 ( b + 1)
+    have ih1: _ := pascal_symm (a + 1) b
+    have ih2: _ := pascal_symm a ( b + 1)
     have h1:=
       calc (pascal (a + 1) (b + 1)) * ((a + 1) !) * ((b + 1) !)
         _ = ((a + 1) + (b + 1)) ! := pascal_eq (a + 1) (b + 1)
@@ -107,6 +109,17 @@ theorem pascal_symm (m n : ℕ) : pascal m n = pascal n m := by
 
 termination_by _ a b => a + b
 
+-- I don't get why we need this "match blah blah" at all.
+-- Why not just this?
+theorem pascal_symm' (m n : ℕ) : pascal m n = pascal n m := by
+  have h1:=
+      calc (pascal m n) * (m !) * (n !)
+        _ = (m + n) ! := pascal_eq m n
+        _ = (n + m) ! := by ring
+        _ = (pascal n m) * (n !) * (m !) := by rw [pascal_eq]
+        _ = (pascal n m) * (m !) * (n !) := by ring
+
+  cancel (n !) at h1; cancel (m !) at h1
 
 example (a : ℕ) : pascal a 1 = a + 1 := by
   simple_induction a with j hj
