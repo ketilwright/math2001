@@ -37,6 +37,7 @@ theorem fmod_add_fdiv (n d : ℤ) : fmod n d + d * fdiv n d = n := by
   split_ifs with h1 h2 h3 <;> push_neg at *
   · -- case `n * d < 0`
     have IH := fmod_add_fdiv (n + d) d -- inductive hypothesis
+    -- ih: fmod (n + d) d + d * fdiv (n + d) d = n + d
     calc fmod (n + d) d + d * (fdiv (n + d) d - 1)
         = (fmod (n + d) d + d * fdiv (n + d) d) - d := by ring
       _ = (n + d) - d := by rw [IH]
@@ -60,6 +61,7 @@ theorem fmod_nonneg_of_pos (n : ℤ) {d : ℤ} (hd : 0 < d) : 0 ≤ fmod n d := 
   split_ifs with h1 h2 h3 <;> push_neg at *
   · -- case `n * d < 0`
     have IH := fmod_nonneg_of_pos (n + d) hd -- inductive hypothesis
+    -- 0 ≤ fmod (n + d) d
     apply IH
   · -- case `0 < d * (n - d)`
     have IH := fmod_nonneg_of_pos (n - d) hd -- inductive hypothesis
@@ -105,9 +107,35 @@ example (a b : ℤ) (h : 0 < b) : ∃ r : ℤ, 0 ≤ r ∧ r < b ∧ a ≡ r [ZM
 
 /-! # Exercises -/
 
-
 theorem lt_fmod_of_neg (n : ℤ) {d : ℤ} (hd : d < 0) : d < fmod n d := by
-  sorry
+
+  rw [fmod]
+  split_ifs with h1 h2 h3<;> push_neg at *
+  · -- suppose n ⬝ d < 0
+    have ih := lt_fmod_of_neg (n + d) hd
+    apply ih
+  · -- suppose 0 ≤ d ⬝ (n - d)
+    have ih := lt_fmod_of_neg (n - d) hd
+    apply ih
+  · -- suppose n = d
+    apply hd
+  · -- Suppose n ≠ d.
+    -- Since we have n ≠ d, we can equivalently prove d ≤ n
+    apply lt_of_le_of_ne
+    have h4: 0 ≤ - d * (n - d) := by addarith [h2]
+    -- Since -d > 0 we can cancel it from the
+    -- preceding inequality & thus 0 ≤ n - d
+    apply Int.neg_pos_of_neg at hd
+    cancel (-d) at h4
+    have h8: d ≤ n := by addarith [h4]
+    ·
+      apply h8
+    ·
+      apply Ne.symm h3
+
+termination_by _ n d hd => 2 * n - d
+
+
 
 def T (n : ℤ) : ℤ :=
   if 0 < n then

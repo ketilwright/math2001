@@ -83,7 +83,7 @@ example (a b : ℕ) : (pascal a b : ℚ) = (a + b)! / (a ! * b !) := by
 theorem pascal_symm (m n : ℕ) : pascal m n = pascal n m := by
   match m, n with
   | 0, 0 =>
-    rw [pascal];
+    ring
   | a + 1, 0 =>
     rw [pascal, pascal]
   | 0, b + 1 =>
