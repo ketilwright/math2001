@@ -120,11 +120,11 @@ theorem lt_fmod_of_neg (n : ℤ) {d : ℤ} (hd : d < 0) : d < fmod n d := by
   · -- suppose n = d
     apply hd
   · -- Suppose n ≠ d.
-    -- Since we have n ≠ d, we can equivalently prove d ≤ n
+    -- Then we can equivalently prove d ≤ n
     apply lt_of_le_of_ne
     have h4: 0 ≤ - d * (n - d) := by addarith [h2]
     -- Since -d > 0 we can cancel it from the
-    -- preceding inequality & thus 0 ≤ n - d
+    -- preceding inequality. Thus 0 ≤ n - d
     apply Int.neg_pos_of_neg at hd
     cancel (-d) at h4
     have h8: d ≤ n := by addarith [h4]
@@ -147,7 +147,28 @@ def T (n : ℤ) : ℤ :=
 termination_by T n => 3 * n - 1
 
 theorem T_eq (n : ℤ) : T n = n ^ 2 := by
-  sorry
+  rw [T]
+  split_ifs with h1 h2 /-h3-/<;> push_neg
+  · -- Suppose 0 < n
+    have ih₁: T (1 - n) = (1 - n) ^ 2 := T_eq (1 - n)
+    calc T (1 - n) + 2 * n - 1
+      _ = (1 - n) ^ 2 + 2 * n - 1 := by rw [ih₁]
+      _ = 1 - 2 * n + n ^ 2 + 2 * n - 1 := by ring
+      _ = n ^ 2 := by ring
+  · -- goal: T (-n) = n ^ 2
+    have ih₂: T (-n) = (-n) ^ 2 := T_eq (-n)
+    calc  T (-n)
+      _ = (-n) ^ 2 := by rw [ih₂]
+      _ = n ^ 2 := by ring
+  · -- Suppose 0 is not less than n and 0 is not less than (-n).
+    -- This can only be true when n = 0
+    have h3: n ≤ 0 := Int.not_lt.mp h1
+    have h4: - n ≤ 0 := Int.not_lt.mp h2
+    have h5: n ≥ 0 := Int.nonneg_of_neg_nonpos h4
+    rw [le_antisymm h3 h5]; numbers
+
+  termination_by _ n => 3 * n - 1
+
 
 theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
     (hr : 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b])
