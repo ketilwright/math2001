@@ -1,7 +1,7 @@
 /- Copyright (c) Heather Macbeth, 2023.  All rights reserved. -/
 import Library.Basic
 import Library.Theory.ModEq.Defs
-
+import Library.Theory.ModEq.Lemmas
 math2001_init
 
 
@@ -146,6 +146,8 @@ def T (n : ℤ) : ℤ :=
     0
 termination_by T n => 3 * n - 1
 
+
+
 theorem T_eq (n : ℤ) : T n = n ^ 2 := by
   rw [T]
   split_ifs with h1 h2 /-h3-/<;> push_neg
@@ -170,10 +172,61 @@ theorem T_eq (n : ℤ) : T n = n ^ 2 := by
   termination_by _ n => 3 * n - 1
 
 
+
+
+
 theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
-    (hr : 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b])
-    (hs : 0 ≤ s ∧ s < b ∧ a ≡ s [ZMOD b]) : r = s := by
-  sorry
+  (hr : 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b])
+  (hs : 0 ≤ s ∧ s < b ∧ a ≡ s [ZMOD b]) : r = s := by
+  obtain ⟨hr1, hr2, hr3⟩ := hr
+  obtain ⟨hs1, hs2, hs3⟩ := hs
+  -- Since zmod is symmetric and transitive, we have r ≡ₛ b
+  have h4: r ≡ a [ZMOD b] := Int.ModEq.symm hr3
+  have h5: r ≡ s [ZMOD b] := Int.ModEq.trans h4 hs3
+  -- Since r ≡ₛ b there is c ∈ ℤ with r - s = b ⬝ c
+  obtain ⟨c, hc⟩ := h5
+  -- From which it follows that -b < r - s < b
+  have h6:=
+    calc -b
+        _ < -s := Int.neg_lt_neg hs2
+        _ ≤ -s + r := by addarith[hr1]
+        _ = r - s := by ring
+
+
+  have h7:=
+    calc r - s
+      _ ≤ r := by addarith [hs1]
+      _ < b := hr2
+  -- Then since r - s = bc: -b < b ⬝ c < b
+  rw [hc] at h6; rw [hc] at h7
+  -- Since bc < b, c < 1
+  have h8: c < 1 := (mul_lt_iff_lt_one_right h).mp h7
+  have h9: -b = (-1) * b := by ring
+  rw [h9, Int.mul_comm]  at h6
+  cancel b at h6
+  -- Similarly since -b < bc, -1 < c
+  -- Since -1 < c < 1, c = 0
+  obtain h10 | h10 := eq_or_ne c 0
+  ·
+  -- Since c = 0, bc = 0 = r - s, so r = s
+    have h11: b * 0 = 0 := by ring
+    rw [h10, h11] at hc
+    calc r
+      _ = (r - s) + s := by ring
+      _ = 0 + s := by rw [hc]
+      _ = s := by ring
+  · -- we can exclude cases where c ≠ 0
+    -- which lead to contradictions
+    obtain h12 | h12 := Ne.lt_or_lt h10
+    ·
+      have h13: ¬ c < 0 := Int.not_lt.mpr h6
+      contradiction
+    ·
+      have h14: ¬ c < 1 := Int.not_lt.mpr h12
+      contradiction
+
 
 example (a b : ℤ) (h : 0 < b) : ∃! r : ℤ, 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b] := by
+  --apply uniqueness a b h
+
   sorry
