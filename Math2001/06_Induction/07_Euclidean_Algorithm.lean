@@ -95,6 +95,7 @@ theorem gcd_dvd (a b : ℤ) : gcd a b ∣ b ∧ gcd a b ∣ a := by
 termination_by gcd_dvd a b => b
 
 
+
 mutual
 theorem gcd_dvd_right (a b : ℤ) : gcd a b ∣ b := by
   rw [gcd]
@@ -221,4 +222,11 @@ theorem bezout (a b : ℤ) : ∃ x y : ℤ, x * a + y * b = gcd a b := by
 
 
 theorem gcd_maximal {d a b : ℤ} (ha : d ∣ a) (hb : d ∣ b) : d ∣ gcd a b := by
-  sorry
+  obtain ⟨x, hx⟩ := ha
+  obtain ⟨y, hy⟩ := hb
+  obtain ⟨t, u, htu⟩ := bezout a b
+  use (t * x + u * y)
+  calc gcd a b
+    _ = t * a + u * b := by rw [htu]
+    _ = t * (d * x) + u * (d * y) := by rw [hx, hy]
+    _ = d * (t * x + u * y) := by ring
