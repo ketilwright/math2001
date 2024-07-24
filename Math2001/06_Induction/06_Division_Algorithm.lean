@@ -1,6 +1,8 @@
 /- Copyright (c) Heather Macbeth, 2023.  All rights reserved. -/
 import Library.Basic
 import Library.Theory.ModEq.Defs
+-- added for next to last so I don't need to reinvent
+-- the wheel
 import Library.Theory.ModEq.Lemmas
 math2001_init
 
@@ -181,6 +183,8 @@ theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
   obtain ⟨hr1, hr2, hr3⟩ := hr
   obtain ⟨hs1, hs2, hs3⟩ := hs
   -- Since zmod is symmetric and transitive, we have r ≡ₛ b
+  -- This might be cheating (I had to import ModEq.Lemmas
+  -- for this to work)
   have h4: r ≡ a [ZMOD b] := Int.ModEq.symm hr3
   have h5: r ≡ s [ZMOD b] := Int.ModEq.trans h4 hs3
   -- Since r ≡ₛ b there is c ∈ ℤ with r - s = b ⬝ c
@@ -191,7 +195,6 @@ theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
         _ < -s := Int.neg_lt_neg hs2
         _ ≤ -s + r := by addarith[hr1]
         _ = r - s := by ring
-
 
   have h7:=
     calc r - s
@@ -225,8 +228,50 @@ theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
       have h14: ¬ c < 1 := Int.not_lt.mpr h12
       contradiction
 
-
 example (a b : ℤ) (h : 0 < b) : ∃! r : ℤ, 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b] := by
-  --apply uniqueness a b h
 
-  sorry
+  use (fmod a b)
+  constructor
+  ·
+    constructor
+    ·
+      apply fmod_nonneg_of_pos
+      apply h
+    ·
+      constructor
+      ·
+        apply fmod_lt_of_pos
+        apply h
+      ·
+        use fdiv a b
+        calc a - fmod a b
+          _ = (fmod a b + b * fdiv a b) - fmod a b := by rw [fmod_add_fdiv a b]
+          _ = b * fdiv a b := by ring
+  · -- Let y ∈ Z be arbitrary, and assume 0 ≤ y < b and a ≡ y [ZMOD b]
+    -- we need to prove y = a % b, which is y = fmod a b
+    intro y hy
+    obtain ⟨hy1, hy2, ⟨c, hc⟩⟩ := hy
+
+    apply uniqueness a b
+    · apply h -- b > 0
+    · constructor
+      · apply hy1 -- y ≥ 0
+      · constructor
+        · apply hy2 -- y < b
+        · -- Since b ∣ a - y, we have a ≡ y [ZMOD b]
+          use c; apply hc
+    · constructor
+      · -- Since b > 0, a % b ≥ 0
+        calc 0
+          _ ≤ fmod a b := fmod_nonneg_of_pos a h
+      ·
+        constructor
+        · -- Since b > 0, a % b < b
+          calc fmod a b
+            _ < b := fmod_lt_of_pos a h
+        · -- Since a % b + b * a / b = a, we can use a / b
+          -- as witness
+          use fdiv a b
+          calc a - fmod a b
+            _ = fmod a b + b * fdiv a b - fmod a b := by rw [fmod_add_fdiv a b]
+            _ = b * fdiv a b := by ring
