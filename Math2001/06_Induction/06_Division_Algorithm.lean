@@ -228,21 +228,20 @@ theorem uniqueness (a b : ℤ) (h : 0 < b) {r s : ℤ}
       have h14: ¬ c < 1 := Int.not_lt.mpr h12
       contradiction
 
+
 example (a b : ℤ) (h : 0 < b) : ∃! r : ℤ, 0 ≤ r ∧ r < b ∧ a ≡ r [ZMOD b] := by
 
   use (fmod a b)
   constructor
   ·
     constructor
-    ·
-      apply fmod_nonneg_of_pos
-      apply h
+    · -- 0 ≤ fmod a b
+      apply fmod_nonneg_of_pos a h
     ·
       constructor
-      ·
-        apply fmod_lt_of_pos
-        apply h
-      ·
+      · -- fmod a b < b
+        apply fmod_lt_of_pos a h
+      · -- a ≡ fmod a b [ZMOD b]
         use fdiv a b
         calc a - fmod a b
           _ = (fmod a b + b * fdiv a b) - fmod a b := by rw [fmod_add_fdiv a b]
