@@ -142,42 +142,29 @@ theorem gcd_symm (a b: ℤ) : gcd a b = gcd b a := by
 theorem gcd_dvd (a b : ℤ) : gcd a b ∣ b ∧ gcd a b ∣ a := by
   rw [gcd]
   split_ifs with h1 h2 h3<;> push_neg at *
-  · -- case `0 < b`
-    have hBne0 : b ≠ 0 := Int.ne_of_gt h1
-    have IH : _ ∧ _ := gcd_dvd b (fmod a b) -- inductive hypothesis
-    obtain ⟨IH_right, IH_left⟩ := IH
-
+  · -- suppose 0 < b
+    obtain ⟨IH_right, IH_left⟩ := gcd_dvd b (fmod a b) -- inductive hypothesis
     constructor
     · -- prove that `gcd b (fmod a b) ∣ b`
       apply IH_left
     · -- prove that `gcd b (fmod a b) ∣ a`
-      obtain ⟨c, hc⟩ := IH_left -- -- b = gcd b (fmod a b) * c
-      obtain ⟨d, hd⟩ := IH_right-- fmod a b = gcd b (fmod a b) * d
-
+      obtain ⟨c, hc⟩ := IH_left   -- b = gcd b (fmod a b) * c
+      obtain ⟨d, hd⟩ := IH_right  -- fmod a b = gcd b (fmod a b) * d
       use (fdiv a b) * c + d
       calc a
         _ = fmod a b + b * fdiv a b := by rw [fmod_add_fdiv a b]
         _ = gcd b (fmod a b) * d + b * fdiv a b := by rw [hd.symm]
         _ = gcd b (fmod a b) * d + gcd b (fmod a b) * c * fdiv a b := by rw [hc.symm]
         _ = gcd b (fmod a b) * (fdiv a b * c + d) := by ring
-
-
   · -- case `b < 0`
     constructor
     · -- prove that `gcd b (fmod a (-b)) ∣ b`
-      have IH2 : _ ∧ _ := gcd_dvd b (fmod a (-b)) -- inductive hypothesis
-      obtain ⟨IH_right2, IH_left2⟩ := IH2
-
-      apply IH_left2
+      obtain ⟨IH_right, IH_left⟩ := gcd_dvd b (fmod a (-b)) -- inductive hypothesis
+      apply IH_left
     · -- prove that `gcd b (fmod a (-b)) ∣ a`
-      have IH3 : _ ∧ _ := gcd_dvd b (fmod a (-b)) -- inductive hypothesis
-      obtain ⟨IH_right3, IH_left3⟩ := IH3
-
-      obtain ⟨c, hc⟩ := IH_left3 -- -- b = gcd b (fmod a (-b)) * c
-      obtain ⟨d, hd⟩ := IH_right3-- fmod a (-b) = gcd b (fmod a (-b)) * d
-      --have h3: fmod a (-b) + -b * fdiv a (-b) = a := fmod_add_fdiv a (-b)
-      -- have h4: -b * fdiv a (-b) = a - fmod a (-b) := by addarith [h3]
-      -- dsimp [. ∣ .] -- ∃ c, a = gcd b (fmod a (-b)) * c
+      obtain ⟨IH_right, IH_left⟩ := gcd_dvd b (fmod a (-b)) -- inductive hypothesis
+      obtain ⟨c, hc⟩ := IH_left   -- b = gcd b (fmod a (-b)) * c
+      obtain ⟨d, hd⟩ := IH_right  -- fmod a (-b) = gcd b (fmod a (-b)) * d
       use d - c * fdiv a (-b)
       calc a
         _ = fmod a (-b) + -b * fdiv a (-b) := by rw [fmod_add_fdiv a (-b)]
@@ -185,21 +172,17 @@ theorem gcd_dvd (a b : ℤ) : gcd a b ∣ b ∧ gcd a b ∣ a := by
         _ = gcd b (fmod a (-b)) * d + -(gcd b (fmod a (-b)) * c) * fdiv a (-b) := by rw [←hc]
         _ = gcd b (fmod a (-b)) * d - (gcd b (fmod a (-b)) * c) * fdiv a (-b) := by ring
         _ = gcd b (fmod a (-b)) * (d - c * fdiv a (-b)) := by ring
-
-  · -- case `b = 0`, `0 ≤ a`
-
+  · -- 0 ≤ a, 0 ≤ b and b ≤ 0
+    -- since 0 ≤ b and b ≤ 0, b = 0
     constructor
     · -- prove that `a ∣ b`
-      rw [Int.le_antisymm h1 h2]
-      use 0; ring
+      use 0; rw[Int.le_antisymm h1 h2]; ring
     · -- prove that `gcd a b ∣ a`
       use 1; ring
-
   · -- case `b = 0`, `a < 0`
     constructor
     · -- prove that `-a ∣ b`
-      rw [Int.le_antisymm h1 h2]
-      use 0; ring
+      use 0; rw [Int.le_antisymm h1 h2]; ring
     · -- prove that `-a ∣ a`
       use -1; ring
 
