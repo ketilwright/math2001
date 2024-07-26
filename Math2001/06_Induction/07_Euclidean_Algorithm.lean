@@ -62,14 +62,20 @@ termination_by _ a b => b
 
 
 theorem gcd_zero_zero : gcd 0 0 = 0 := by rfl
+
+
+
+
 theorem gcd_zero (a: ℤ) (aNonNeg: a > 0) : gcd 0 a = a  := by
   rw [gcd, if_pos aNonNeg]
-  have h1: fmod 0 a = 0 := by exact zero_fmod a
-  have h2: ¬ 0 < fmod 0 a := by exact Eq.not_gt h1
-  have h3: ¬ fmod 0 a < 0 := by exact Eq.not_gt (id h1.symm)
-  rw [gcd, if_neg h2, if_neg h3]
+  have h1: fmod 0 a = 0 := zero_fmod a
+  --have h2: ¬ 0 < fmod 0 a := Eq.not_gt h1
+  --have h3: ¬ fmod 0 a < 0 := Eq.not_gt (id h1.symm)
+  rw [gcd, if_neg (Eq.not_gt (zero_fmod a)), if_neg (Eq.not_gt (zero_fmod a).symm)]
   have h4: 0 ≤ a := by exact Int.le_of_lt aNonNeg
   rw [if_pos h4]
+
+
 
 theorem gcd_zero' (a: ℤ) (aNeg: a < 0) : gcd 0 a = -a  := by
   have h1: ¬ 0 < a := by exact lt_asymm aNeg
