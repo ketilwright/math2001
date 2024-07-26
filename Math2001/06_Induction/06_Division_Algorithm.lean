@@ -34,6 +34,7 @@ termination_by _ n d => 2 * n - d
 #eval fdiv 11 4 -- infoview displays `2`
 
 
+
 theorem fmod_add_fdiv (n d : ℤ) : fmod n d + d * fdiv n d = n := by
   rw [fdiv, fmod]
   split_ifs with h1 h2 h3 <;> push_neg at *
