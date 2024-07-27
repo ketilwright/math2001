@@ -387,10 +387,29 @@ example : ¬ ∀ (f : ℚ → ℚ), Injective f → Injective (fun x ↦ f x + 1
 /-
 example : ∀ (f : ℚ → ℚ), Injective f → Injective (fun x ↦ f x + x) := by
   sorry
-
+-/
 example : ¬ ∀ (f : ℚ → ℚ), Injective f → Injective (fun x ↦ f x + x) := by
-  sorry
+  -- nope. consider f(x) = -x
+  push_neg
+  use fun x ↦ -x
+  constructor
+  ·
+    dsimp [Injective]
+    intro a b hab
+    calc a
+      _ = - (- a) := by ring
+      _ = - (- b) := by rw [hab]
+      _ = b := by ring
+  ·
+    dsimp [Injective]
+    push_neg
+    use 0; use 42
+    constructor
+    · numbers
+    · numbers
 
+
+/-
 example : ∀ (f : ℤ → ℤ), Surjective f → Surjective (fun x ↦ 2 * f x) := by
   sorry
 
