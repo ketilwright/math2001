@@ -28,8 +28,10 @@ def q (x : ℝ) : ℝ := x + 3
 
 #check @q -- infoview displays `q : ℝ → ℝ`
 
-
+-- \mapsto makes ↦
 #check fun (x : ℝ) ↦ x ^ 2 -- infoview displays `fun x ↦ x ^ 2 : ℝ → ℝ`
+
+-- #check Injective ∀ ⦃a₁ a₂⦄, f a₁ = f a₂ → a₁ = a₂
 
 
 example : Injective q := by
@@ -49,6 +51,8 @@ example : ¬ Injective (fun x : ℝ ↦ x ^ 2) := by
 
 
 def s (a : ℚ) : ℚ := 3 * a + 2
+
+-- #check Surjective ∀ b, ∃ a, f a = b
 
 example : Surjective s := by
   dsimp [Surjective]
@@ -135,7 +139,7 @@ example : Surjective g := by
     exhaust
 
 
-
+-- f(x) = x³ is 1:1
 example : Injective (fun (x:ℝ) ↦ x ^ 3) := by
   intro x1 x2 hx
   dsimp at hx
@@ -169,51 +173,110 @@ example : Injective (fun (x:ℝ) ↦ x ^ 3) := by
 
 
 example : Injective (fun (x : ℚ) ↦ x - 12) := by
-  sorry
+  dsimp [Injective]
+  intro x y hxy
+  calc x
+    _ = x - 12 + 12 := by ring
+    _ = y - 12 + 12 := by rw [hxy]
+    _ = y := by ring
 
+/-
 example : ¬ Injective (fun (x : ℚ) ↦ x - 12) := by
   sorry
+-/
 
-
+/-
 example : Injective (fun (x : ℝ) ↦ 3) := by
   sorry
-
+-/
 example : ¬ Injective (fun (x : ℝ) ↦ 3) := by
-  sorry
+  dsimp [Injective]; push_neg
+  use 0; use 42
+  constructor; numbers; numbers
+
 
 example : Injective (fun (x : ℚ) ↦ 3 * x - 1) := by
-  sorry
+  dsimp [Injective]
+  intro x y hxy
+  -- 3 * x - 1 = 3 * y - 1
+
+  calc x
+    _ = (3 * x - 1 - 2) / 3 + 1 := by ring
+    _ = (3 * y - 1 - 2) / 3 + 1 := by rw [hxy]
+    _ = y := by ring
+
+
+/-
 
 example : ¬ Injective (fun (x : ℚ) ↦ 3 * x - 1) := by
   sorry
-
+-/
 
 example : Injective (fun (x : ℤ) ↦ 3 * x - 1) := by
-  sorry
-
+  dsimp [Injective]
+  intro x y hxy
+  -- 3 * x - 1 = 3 * y - 1
+  have h1: 3 * x = 3 * y := by addarith [hxy]
+  cancel 3 at h1
+/-
 example : ¬ Injective (fun (x : ℤ) ↦ 3 * x - 1) := by
   sorry
-
+-/
 
 example : Surjective (fun (x : ℝ) ↦ 2 * x) := by
-  sorry
+  dsimp [Surjective]
+  intro b; use b / 2; ring
 
+
+/-
 example : ¬ Surjective (fun (x : ℝ) ↦ 2 * x) := by
   sorry
+-/
 
-
+/-
 example : Surjective (fun (x : ℤ) ↦ 2 * x) := by
   sorry
+-/
 
 example : ¬ Surjective (fun (x : ℤ) ↦ 2 * x) := by
-  sorry
+  dsimp [Surjective]; push_neg
+  use 1
+  intro a
+  have h1: Odd 1 := by use 0; ring
+  have h2: Even (2 * a) := by use a; ring
+  intro hContra
+  have h3: Even 1 := by rw [←hContra]; apply h2
+  have h4: ¬ Even 1 := (odd_iff_not_even 1).mp h1
+  contradiction
 
+/-
 example : Surjective (fun (n : ℕ) ↦ n ^ 2) := by
   sorry
+-/
+
+
+theorem sq_ne_two (n : ℤ) : n ^ 2 ≠ 2 := by
+  intro hn
+  obtain ⟨hn1, hn2⟩ : -2 < n ∧ n < 2
+  · apply abs_lt_of_sq_lt_sq'
+    ·
+      calc n ^ 2
+        _ = 2 := hn
+        _ < 4 := by numbers
+        _ = 2 ^ 2 := by ring
+    ·
+      numbers
+  interval_cases n <;> norm_num at hn
 
 example : ¬ Surjective (fun (n : ℕ) ↦ n ^ 2) := by
-  sorry
+  dsimp [Surjective]; push_neg
+  use 2
+  intro a
+  intro hContra
+  have h1:= sq_ne_two a -- (n : ℤ) : n ^ 2 ≠ 2 := by
+  norm_cast at h1 -- appears to acknowledge the contradiction
 
+/-
 inductive White
   | meg
   | jack
@@ -290,3 +353,4 @@ example {f : ℚ → ℚ} (hf : ∀ x y, x < y → f x < f y) : Injective f := b
 example {f : X → ℕ} {x0 : X} (h0 : f x0 = 0) {i : X → X}
     (hi : ∀ x, f (i x) = f x + 1) : Surjective f := by
   sorry
+-/
