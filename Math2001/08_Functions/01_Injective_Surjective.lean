@@ -7,7 +7,7 @@ import Library.Theory.ParityModular
 
 math2001_init
 set_option pp.funBinderTypes true
-
+set_option pp.rawOnError true
 open Function
 namespace Int
 
@@ -276,7 +276,7 @@ example : ¬ Surjective (fun (n : ℕ) ↦ n ^ 2) := by
   have h1:= sq_ne_two a -- (n : ℤ) : n ^ 2 ≠ 2 := by
   norm_cast at h1 -- appears to acknowledge the contradiction
 
-/-
+
 inductive White
   | meg
   | jack
@@ -289,46 +289,102 @@ def h : Musketeer → White
   | porthos => meg
   | aramis => jack
 
-example : Injective h := by
-  sorry
-
 example : ¬ Injective h := by
-  sorry
+  dsimp [Injective]; push_neg
+  use Musketeer.athos, Musketeer.aramis
+
+  constructor
+  ·
+    have h1: h athos = jack := rfl
+    have h2: h aramis = jack := rfl
+    rw [h1, h2];
+  ·
+    exhaust
+
+
+
 
 example : Surjective h := by
-  sorry
+  dsimp [Surjective]
+  intro b
+  cases b
+  · -- suppose b = meg
+    use porthos; rfl
 
+  · -- suppose b = jack
+    use athos; exhaust --rfl
+
+/-
 example : ¬ Surjective h := by
   sorry
-
+-/
 
 def l : White → Musketeer
   | meg => aramis
   | jack => porthos
 
 example : Injective l := by
-  sorry
+  dsimp [Injective]
+  intro a b hab
+  cases a
+  · cases b
+    · rfl
+    · contradiction
+  · cases b
+    · contradiction
+    · rfl
 
+/-
 example : ¬ Injective l := by
   sorry
+-/
 
-
+/-
 example : Surjective l := by
   sorry
-
+-/
 example : ¬ Surjective l := by
-  sorry
+  dsimp [Surjective]; push_neg
+  use Musketeer.athos
+  intro a; intro hContra
+  cases a
+  ·
+    --have h1: l meg = aramis := by rfl
+    contradiction
+  ·
+    contradiction
 
 example (f : X → Y) : Injective f ↔ ∀ x1 x2 : X, x1 ≠ x2 → f x1 ≠ f x2 := by
-  sorry
+  constructor
+  · -- →
+    -- Suppose f is an injection
+    intro h1
+    dsimp [Injective] at h1
+    intro a b hab
+    intro hContra
+    have h2: a = b := by apply h1 hContra
+    contradiction
+  · -- ← Suppose ∀ (x1 x2 : X), x1 ≠ x2 → f x1 ≠ f x2
+    intro h3
+    dsimp [Injective]
+    intro a b hab
+    have h4: a ≠ b → f a ≠ f b := by apply h3
+    exhaust -- no "contrapos :-("
+
 
 example : ∀ (f : ℚ → ℚ), Injective f → Injective (fun x ↦ f x + 1) := by
-  sorry
+  intro f; intro hf
+  intro a b hab
+  dsimp at hab -- gets rid of fun ↦ gibberish
+  have h1: f a = f b := by addarith [hab]
+  apply hf h1
 
+/-
 example : ¬ ∀ (f : ℚ → ℚ), Injective f → Injective (fun x ↦ f x + 1) := by
   sorry
+-/
 
-
+/-
 example : ∀ (f : ℚ → ℚ), Injective f → Injective (fun x ↦ f x + x) := by
   sorry
 
