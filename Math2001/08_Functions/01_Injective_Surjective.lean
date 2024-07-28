@@ -409,23 +409,84 @@ example : ¬ ∀ (f : ℚ → ℚ), Injective f → Injective (fun x ↦ f x + x
     · numbers
 
 
+example : ¬ ∀ (f : ℚ → ℚ), Injective f → Injective (fun x ↦ f x + x) := by
+  -- f(x) = 1 / x works also
+  push_neg
+  use fun x ↦ 1 / x
+  dsimp [Injective]
+  constructor
+  ·
+    intro a b hab
+    calc a
+      _ = 1 / (1 / a) := by rw [one_div_one_div]
+      _ = 1 / (1 / b) := by rw [hab]
+      _ = b := by rw [one_div_one_div]
+  ·
+    push_neg
+    use (10: ℚ); use (1 / 10)
+    constructor
+    · numbers
+    · numbers
+
+
 /-
 example : ∀ (f : ℤ → ℤ), Surjective f → Surjective (fun x ↦ 2 * f x) := by
   sorry
+-/
 
 example : ¬ ∀ (f : ℤ → ℤ), Surjective f → Surjective (fun x ↦ 2 * f x) := by
-  sorry
-
+  push_neg; use fun x ↦ x
+  dsimp [Surjective]
+  constructor
+  ·
+    intro b; use b; ring
+  ·
+    push_neg; use 1;
+    intro a; intro hContra
+    have h1: (2:ℤ) ∣ 1 := by use a; rw [hContra]
+    have h2: ¬(2: ℤ) ∣ 1 := by
+      apply Int.not_dvd_of_exists_lt_and_lt
+      use 0
+      constructor
+      · numbers
+      · numbers
+    contradiction
+/-
 example : ∀ c : ℝ, Surjective (fun x ↦ c * x) := by
-  sorry
+-/
 
 example : ¬ ∀ c : ℝ, Surjective (fun x ↦ c * x) := by
-  sorry
+  push_neg; use 0; push_neg; dsimp [Surjective]; push_neg
+  use 42; intro a
+  calc 0 * a
+    _ = 0 := by ring
+    _ ≠ 42 := by numbers
+
+
 
 example {f : ℚ → ℚ} (hf : ∀ x y, x < y → f x < f y) : Injective f := by
-  sorry
+  dsimp [Injective]
+  intro x y h
+  obtain h1 | h1 := le_or_gt x y
+  ·
+    obtain h2 | h2 := lt_or_eq_of_le h1
+    ·
+      have h4: f x ≠ f y := ne_of_lt (hf x y h2)
+      contradiction
+    · apply h2
+  ·
+    have h5: f x ≠ f y := Ne.symm (ne_of_lt (hf y x h1))
+    contradiction
 
 example {f : X → ℕ} {x0 : X} (h0 : f x0 = 0) {i : X → X}
     (hi : ∀ x, f (i x) = f x + 1) : Surjective f := by
-  sorry
--/
+  intro n -- ℕ
+  simple_induction n with k indHyp
+  ·
+    use x0; apply h0
+  ·
+    obtain ⟨xₖ, hxk⟩ := indHyp
+    use i xₖ
+    calc f (i xₖ)
+      _ = f xₖ + 1 := hi xₖ
+      _ = k + 1 := by rw [hxk]
