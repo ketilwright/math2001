@@ -349,7 +349,6 @@ example : ¬ Surjective l := by
   intro a; intro hContra
   cases a
   ·
-    --have h1: l meg = aramis := by rfl
     contradiction
   ·
     contradiction
@@ -482,10 +481,12 @@ example {f : X → ℕ} {x0 : X} (h0 : f x0 = 0) {i : X → X}
     (hi : ∀ x, f (i x) = f x + 1) : Surjective f := by
   intro n -- ℕ
   simple_induction n with k indHyp
-  ·
+  · -- Base case: Suppose n = 0. Then since f(x₀) = 0 we're done
     use x0; apply h0
-  ·
+  · -- From the inductive hypothesis, we can choose
+    -- k with f(xₖ) = k
     obtain ⟨xₖ, hxk⟩ := indHyp
+    -- Since ∀x, f(i (x)) = f(x) + 1, f(i(xₖ)) = k + 1
     use i xₖ
     calc f (i xₖ)
       _ = f xₖ + 1 := hi xₖ

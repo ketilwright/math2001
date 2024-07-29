@@ -107,7 +107,9 @@ example {f : X → Y} : Bijective f ↔ ∀ y, ∃! x, f x = y := by
       use x
       apply hx
 
-
+/-
+  Celestial: sun & moon
+-/
 example : ∀ f : Celestial → Celestial, Injective f → Bijective f := by
   intro f hf
   constructor
@@ -127,8 +129,22 @@ example : ∀ f : Celestial → Celestial, Injective f → Bijective f := by
       apply h_sun
     · use moon
       apply h_moon
-  | moon, sun => sorry
-  | moon, moon => sorry
+  | moon, sun =>
+    dsimp [Surjective]
+    intro y
+    cases y
+    · use moon; apply h_moon
+    · use sun; apply h_sun
+
+  | moon, moon =>
+    intro y
+    cases y
+    ·
+      dsimp [Injective] at hf
+      rw [←h_moon] at h_sun
+      have : sun = moon := by apply hf h_sun
+      contradiction
+    · use moon; apply h_moon
 
 
 example : ¬ ∀ f : ℕ → ℕ, Injective f → Bijective f := by
@@ -154,17 +170,35 @@ example : ¬ ∀ f : ℕ → ℕ, Injective f → Bijective f := by
 
 
 example : Bijective (fun (x : ℝ) ↦ 4 - 3 * x) := by
-  sorry
+  constructor
+  · -- Proof of injectivity
+    intro x y hf
+    dsimp at hf -- 4 - 3 * x = 4 - 3 * y
+    have h1: - 3 * x = - 3 * y := by addarith [hf] -- addarith only works after dsimp
+    cancel -3 at h1
+  · -- surjective
+    intro x
+    dsimp
+    use (4 - x) / 3
+    ring
 
+/-
 example : ¬ Bijective (fun (x : ℝ) ↦ 4 - 3 * x) := by
   sorry
+-/
 
-
+/-
 example : Bijective (fun (x : ℝ) ↦ x ^ 2 + 2 * x) := by
   sorry
+-/
 
 example : ¬ Bijective (fun (x : ℝ) ↦ x ^ 2 + 2 * x) := by
-  sorry
+  dsimp [Bijective]; push_neg; left
+  dsimp [Injective]; push_neg
+  use 0; use -2
+  constructor
+  · numbers
+  · numbers
 
 inductive Element
   | fire
@@ -182,15 +216,92 @@ def e : Element → Element
   | air => water
 
 example : Bijective e := by
-  sorry
-
-example : ¬ Bijective e := by
-  sorry
+  dsimp [Bijective]
+  constructor
+  · dsimp [Injective]
+    intro e₁; intro e₂; intro he
+    cases e₁ <;> cases e₂ <;> exhaust
+  · dsimp [Surjective]
+    intro e₂
+    cases e₂
+    · use earth; rfl
+    · use air; rfl
+    · use fire; rfl
+    · use water; rfl
 
 
 example : ∀ f : Subatomic → Subatomic, Injective f → Bijective f := by
-  sorry
+  intro f
+  intro hfInj
+  dsimp [Bijective]
+  ·
+    constructor
+    · -- f is injective by assumption
+      apply hfInj
+    ·
 
+      dsimp [Surjective]
+      match hProt : f proton, hNeut : f neutron, hElec : f electron with
+      -- my pet chimpanzee could do this
+      | proton, neutron, electron =>
+        intro b; cases b
+        · use proton; apply hProt
+        · use neutron; apply hNeut
+        · use electron; apply hElec
+      | proton, electron, neutron =>
+        intro b; cases b
+        · use proton; apply hProt
+        · use electron; apply hElec
+        · use neutron; use hNeut
+      | neutron, proton, electron =>
+        intro b; cases b
+        · use neutron; apply hNeut
+        · use proton; apply hProt
+        · use electron; apply hElec
+      | neutron, electron, proton =>
+        intro b; cases b
+        · use electron; apply hElec
+        · use proton; apply hProt
+        · use neutron; apply hNeut
+      | electron, neutron, proton =>
+        intro b; cases b
+        · use electron; apply hElec
+        · use neutron; apply hNeut
+        · use proton; apply hProt
+      | electron, proton, neutron =>
+        intro b; cases b
+        · use neutron; apply hNeut
+        · use electron; apply hElec
+        · use proton; apply hProt
+      -- The following are all the non 1:1 cases
+
+      | electron, electron, electron =>
+        have _ : neutron = proton := by
+          rw [←hProt] at hNeut
+          apply hfInj hNeut
+        contradiction
+      -- the chimpanzee ran out of patience
+
+      | electron, electron, neutron => sorry
+      | electron, electron, proton => sorry
+      | electron, neutron, electron => sorry
+      | electron, neutron, neutron => sorry
+      | electron, proton, electron => sorry
+      | electron, proton, proton => sorry
+      | neutron, electron, electron => sorry
+      | neutron, electron, neutron => sorry
+      | neutron, neutron, electron => sorry
+      | neutron, neutron, neutron => sorry
+      | neutron, neutron, proton => sorry
+      | neutron, proton, neutron => sorry
+      | neutron, proton, proton => sorry
+      | proton, electron, electron => sorry
+      | proton, electron, proton => sorry
+      | proton, neutron, neutron => sorry
+      | proton, neutron, proton => sorry
+      | proton, proton, electron => sorry
+      | proton, proton, neutron => sorry
+      | proton, proton, proton => sorry
 
 example : ∀ f : Element → Element, Injective f → Bijective f := by
   sorry
