@@ -131,10 +131,10 @@ def b : Humour → Humour
   | sanguine => sanguine
 
 def c : Humour → Humour
-  | melancholic => sorry
-  | choleric => sorry
-  | phlegmatic => sorry
-  | sanguine => sorry
+  | melancholic => sanguine
+  | choleric => phlegmatic
+  | phlegmatic => melancholic
+  | sanguine => phlegmatic
 
 example : b ∘ a = c := by
   ext x
@@ -143,25 +143,68 @@ example : b ∘ a = c := by
 
 def u (x : ℝ) : ℝ := 5 * x + 1
 
-noncomputable def v (x : ℝ) : ℝ := sorry
+noncomputable def v (x : ℝ) : ℝ := (x - 1) / 5
 
 example : Inverse u v := by
-  sorry
+  dsimp [Inverse]
+  constructor
+  ·
+    ext x;
+    calc (v ∘ u) x
+      _ = v (u x) := by rfl
+      _ = ((5 * x + 1) - 1) / 5 := by rw [u, v]
+      _ = x := by ring
+
+  .
+    ext x
+    calc (u ∘ v) x
+      _ = u ( v x) := rfl
+      _ = 5 * ((x - 1) / 5) + 1 := by rw [u, v]
+      _ = x := by ring
+
 
 example {f : X → Y} (hf : Injective f) {g : Y → Z} (hg : Injective g) :
     Injective (g ∘ f) := by
-  sorry
+  intro a b hab
+  apply hf (hg hab)
+
 
 example {f : X → Y} (hf : Surjective f) {g : Y → Z} (hg : Surjective g) :
     Surjective (g ∘ f) := by
-  sorry
+  -- let z be arbitrary
+  intro z
+  -- Since g is onto there is y with g(y) = z
+  obtain ⟨y, hy⟩ := hg z
+  -- Since f is onto there is x with f(x) = y
+  obtain ⟨x, hx⟩ := hf y
+  -- Therefore g ∘ f (x) = g (f (x)) = g (y) = z
+  use x
+  calc g ( f (x))
+    _ = g y := by rw [hx]
+    _ = z := by rw [hy]
+
 
 example {f : X → Y} (hf : Surjective f) : ∃ g : Y → X, f ∘ g = id := by
-  sorry
+  dsimp [Surjective] at hf
+  -- Since f is onto, from AOC there is a function g with
+  -- ∀b,f (g (b)) = b
+  choose g hg using hf
+  use g
+  ext x
+  calc (f ∘ g) x
+    _ = f ( g (x)) := by rfl
+    _ = x := by rw [hg]
 
 example {f : X → Y} {g : Y → X} (h : Inverse f g) : Inverse g f := by
-  sorry
+  dsimp [Inverse] at h
+  dsimp [Inverse]
+  obtain ⟨hl, hr⟩ := h
+  constructor
+  · apply hr
+  · apply hl
+
 
 example {f : X → Y} {g1 g2 : Y → X} (h1 : Inverse f g1) (h2 : Inverse f g2) :
     g1 = g2 := by
+
   sorry
