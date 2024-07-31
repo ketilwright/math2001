@@ -182,7 +182,7 @@ def A : ℕ → ℕ
   | 0 => 0
   | n + 1 => A n + n + 1
 
-#eval [A 0, A 1, A 2, A 3, A 4, A 5] -- triangle numbers
+-- #eval [A 0, A 1, A 2, A 3, A 4, A 5] -- triangle numbers
 
 theorem A_mono {n m : ℕ} (h : n ≤ m) : A n ≤ A m := by
   induction_from_starting_point m, h with k hk IH
@@ -269,15 +269,50 @@ example : Bijective p := by
 
 example : Bijective (fun ((r, s) : ℚ × ℚ) ↦ (s, r - s)) := by
   rw [bijective_iff_exists_inverse]
-  sorry
+  use fun (a, b) ↦ (a + b, a)
+  constructor
+  · ext ⟨r, s⟩
+    dsimp
+    ring
+  · ext ⟨r, s⟩
+    dsimp
+    ring
+
+
+
 
 example : ¬ Injective (fun ((x, y) : ℤ × ℤ) ↦ x - 2 * y - 1) := by
-  sorry
+  dsimp [Injective]; push_neg
+  use ⟨(0: ℤ), (1: ℤ)⟩; use ⟨(-2: ℤ), (0: ℤ)⟩
+  dsimp
+  constructor
+  ·
+    numbers
+  ·
+    numbers
+
+
 example : Surjective (fun ((x, y) : ℤ × ℤ) ↦ x - 2 * y - 1) := by
-  sorry
+  dsimp [Surjective]
+  intro b
+  use (b + 1, 0)
+  dsimp
+  ring
+
 
 example : ¬ Surjective (fun ((x, y) : ℚ × ℚ) ↦ x ^ 2 + y ^ 2) := by
-  sorry
+  dsimp [Surjective]; push_neg
+  use (-1: ℚ)
+  intro ⟨x, y⟩
+  dsimp
+  have h3:=
+    calc x ^ 2 + y ^ 2
+      _ ≥ 0 + 0 := by rel [sq_nonneg x, sq_nonneg y]
+      _ = 0 := by numbers
+  intro hContra
+  rw [hContra] at h3
+  numbers at h3
+
 
 example : Surjective (fun ((x, y) : ℚ × ℚ) ↦ x ^ 2 - y ^ 2) := by
   sorry
