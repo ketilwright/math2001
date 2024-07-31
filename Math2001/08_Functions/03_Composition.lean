@@ -204,14 +204,14 @@ example {f : X → Y} {g : Y → X} (h : Inverse f g) : Inverse g f := by
   · apply hl
 
 example {f : X → Y} {g1 g2 : Y → X} (h1 : Inverse f g1) (h2 : Inverse f g2) :
-  g1 = g2 := by
+  g1 = g2 := byx
   ext y
   -- Since f has an inverse, f is 1:1 (and onto)
   obtain ⟨hInj_f, hSur_f⟩ := bijective_of_inverse h1
   -- Since f = g₁⁻¹, (f ∘ g₁) = identity
-  obtain ⟨h3, h4⟩ := h1
+  obtain ⟨_, h4⟩ := h1
   -- Since f = g₂⁻¹, (f ∘ g₂) = identity
-  obtain ⟨h5, h6⟩ := h2
+  obtain ⟨_, h6⟩ := h2
   -- Thus (f ∘ g₁) = (f ∘ g₂)
   have h7: ∀ y: Y, (f ∘ g1) y = (f ∘ g2) y := by
     intro y₁; rw [h4, h6]

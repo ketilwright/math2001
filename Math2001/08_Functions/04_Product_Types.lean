@@ -1,5 +1,6 @@
 /- Copyright (c) Heather Macbeth, 2023.  All rights reserved. -/
 import Mathlib.Data.Real.Basic
+--import Mathlib.Data.Prod.Basic
 import Library.Theory.InjectiveSurjective
 import Library.Basic
 import Library.Tactic.ModEq
@@ -13,11 +14,17 @@ open Function
 
 def q (m : ℤ) : ℤ × ℤ := (m + 1, 2 - m)
 
+-- #eval [q (-3), q (-2), q (-1), q (0), q (1), q (2), q (3)]
+-- [(-2, 5), (-1, 4), (0, 3), (1, 2), (2, 1), (3, 0), (4, -1)]
+
 example : Injective q := by
   dsimp [Injective]
   intro m1 m2 hm
   dsimp [q] at hm
+  -- new trick usage of obtain
+  -- I think this may be similar to Prod.mk.inj_iff
   obtain ⟨hm', hm''⟩ := hm
+  -- eq: rewrite [Prod.mk.inj_iff] at hm: hm is now a conjeunction of
   addarith [hm']
 
 
@@ -34,6 +41,7 @@ example : ¬ Surjective q := by
 
 example : Bijective (fun ((m, n) : ℤ × ℤ) ↦ (m + n, m + 2 * n)) := by
   rw [bijective_iff_exists_inverse]
+  -- now show the the function has an inverse
   use fun (a, b) ↦ (2 * a - b, b - a)
   constructor
   · ext ⟨m, n⟩
@@ -45,29 +53,65 @@ example : Bijective (fun ((m, n) : ℤ × ℤ) ↦ (m + n, m + 2 * n)) := by
 
 
 example : Bijective (fun ((m, n) : ℝ × ℝ) ↦ (m + n, m - n)) := by
-  sorry
+  rw [bijective_iff_exists_inverse]
 
+  /- Scratch work:
+    a = m + n
+    b = m - n
+    a + b = (m + n) + (m - n)
+          = 2m
+    a - b = (m + n) - (m - n)
+          = 2 n
+    So (m, n) ↦ ((a + b) / 2, (a - b) / 2)
+  -/
+  use fun (a, b) ↦ ((a + b) / 2, (a - b) / 2)
+  constructor
+  · ext ⟨m, n⟩
+    dsimp
+    ring
+  · ext ⟨m, n⟩
+    dsimp
+    ring
+
+-- Whole different ball game over Z:
 example : ¬ Bijective (fun ((m, n) : ℤ × ℤ) ↦ (m + n, m - n)) := by
   dsimp [Bijective, Injective, Surjective]
   push_neg
+  -- Show f is not onto
   right
+  -- Since there is no f(m,n) = (0, 1)
   use (0, 1)
+  -- not angle brackets this time.
   intro (m, n) h
   dsimp at h
+  -- splits into h1: m + n = 0 and h2: m - n = 1
   obtain ⟨h1, h2⟩ := h
-  have :=
-  calc 0 ≡ 2 * m [ZMOD 2] := by extra
-    _ = (m - n) + (m + n) := by ring
-    _ = 1 + 0 := by rw [h1, h2]
-    _ = 1 := by numbers
-  numbers at this
 
+  -- have :=
+  -- calc 0 ≡ 2 * m [ZMOD 2] := by extra
+  --   _ = (m - n) + (m + n) := by ring
+  --   _ = 1 + 0 := by rw [h1, h2]
+  --   _ = 1 := by numbers
+  -- numbers at this
+
+  -- another approach
+  have h3: (2: ℤ) ∣  1 := by
+    use m
+    calc 1
+      _ = m - n := by rw [h2]
+      _ = m + m := by addarith [h1]
+      _ = 2 * m := by ring
+
+  have h4: ¬(2: ℤ) ∣ 1 := by
+    apply Int.not_dvd_of_exists_lt_and_lt
+    use 0; constructor; numbers; numbers
+  contradiction
 
 example : Injective (fun ((x, y) : ℝ × ℝ) ↦ (x + y, x - y, y)) := by
   intro (x1, y1) (x2, y2) h
   dsimp at h
   obtain ⟨h, h', hy⟩ := h
-  constructor
+  constructor -- note use of ctor tactiv to reduce goal of eq in prod type
   · addarith [h, hy]
   · apply hy
 
@@ -104,12 +148,19 @@ example : Surjective (fun ((m, n) : ℤ × ℤ) ↦ 5 * m + 8 * n) := by
 
 
 example : ¬ Injective (fun ((m, n) : ℤ × ℤ) ↦ 5 * m + 10 * n) := by
-  sorry
+  dsimp [Injective]; push_neg
+  use (2, 0); use (0, 1) -- both map the same place (10)
+  constructor
+  · ring
+  · intro hContra
+    obtain ⟨h1, h2⟩ := hContra
+    numbers at h1
+
 
 example : ¬ Surjective (fun ((m, n) : ℤ × ℤ) ↦ 5 * m + 10 * n) := by
   dsimp [Surjective]
   push_neg
-  use 1
+  use 1 -- 5m + 10n can never equal 1
   intro (m, n) h
   dsimp at h
   have :=
@@ -131,6 +182,8 @@ def A : ℕ → ℕ
   | 0 => 0
   | n + 1 => A n + n + 1
 
+#eval [A 0, A 1, A 2, A 3, A 4, A 5] -- triangle numbers
+
 theorem A_mono {n m : ℕ} (h : n ≤ m) : A n ≤ A m := by
   induction_from_starting_point m, h with k hk IH
   · extra
@@ -142,18 +195,24 @@ theorem A_mono {n m : ℕ} (h : n ≤ m) : A n ≤ A m := by
 
 theorem of_A_add_mono {a1 a2 b1 b2 : ℕ} (h : A (a1 + b1) + b1 ≤ A (a2 + b2) + b2) :
     a1 + b1 ≤ a2 + b2 := by
+
+  -- le_or_lt on N would ordinarily say a₁ + b₁ ≤ a₂ + b₂ or a₂ + b₂ < a₁ + b₁
+  -- but it looks like you can add 1 to the lhs & use ≤
   obtain h' | h' : _ ∨ a2 + b2 + 1 ≤ a1 + b1 := le_or_lt (a1 + b1) (a2 + b2)
-  · apply h'
-  rw [← not_lt] at h
-  have :=
-  calc A (a2 + b2) + b2
-     < A (a2 + b2) + b2 + (a2 + 1) := by extra
-    _ = A (a2 + b2) + (a2 + b2) + 1 := by ring
-    _ = A ((a2 + b2) + 1) := by rw [A]
-    _ = A (a2 + b2 + 1) := by ring
-    _ ≤ A (a1 + b1) := A_mono h'
-    _ ≤ A (a1 + b1) + b1 := by extra
-  contradiction
+
+  · -- by assumption a₁ + b₁ ≤ a₂ + b₂
+    apply h'
+  · -- Suppose a₂ + b₂ + 1 ≤ a₁ + b₁
+    rw [← not_lt] at h -- converts to negative, & proceeds to contradict
+    have :=
+    calc A (a2 + b2) + b2
+      < A (a2 + b2) + b2 + (a2 + 1) := by extra
+      _ = A (a2 + b2) + (a2 + b2) + 1 := by ring
+      _ = A ((a2 + b2) + 1) := by rw [A]
+      _ = A (a2 + b2 + 1) := by ring
+      _ ≤ A (a1 + b1) := A_mono h'
+      _ ≤ A (a1 + b1) + b1 := by extra
+    contradiction
 
 
 def p : ℕ × ℕ → ℕ

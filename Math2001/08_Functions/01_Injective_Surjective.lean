@@ -477,6 +477,9 @@ example {f : ℚ → ℚ} (hf : ∀ x y, x < y → f x < f y) : Injective f := b
     have h5: f x ≠ f y := Ne.symm (ne_of_lt (hf y x h1))
     contradiction
 
+/-
+  "surjective of intertwining"
+-/
 example {f : X → ℕ} {x0 : X} (h0 : f x0 = 0) {i : X → X}
     (hi : ∀ x, f (i x) = f x + 1) : Surjective f := by
   intro n -- ℕ
