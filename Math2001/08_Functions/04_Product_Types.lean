@@ -331,7 +331,7 @@ example : Surjective (fun ((a, b) : ℚ × ℕ) ↦ a ^ b) := by
 example : ¬ Injective
     (fun ((x, y, z) : ℝ × ℝ × ℝ) ↦ (x + y + z, x + 2 * y + 3 * z)) := by
   dsimp [Injective]; push_neg;
-  use (2/3, -1/3, -1/3); use (1, -1, 0)
+  use (2, -1, -1); use (3, -3, 0)
   dsimp
   constructor
   ·
@@ -343,11 +343,25 @@ example : ¬ Injective
   · -- (x₁, y₁, z₁) ≠ (x₂, y₂, z₂)
     numbers
 
-
-
-
 example : Injective (fun ((x, y) : ℝ × ℝ) ↦ (x + y, x + 2 * y, x + 3 * y)) := by
-  sorry
+  dsimp [Injective]
+  intro (x, y); intro (z, w)
+  dsimp; intro h
+  obtain ⟨h₁, h₂, h₃⟩ := h
+  constructor
+  · -- proof x = z
+    calc x
+      _ = z + w - y := by addarith [h₁]
+      _ = z + 2 * w - y - w := by ring
+      _ = x + 2 * y - y - w := by rw [h₂]
+      _ = x + y - w := by ring
+      _ = z + w - w := by rw [h₁]
+      _ = z := by ring
+  · -- proof y = w
+    calc y
+      _ = (x + 3 * y) - (x + 2 * y) := by ring
+      _ = (z + 3 * w) - (z + 2 * w) := by rw [h₂, h₃]
+      _ = w := by ring
 
 def h : ℝ × ℝ × ℝ → ℝ × ℝ × ℝ
   | (x, y, z) => (y, z, x)
