@@ -321,13 +321,30 @@ example : Surjective (fun ((x, y) : ℚ × ℚ) ↦ x ^ 2 - y ^ 2) := by
   dsimp
   ring
 
-
 example : Surjective (fun ((a, b) : ℚ × ℕ) ↦ a ^ b) := by
-  sorry
+  intro b
+  use (b, 1)
+  ring -- trick question
+
+
 
 example : ¬ Injective
     (fun ((x, y, z) : ℝ × ℝ × ℝ) ↦ (x + y + z, x + 2 * y + 3 * z)) := by
-  sorry
+  dsimp [Injective]; push_neg;
+  use (2/3, -1/3, -1/3); use (1, -1, 0)
+  dsimp
+  constructor
+  ·
+    constructor
+    · -- x₁ + y₁ + z₁ = x₂ + y₂ + z₂
+      numbers
+    · -- x₁ + 2y₁ + 3z₁ = x₂ + 2y₂ + 3z₂
+      ring
+  · -- (x₁, y₁, z₁) ≠ (x₂, y₂, z₂)
+    numbers
+
+
+
 
 example : Injective (fun ((x, y) : ℝ × ℝ) ↦ (x + y, x + 2 * y, x + 3 * y)) := by
   sorry
