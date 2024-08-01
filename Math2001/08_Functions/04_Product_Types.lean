@@ -315,7 +315,12 @@ example : ¬ Surjective (fun ((x, y) : ℚ × ℚ) ↦ x ^ 2 + y ^ 2) := by
 
 
 example : Surjective (fun ((x, y) : ℚ × ℚ) ↦ x ^ 2 - y ^ 2) := by
-  sorry
+  dsimp [Surjective]
+  intro b
+  use ((b + 1) / 2, (b - 1) / 2)
+  dsimp
+  ring
+
 
 example : Surjective (fun ((a, b) : ℚ × ℕ) ↦ a ^ b) := by
   sorry
