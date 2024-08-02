@@ -87,15 +87,6 @@ theorem gcd_zero' (a: ℤ) (aNeg: a < 0) : gcd 0 a = -a  := by
   rw [gcd, if_neg h3, if_neg h4, if_neg h5]
 
 
-/-
-Int.not_lt {a b : ℤ} : ¬a < b ↔ b ≤ a
-
--/
-
-
-
--- theorem gcd_zero (a: ℤ) (aNonNeg: a > 0) : gcd 0 a = a  := by
--- theorem gcd_zero' (a: ℤ) (aNeg: a < 0) : gcd 0 a = -a  := by
 theorem gcd_symm (a b: ℤ) : gcd a b = gcd b a := by
   -- let lhs: ℤ := gcd a b
   -- set rhs: ℤ := gcd b a

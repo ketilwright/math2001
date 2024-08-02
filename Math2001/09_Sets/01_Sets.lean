@@ -124,65 +124,103 @@ example : {1, 3, 6} ⊆ {t : ℚ | t < 10} := by
 
 /-! # Exercises -/
 
-
+/-
 example : 4 ∈ {a : ℚ | a < 3} := by
   sorry
-
+-/
 example : 4 ∉ {a : ℚ | a < 3} := by
-  sorry
+  dsimp
+  numbers
+
 
 example : 6 ∈ {n : ℕ | n ∣ 42} := by
-  sorry
+  dsimp
+  use 7; numbers
 
+/-
 example : 6 ∉ {n : ℕ | n ∣ 42} := by
   sorry
-
-
+-/
+/-
 example : 8 ∈ {k : ℤ | 5 ∣ k} := by
   sorry
-
+-/
 example : 8 ∉ {k : ℤ | 5 ∣ k} := by
-  sorry
+  dsimp
+  apply Int.not_dvd_of_exists_lt_and_lt
+  use 1
+  constructor
+  · numbers
+  · numbers
 
 example : 11 ∈ {n : ℕ | Odd n} := by
-  sorry
+  dsimp; use 5; numbers
 
+/-
 example : 11 ∉ {n : ℕ | Odd n} := by
   sorry
-
+-/
 
 example : -3 ∈ {x : ℝ | ∀ y : ℝ, x ≤ y ^ 2} := by
-  sorry
-
+  dsimp
+  intro y
+  calc (↑(-3): ℝ)
+    _ ≤ 0 := by numbers
+    _ ≤ y ^ 2 := by extra
+/-
 example : -3 ∉ {x : ℝ | ∀ y : ℝ, x ≤ y ^ 2} := by
   sorry
-
+-/
 
 example : {a : ℕ | 20 ∣ a} ⊆ {x : ℕ | 5 ∣ x} := by
-  sorry
+  dsimp [Set.subset_def]
+  intro n hn
+  obtain ⟨k, hk⟩ := hn
+  use 4 * k
+  calc n
+    _ = 20 * k := hk
+    _ = 5 * (4 * k) := by ring
 
+/-
 example : {a : ℕ | 20 ∣ a} ⊈ {x : ℕ | 5 ∣ x} := by
   sorry
+-/
 
-
+/-
 example : {a : ℕ | 5 ∣ a} ⊆ {x : ℕ | 20 ∣ x} := by
   sorry
+-/
 
 example : {a : ℕ | 5 ∣ a} ⊈ {x : ℕ | 20 ∣ x} := by
-  sorry
+  dsimp [Set.subset_def]; push_neg
+  use 10
+  constructor
+  · use 2; numbers
+  ·
+    apply Nat.not_dvd_of_exists_lt_and_lt
+    use 0
+    constructor
+    · numbers
+    · numbers
 
+/-
 example : {r : ℤ | 3 ∣ r} ⊆ {s : ℤ | 0 ≤ s} := by
   sorry
+-/
 
 example : {r : ℤ | 3 ∣ r} ⊈ {s : ℤ | 0 ≤ s} := by
-  sorry
+  dsimp [Set.subset_def]; push_neg
+  use -3
+  constructor
+  · use -1; numbers
+  · numbers
+
 
 example : {m : ℤ | m ≥ 10} ⊆ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
   sorry
 
 example : {m : ℤ | m ≥ 10} ⊈ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
   sorry
-
 
 namespace Int
 example : {n : ℤ | Even n} = {a : ℤ | a ≡ 6 [ZMOD 2]} := by
