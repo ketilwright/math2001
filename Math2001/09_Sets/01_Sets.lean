@@ -216,11 +216,44 @@ example : {r : ℤ | 3 ∣ r} ⊈ {s : ℤ | 0 ≤ s} := by
   · numbers
 
 
-example : {m : ℤ | m ≥ 10} ⊆ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
-  sorry
 
+example : {m : ℤ | m ≥ 10} ⊆ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
+  dsimp [Set.subset_def]
+  intro m hm
+  have h1: m ^ 3 - 7 * m ^ 2 = ( m ^ 2 - 7 * m) * m := by ring
+  rw [h1]
+  have h10: 0 < 10 := by numbers
+  have h2:=
+    calc m
+      _ ≥ 10 := hm
+      _ > 0 := by numbers
+
+  have h3:  (m ^ 2 - 7 * m) * m ≥ 4 * m ↔  (m ^ 2 - 7 * m) ≥ 4 := mul_le_mul_right h2
+  rw [h3]
+  have h4: m ^ 2 - 7 * m ≥ 4 ↔ m ^ 2 ≥ 7 * m + 4 := by
+    constructor
+    · intro h5
+      exact Int.add_le_of_le_sub_left h5
+
+    ·
+      intro h5
+      exact Int.le_sub_left_of_add_le h5
+
+  rw [h4]
+  have h6:=
+    calc 3 * m
+      _ ≥ 3 * 10 := by rel [hm]
+      _ > 4 := by numbers
+  calc m ^ 2
+    _ = m * m := by ring
+    _ ≥ 10 * m := by rel [hm]
+    _ = 7 * m + 3 * m := by ring
+    _ ≥ 7 * m + 4 := by rel [h6]
+
+/-
 example : {m : ℤ | m ≥ 10} ⊈ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
   sorry
+-/
 
 namespace Int
 example : {n : ℤ | Even n} = {a : ℤ | a ≡ 6 [ZMOD 2]} := by
