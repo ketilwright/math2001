@@ -366,6 +366,11 @@ example : Injective (fun ((x, y) : ℝ × ℝ) ↦ (x + y, x + 2 * y, x + 3 * y)
 def h : ℝ × ℝ × ℝ → ℝ × ℝ × ℝ
   | (x, y, z) => (y, z, x)
 
+example : h ∘ h ∘ h = id := by rfl -- but that's no fun
+
 example : h ∘ h ∘ h = id := by
-  --ext x
-  rfl
+  ext ⟨x, y, z⟩
+  calc (h ∘ h ∘ h) (x, y, z)
+    _ = (h ∘ h) (y, z, x) := by rfl
+    _ = h (z, x, y) := by rfl
+    _ = (x, y, z) := by rfl
