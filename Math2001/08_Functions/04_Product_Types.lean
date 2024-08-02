@@ -367,4 +367,5 @@ def h : ℝ × ℝ × ℝ → ℝ × ℝ × ℝ
   | (x, y, z) => (y, z, x)
 
 example : h ∘ h ∘ h = id := by
-  sorry
+  --ext x
+  rfl
