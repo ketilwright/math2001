@@ -77,14 +77,16 @@ example : {k : ℤ | 8 ∣ 5 * k} = {l : ℤ | 8 ∣ l} := by
   ext n
   dsimp
   constructor
-  · intro hn
+  · -- Proof 8 ∣ n
+    intro hn
     obtain ⟨a, ha⟩ := hn
     use -3 * a + 2 * n
     calc
       n = -3 * (5 * n) + 16 * n := by ring
       _ = -3 * (8 * a) + 16 * n := by rw [ha]
       _ = 8 * (-3 * a + 2 * n) := by ring
-  · intro hn
+  · -- Proof 8 ∣ 5 ⬝ n
+    intro hn
     obtain ⟨a, ha⟩ := hn
     use 5 * a
     calc 5 * n = 5 * (8 * a) := by rw [ha]
@@ -222,7 +224,7 @@ example : {m : ℤ | m ≥ 10} ⊆ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
   intro m hm
   have h1: m ^ 3 - 7 * m ^ 2 = ( m ^ 2 - 7 * m) * m := by ring
   rw [h1]
-  have h10: 0 < 10 := by numbers
+
   have h2:=
     calc m
       _ ≥ 10 := hm
@@ -257,37 +259,126 @@ example : {m : ℤ | m ≥ 10} ⊈ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
 
 namespace Int
 example : {n : ℤ | Even n} = {a : ℤ | a ≡ 6 [ZMOD 2]} := by
-  sorry
+  ext x
+  dsimp
+  constructor
+  ·
+    intro hx
+    obtain ⟨c, hc⟩ := hx
+    use c - 3
+    calc x - 6
+      _ = 2 * c - 6 := by rw [hc]
+      _ = 2 * (c - 3) := by ring
+  ·
+    intro hx
+    obtain ⟨c, hc⟩ := hx
+    use c + 3
+    calc x
+      _ = x - 6 + 6 := by ring
+      _ = 2 * c + 6 := by rw [hc]
+      _ = 2 * (c + 3) := by ring
 
+/-
 example : {n : ℤ | Even n} ≠ {a : ℤ | a ≡ 6 [ZMOD 2]} := by
   sorry
+-/
 end Int
 
-
+/-
 example : {t : ℝ | t ^ 2 - 5 * t + 4 = 0} = {4} := by
   sorry
-
+-/
 example : {t : ℝ | t ^ 2 - 5 * t + 4 = 0} ≠ {4} := by
-  sorry
+  ext; dsimp; push_neg
+  use 1
+  left
+  constructor
+  · numbers
+  · numbers
 
+/-
 example : {k : ℤ | 8 ∣ 6 * k} = {l : ℤ | 8 ∣ l} := by
   sorry
-
+-/
 example : {k : ℤ | 8 ∣ 6 * k} ≠ {l : ℤ | 8 ∣ l} := by
-  sorry
+  ext; dsimp; push_neg
+  use 4
+  left
+  constructor
+  · use 3; numbers
+  · apply Int.not_dvd_of_exists_lt_and_lt
+    use 0
+    constructor
+    · numbers
+    · numbers
+
 
 example : {k : ℤ | 7 ∣ 9 * k} = {l : ℤ | 7 ∣ l} := by
-  sorry
+  ext k
+  dsimp
+  constructor
+  ·
+    intro hk
+    obtain ⟨c, hc⟩ := hk -- 9k = 7c
+    use 4 * k - 3 * c
+    calc k
+      _ = 7 * (4 * k) - 3 * (9 * k) := by ring
+      _ = 7 * (4 * k) - 3 * (7 * c) := by rw [hc]
+      _ = 7 * (4 * k - 3 * c) := by ring
+  ·
+    intro hk
+    obtain ⟨c, hc⟩ := hk -- k = 7 * c
+    dsimp [·  ∣ · ]
+    use 9 * c
+    calc 9 * k
+      _ = 9 * (7 * c) := by rw [hc]
+      _ = 7 * (9 * c) := by ring
 
+/-
 example : {k : ℤ | 7 ∣ 9 * k} ≠ {l : ℤ | 7 ∣ l} := by
   sorry
+-/
 
-
+/-
 example : {1, 2, 3} = {1, 2} := by
   sorry
-
+-/
 example : {1, 2, 3} ≠ {1, 2} := by
-  sorry
+  ext; dsimp; push_neg
+  use 3
+  left
+  constructor
+  · right; right; numbers
+  · constructor
+    · numbers
+    · numbers
 
 example : {x : ℝ | x ^ 2 + 3 * x + 2 = 0} = {-1, -2} := by
-  sorry
+  ext x
+  dsimp
+  constructor
+  ·
+    intro hx
+    have h1: x ^ 2 + 3 * x + 2 = (x + 1) * (x + 2) := by ring
+    rw [h1] at hx
+    obtain h2 | h2 := zero_eq_mul.mp hx.symm
+    ·
+      left;
+      have h3: x = -1 := by addarith [h2]
+      apply h3
+    ·
+      right
+      have h4: x = -2 := by addarith [h2]
+      apply h4
+  ·
+    intro h5
+    obtain h6 | h6 := h5
+    ·
+      calc x ^ 2 + 3 * x + 2
+        _ = (-1) ^ 2 + 3 * (-1) + 2 := by rw [h6]
+        _ = 0 := by numbers
+
+    ·
+      calc x ^ 2 + 3 * x + 2
+        _ = (-2) ^ 2 + 3 * (-2) + 2 := by rw [h6]
+        _ = 0 := by numbers
