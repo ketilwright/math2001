@@ -217,40 +217,33 @@ example : {r : ℤ | 3 ∣ r} ⊈ {s : ℤ | 0 ≤ s} := by
   · use -1; numbers
   · numbers
 
-
-
 example : {m : ℤ | m ≥ 10} ⊆ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
   dsimp [Set.subset_def]
   intro m hm
-  have h1: m ^ 3 - 7 * m ^ 2 = ( m ^ 2 - 7 * m) * m := by ring
-  rw [h1]
-
-  have h2:=
-    calc m
-      _ ≥ 10 := hm
-      _ > 0 := by numbers
-
-  have h3:  (m ^ 2 - 7 * m) * m ≥ 4 * m ↔  (m ^ 2 - 7 * m) ≥ 4 := mul_le_mul_right h2
-  rw [h3]
-  have h4: m ^ 2 - 7 * m ≥ 4 ↔ m ^ 2 ≥ 7 * m + 4 := by
+  -- Since m ≥ 10 it is sufficient to prove m² ≥ 7 ⬝ m + 4
+  have h1: m ^ 3 - 7 * m ^ 2 ≥ 4 * m ↔ m ^ 2 ≥ 7 * m + 4 := by
+    have h2: m ^ 3 - 7 * m ^ 2 = (m ^ 2 - 7 * m) * m := by ring
     constructor
-    · intro h5
-      exact Int.add_le_of_le_sub_left h5
-
     ·
-      intro h5
-      exact Int.le_sub_left_of_add_le h5
-
-  rw [h4]
-  have h6:=
-    calc 3 * m
-      _ ≥ 3 * 10 := by rel [hm]
-      _ > 4 := by numbers
+      intro h3 -- m ^ 3 - 7 * m ^ 2 ≥ 4 * m
+      rw [h2] at h3
+      cancel m at h3
+      addarith [h3]
+    ·
+      intro h4 -- m ^ 2 ≥ 7 * m + 4
+      calc m ^ 3 - 7 * m ^ 2
+        _ = m * (m ^ 2 - 7 * m) := by ring
+        _ ≥ m * (7 * m + 4 - 7 * m) := by rel [h4]
+        _ = 4 * m := by ring
+  rw [h1]
   calc m ^ 2
     _ = m * m := by ring
     _ ≥ 10 * m := by rel [hm]
     _ = 7 * m + 3 * m := by ring
-    _ ≥ 7 * m + 4 := by rel [h6]
+    _ ≥ 7 * m + 3 * 10 := by rel [hm]
+    _ = 7 * m + 4 + 26 := by ring
+    _ ≥ 7 * m + 4 := by extra
+
 
 /-
 example : {m : ℤ | m ≥ 10} ⊈ {n : ℤ | n ^ 3 - 7 * n ^ 2 ≥ 4 * n} := by
