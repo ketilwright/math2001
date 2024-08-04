@@ -175,7 +175,59 @@ example : {n : ℤ | 5 ∣ n} ∩ {n : ℤ | 8 ∣ n} ⊆ {n : ℤ | 40 ∣ n} :
 
 example :
     {n : ℤ | 3 ∣ n} ∪ {n : ℤ | 2 ∣ n} ⊆ {n : ℤ | n ^ 2 ≡ 1 [ZMOD 6]}ᶜ := by
-  sorry
+  dsimp [Set.subset_def]
+  intro x hx
+  dsimp [Int.ModEq]
+  dsimp [· ∣ · ]
+  push_neg
+  intro c
+  intro hContra
+  have h4: (6: ℤ) = 3 * 2 := by numbers
+  rw [h4] at hContra
+  obtain h1 | h1 := hx
+  · -- suppose 3 ∣ x
+    obtain ⟨k, hk⟩ := h1
+    have h2: 3 ∣ x ^ 2 := by use 3 * k ^ 2; rw [hk]; ring
+    have h3: ¬ 3 ∣ (x ^ 2) - 1 := by
+      intro hContra1
+      have h42: 3 ∣ (-1) := by exact (Int.dvd_add_right h2).mp hContra1
+      have h43: ¬ 3 ∣ (-1) := by
+        apply Int.not_dvd_of_exists_lt_and_lt
+        use (-1)
+        constructor
+        · numbers
+        · numbers
+      contradiction
+
+    have h5: 3 ∣ (x ^ 2 - 1) := by
+      dsimp [· ∣ · ]
+      use 2 * c
+      calc x ^ 2 - 1
+        _ = 3 * 2 * c := hContra
+        _ = 3 * (2 * c) := mul_assoc 3 2 c
+    contradiction
+  ·
+    obtain ⟨k, hk⟩ := h1
+    have h6: 2 ∣ x ^ 2 := by use 2 * k ^ 2; rw [hk]; ring
+    have h7: ¬ 2 ∣ (x ^ 2 - 1) := by
+      intro hContra2
+      have h44: 2 ∣ (-1) := by exact (Int.dvd_add_right h6).mp hContra2
+      have h45: ¬ 2 ∣ (-1) := by
+        apply Int.not_dvd_of_exists_lt_and_lt
+        use (-1)
+        constructor
+        · numbers
+        · numbers
+      contradiction
+
+    have h8: 2 ∣ x ^ 2 - 1 := by
+      use 3 * c
+      calc x ^ 2 - 1
+        _ = 3 * 2 * c := hContra
+        _ = 2 * (3 * c) := by ring
+    contradiction
+
+
 
 def SizeAtLeastTwo (s : Set X) : Prop := ∃ x1 x2 : X, x1 ≠ x2 ∧ x1 ∈ s ∧ x2 ∈ s
 def SizeAtLeastThree (s : Set X) : Prop :=
