@@ -173,6 +173,8 @@ example : {n : ℤ | 5 ∣ n} ∩ {n : ℤ | 8 ∣ n} ⊆ {n : ℤ | 40 ∣ n} :
     _ = 80 * a - 120 * b := by ring
     _ = 40 * (2 * a - 3 * b) := by ring
 
+
+-- TODO: see about doing this without so much contradictions
 example :
     {n : ℤ | 3 ∣ n} ∪ {n : ℤ | 2 ∣ n} ⊆ {n : ℤ | n ^ 2 ≡ 1 [ZMOD 6]}ᶜ := by
   dsimp [Set.subset_def]
@@ -182,16 +184,15 @@ example :
   push_neg
   intro c
   intro hContra
-  have h4: (6: ℤ) = 3 * 2 := by numbers
-  rw [h4] at hContra
+
   obtain h1 | h1 := hx
   · -- suppose 3 ∣ x
     obtain ⟨k, hk⟩ := h1
     have h2: 3 ∣ x ^ 2 := by use 3 * k ^ 2; rw [hk]; ring
     have h3: ¬ 3 ∣ (x ^ 2) - 1 := by
       intro hContra1
-      have h42: 3 ∣ (-1) := by exact (Int.dvd_add_right h2).mp hContra1
-      have h43: ¬ 3 ∣ (-1) := by
+      have h4: 3 ∣ (-1) := (Int.dvd_add_right h2).mp hContra1
+      have h5: ¬ 3 ∣ (-1) := by
         apply Int.not_dvd_of_exists_lt_and_lt
         use (-1)
         constructor
@@ -199,7 +200,7 @@ example :
         · numbers
       contradiction
 
-    have h5: 3 ∣ (x ^ 2 - 1) := by
+    have h6: 3 ∣ (x ^ 2 - 1) := by
       dsimp [· ∣ · ]
       use 2 * c
       calc x ^ 2 - 1
@@ -208,22 +209,22 @@ example :
     contradiction
   ·
     obtain ⟨k, hk⟩ := h1
-    have h6: 2 ∣ x ^ 2 := by use 2 * k ^ 2; rw [hk]; ring
-    have h7: ¬ 2 ∣ (x ^ 2 - 1) := by
+    have h7: 2 ∣ x ^ 2 := by use 2 * k ^ 2; rw [hk]; ring
+    have h8: ¬ 2 ∣ (x ^ 2 - 1) := by
       intro hContra2
-      have h44: 2 ∣ (-1) := by exact (Int.dvd_add_right h6).mp hContra2
-      have h45: ¬ 2 ∣ (-1) := by
+      have h9: 2 ∣ (-1) := (Int.dvd_add_right h7).mp hContra2
+      have h10: ¬ 2 ∣ (-1) := by
         apply Int.not_dvd_of_exists_lt_and_lt
         use (-1)
         constructor
         · numbers
         · numbers
       contradiction
-
-    have h8: 2 ∣ x ^ 2 - 1 := by
+    -- Int.mul_comm (a b : ℤ) : a * b = b * a
+    have h11: 2 ∣ x ^ 2 - 1 := by
       use 3 * c
       calc x ^ 2 - 1
-        _ = 3 * 2 * c := hContra
+        _ = (3 * 2) * c := hContra
         _ = 2 * (3 * c) := by ring
     contradiction
 
