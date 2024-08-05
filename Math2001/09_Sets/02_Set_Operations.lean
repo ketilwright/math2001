@@ -174,7 +174,7 @@ example : {n : ℤ | 5 ∣ n} ∩ {n : ℤ | 8 ∣ n} ⊆ {n : ℤ | 40 ∣ n} :
     _ = 40 * (2 * a - 3 * b) := by ring
 
 
--- TODO: see about doing this without so much contradictions
+-- TODO: see about doing this without so much contradiction
 example :
     {n : ℤ | 3 ∣ n} ∪ {n : ℤ | 2 ∣ n} ⊆ {n : ℤ | n ^ 2 ≡ 1 [ZMOD 6]}ᶜ := by
   dsimp [Set.subset_def]
@@ -229,7 +229,6 @@ example :
     contradiction
 
 
-
 def SizeAtLeastTwo (s : Set X) : Prop := ∃ x1 x2 : X, x1 ≠ x2 ∧ x1 ∈ s ∧ x2 ∈ s
 def SizeAtLeastThree (s : Set X) : Prop :=
   ∃ x1 x2 x3 : X, x1 ≠ x2 ∧ x1 ≠ x3 ∧ x2 ≠ x3 ∧ x1 ∈ s ∧ x2 ∈ s ∧ x3 ∈ s
@@ -237,4 +236,49 @@ def SizeAtLeastThree (s : Set X) : Prop :=
 example {s t : Set X} (hs : SizeAtLeastTwo s) (ht : SizeAtLeastTwo t)
     (hst : ¬ SizeAtLeastTwo (s ∩ t)) :
     SizeAtLeastThree (s ∪ t) := by
-  sorry
+  dsimp [SizeAtLeastTwo] at hs
+  dsimp [SizeAtLeastTwo] at ht
+  dsimp [SizeAtLeastTwo] at hst; push_neg at hst
+
+  obtain ⟨s₁, s₂, ⟨hs₁nes₂, hs₁_in_s, hs₂_in_s⟩ ⟩ := hs
+  obtain ⟨t₁, t₂, ⟨ht₁net₂, ht₁_in_t, ht₂_in_t⟩ ⟩ := ht
+  dsimp [SizeAtLeastThree]
+  obtain h1 | h1 | h1 := hst s₁ t₁
+  · -- suppose s₁ = t₁
+    use s₂, t₁, t₂
+    constructor
+    · -- s₂ ≠ t
+      -- Since s₁ = t₁ and s₁ ≠ s₂, s₂ ≠ t
+      exhaust
+    · constructor
+      ·
+        have: _ := hst s₁ s₂
+        -- Since ¬ | S ∩ T | ≥ 2, thus either
+        --    (1) s₁ = s₂ or
+        --    (2) (s₁ ∉ s ∨ s₁ ∉ t) or
+        --    (3) (s₂ ∉ s ∨ s₂ ∉ t)
+        -- Case 1 is a contradiction of h1
+        -- The left disjunct of (2) is a contradiction with hs₁_in_s : s₁ ∈ s
+        -- the left disjunct of (3) is a contradiction with hs₂_in_s : s₂ ∈ s
+        -- Therefore either s₁ or s₂ is not in T
+        -- But since s₁ = t₁ and t₁ ∈ T, thus s₁ ∈ T, therefore we
+        -- know that S ∪ T is at least {s₁, t₁ = s₁, t₂}
+        -- Thus S ∪ T has at least 3 elements
+        exhaust
+      · constructor
+        · apply ht₁net₂ -- by assumption t₁ ≠ t₂
+        · constructor
+          · left; apply hs₂_in_s -- by assumption, s₂ ∈ S
+          · constructor
+            · right; apply ht₁_in_t -- by assumption, t₂ ∈ T
+            · right; apply ht₂_in_t -- by assumption, t₂ ∈ T
+  ·
+    obtain h2 | h2 := h1
+    · contradiction
+    · use s₁, t₁, t₂
+      exhaust
+  ·
+    obtain h3 | h3 := h1
+    · use t₁, s₁, s₂
+      exhaust
+    · contradiction
