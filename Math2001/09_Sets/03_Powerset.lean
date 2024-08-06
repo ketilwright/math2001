@@ -78,8 +78,20 @@ example : ¬ ∃ f : X → Set X, Surjective f := by
 
 def r (s : Set ℕ) : Set ℕ := s ∪ {3}
 
+
+
 example : ¬ Injective r := by
-  sorry
+  dsimp [Injective]; push_neg
+  use {3}, ∅
+  constructor
+  ·
+    calc r {3}
+      _ = {3, 3} := rfl
+      _ = {3} := pair_eq_singleton 3
+      _ = ∅ ∪ {3} := by rw [empty_union {3}]
+      _ = r ∅ := rfl
+  ·
+    apply singleton_ne_empty 3
 
 namespace Int
 
@@ -87,11 +99,63 @@ def U : ℕ → Set ℤ
   | 0 => univ
   | n + 1 => {x : ℤ | ∃ y ∈ U n, x = 2 * y}
 
+
+
+
+
 example (n : ℕ) : U n = {x : ℤ | (2:ℤ) ^ n ∣ x} := by
   simple_induction n with k hk
   · rw [U]
-    sorry
-  · rw [U]
+    ext n
+    constructor
+    ·
+      intro nInℕ
+      dsimp [· ∣ ·]
+      use n
+      ring
+    ·
+      intro _
+      dsimp
+  · -- U (k + 1) = {x | 2 ^ (k + 1) ∣ x}
+    rw [U]
+
     ext x
     dsimp
-    sorry
+
+    constructor
+    ·
+      intro h1 --  ∃ y ∈ U k, x = 2 * y
+      obtain ⟨y, ⟨h2, h3⟩⟩ := h1
+
+      have h4: 2 ^ k ∣ y := by
+        rw [hk] at h2
+        apply h2
+      obtain ⟨c, hc⟩ := h4
+      rw [hc] at h3
+      have h5: 2 * ((2 ^ k) * c) = 2 ^ (k + 1) * c := by ring
+      rw [h5] at h3
+      use c
+      apply h3
+    · -- Suppose 2ᵏ⁺¹ ∣ x
+      intro h6
+      obtain ⟨c, hc⟩ := h6 -- hc: x = 2 ^ (k + 1) * c
+      have h7: 2 ^ k ∣ x := by
+        use 2 * c
+        calc x
+          _ = 2 ^ (k + 1) * c := hc
+          _ = 2 ^ k * (2 * c) := by ring
+      have h8: x ∈ U k := by
+        rw [hk]
+        apply h7
+
+      have h9: 2 ^ k ∈ U k := by rw [hk]; use 1; ring
+
+      have h10: 2 ^ k * c ∈ U k := by rw [hk]; use c; ring
+      use 2 ^ k * c
+
+      constructor
+      ·
+        apply h10
+
+      ·
+        rw [hc]; ring
