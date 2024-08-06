@@ -99,63 +99,53 @@ def U : ℕ → Set ℤ
   | 0 => univ
   | n + 1 => {x : ℤ | ∃ y ∈ U n, x = 2 * y}
 
-
-
-
-
 example (n : ℕ) : U n = {x : ℤ | (2:ℤ) ^ n ∣ x} := by
+  -- By induction on n
   simple_induction n with k hk
-  · rw [U]
+  · -- Base case: n = 0. Prove that U₀ = {x | 2⁰ ∣ x}
+    rw [U]
     ext n
     constructor
-    ·
-      intro nInℕ
-      dsimp [· ∣ ·]
-      use n
-      ring
-    ·
-      intro _
-      dsimp
-  · -- U (k + 1) = {x | 2 ^ (k + 1) ∣ x}
-    rw [U]
-
-    ext x
-    dsimp
-
+    · -- ( → ) -- Since 2⁰ = 1, we're done
+      intro _; use n; ring
+    · -- ( ← ) -- Clearly ∀ n ∈ N, n ∈ N
+      intro _; dsimp
+  · -- Inductive step.
+    -- Prove that Uₖ = {x | 2ᵏ ∣ x} → Uₖ₊₁ = {x | 2ᵏ⁺¹ ∣ x}
+    -- Suppose Uₖ = {x | 2ᵏ ∣ x}
+    --  Let x be arbitrary
+    rw [U]; ext x; dsimp
     constructor
-    ·
-      intro h1 --  ∃ y ∈ U k, x = 2 * y
+    · -- ( → )
+      --  Suppose ∃ y ∈ Uₖ with x = 2 ⬝ y, and choose y accordingly
+      intro h1
       obtain ⟨y, ⟨h2, h3⟩⟩ := h1
-
+      --    Since y ∈ Uₖ, by definition of U, y ∣ 2ᵏ
+      --    thus we can choose c with y = 2ᵏ ⬝ c
       have h4: 2 ^ k ∣ y := by
         rw [hk] at h2
         apply h2
       obtain ⟨c, hc⟩ := h4
-      rw [hc] at h3
-      have h5: 2 * ((2 ^ k) * c) = 2 ^ (k + 1) * c := by ring
-      rw [h5] at h3
+      --  Since x = 2 ⬝ y = 2 ⬝ (2ᵏ ⬝ c) = 2ᵏ⁺¹ ⬝ c,
+      --  2ᵏ⁺¹ divides x. Thus x ∈ Uₖ₊₁
       use c
-      apply h3
+      calc x
+        _ = 2 * y := h3
+        _ = 2 * (2 ^ k * c) := by rw [hc]
+        _ = 2 ^ (k + 1) * c := by ring
+
     · -- Suppose 2ᵏ⁺¹ ∣ x
       intro h6
+      --  Then we can choose c with x = c ⬝ 2ᵏ⁺¹
       obtain ⟨c, hc⟩ := h6 -- hc: x = 2 ^ (k + 1) * c
-      have h7: 2 ^ k ∣ x := by
-        use 2 * c
-        calc x
-          _ = 2 ^ (k + 1) * c := hc
-          _ = 2 ^ k * (2 * c) := by ring
-      have h8: x ∈ U k := by
-        rw [hk]
-        apply h7
-
-      have h9: 2 ^ k ∈ U k := by rw [hk]; use 1; ring
-
-      have h10: 2 ^ k * c ∈ U k := by rw [hk]; use c; ring
+      --  Since 2ᵏ⁺¹ ∣ x, we also know 2ᵏ ∣ x
+      --    Thus:
+      --      2ᵏ ⬝ c ∈ Uₖ and since
+      --      x = 2ᵏ⁺¹ ⬝ c = 2 ⬝ (2ᵏ ⬝ c)
+      --    2ᵏ ⬝ c is witness to ∃ y ∈ Uₖ | x = 2 * y
       use 2 ^ k * c
-
       constructor
       ·
-        apply h10
-
+        rw [hk]; use c; ring
       ·
         rw [hc]; ring
