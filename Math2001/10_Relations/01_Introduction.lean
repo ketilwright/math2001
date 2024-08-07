@@ -310,30 +310,25 @@ example : ¬ Symmetric (· ∼ ·) := by
     contradiction
 
 
-
 example : AntiSymmetric (· ∼ ·) := by
   -- let x, y be arbitrary, and suppose
-  -- y ≡₅ (x + 1) and x ≡₅ (y + 1)
+  -- y ≡ (x + 1) [zmod 5] and x ≡ (y + 1) [zmod 5]
+  dsimp [AntiSymmetric]
   intro x y h1 h2
-  obtain h3 | h3 := eq_or_ne x y
-  · apply h3
-  ·
-  -- Bad Proof "by contradiction", sort of. Note
-  -- h3 isn't even used here.
-  -- TODO: fix this!
-    obtain ⟨a, ha⟩ := h1
-    obtain ⟨b, hb⟩ := h2
-    have h4:=
-      calc 5 * (a + b)
-        _ = 5 * a + 5 * b := by ring
-        _ = (y - (x + 1)) + (x - (y + 1)) := by rw [ha, hb]
-        _ = -2 := by ring
+  obtain ⟨a, ha⟩ := h1
+  obtain ⟨b, hb⟩ := h2
+  have h3:=
+    calc 5 * (a + b)
+      _ = 5 * a + 5 * b := by ring
+      _ = (y - (x + 1)) + (x - (y + 1)) := by rw [ha, hb]
+      _ = -2 := by ring
+  have h4: 5 ∣ -2 := by use (a + b); apply h3.symm
+  have h5: ¬ 5 ∣ -2 := by
+    apply Int.not_dvd_of_exists_lt_and_lt
+    use -1; constructor; numbers; numbers
+  contradiction
 
-    have h5: 5 ∣ -2 := by use (a + b); apply h4.symm
-    have h6: ¬ 5 ∣ -2 := by
-      apply Int.not_dvd_of_exists_lt_and_lt
-      use -1; constructor; numbers; numbers
-    contradiction
+
 /-
 example : ¬ AntiSymmetric (· ∼ ·) := by
   sorry
