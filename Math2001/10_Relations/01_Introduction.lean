@@ -171,13 +171,27 @@ end
 
 
 example : ¬ Symmetric ((·:ℝ) < ·) := by
-  sorry
+  dsimp [Symmetric]; push_neg
+  use (0: ℝ); use (1: ℝ)
+  constructor
+  · numbers
+  · numbers
 
 section
 local infix:50 "∼" => fun (x y : ℤ) ↦ x ≡ y [ZMOD 2]
 
 example : ¬ AntiSymmetric (· ∼ ·) := by
-  sorry
+  dsimp [AntiSymmetric]; push_neg
+  use 2; use 4
+  constructor
+  ·
+    use -1; numbers
+  · constructor
+    ·
+      use 1; numbers
+    .
+      numbers
+
 
 end
 
@@ -212,30 +226,43 @@ open Little
 
 local infix:50 " ∼ " => s
 
-
+/-
 example : Reflexive (· ∼ ·) := by
   sorry
-
+-/
 example : ¬ Reflexive (· ∼ ·) := by
-  sorry
+  dsimp [Reflexive]; push_neg
+  use beth
+  exhaust
+
 
 example : Symmetric (· ∼ ·) := by
-  sorry
+  dsimp [Symmetric]
+  intro x y hxy
+  cases x <;> cases y <;> exhaust
 
+/-
 example : ¬ Symmetric (· ∼ ·) := by
   sorry
-
+-/
+/-
 example : AntiSymmetric (· ∼ ·) := by
   sorry
-
+-/
 example : ¬ AntiSymmetric (· ∼ ·) := by
-  sorry
+  dsimp [AntiSymmetric]; push_neg
+  use meg; use beth
+  exhaust
 
+/-
 example : Transitive (· ∼ ·) := by
   sorry
-
+-/
 example : ¬ Transitive (· ∼ ·) := by
-  sorry
+  dsimp [Transitive]; push_neg
+  use jo, beth, amy
+  exhaust
+
 
 end
 
@@ -243,23 +270,74 @@ end
 section
 local infix:50 "∼" => fun (x y : ℤ) ↦ y ≡ x + 1 [ZMOD 5]
 
+
+/-
 example : Reflexive (· ∼ ·) := by
   sorry
-
+-/
 example : ¬ Reflexive (· ∼ ·) := by
-  sorry
+  dsimp [Reflexive]; push_neg
+  use 1
+  intro hContra
+  obtain ⟨x, hx⟩ := hContra
+  have h2: -1 = 5 * x := by addarith [hx]
+  have h3: 5 ∣ (-1) := by use x; apply h2
+  have h4: ¬ 5 ∣ (-1) := by
+    apply Int.not_dvd_of_exists_lt_and_lt
+    use -1; constructor; numbers; numbers
+  contradiction
 
+/-
 example : Symmetric (· ∼ ·) := by
   sorry
-
+-/
 example : ¬ Symmetric (· ∼ ·) := by
-  sorry
+  dsimp [Symmetric]; push_neg
+  use 0, 6
+  constructor
+  ·
+    dsimp [Int.ModEq]
+    calc 6
+      _ ≡ 1 [ZMOD 5] := by use 1; numbers
+      _ ≡ 0 + 1 [ZMOD 5] := by numbers
+  ·
+    intro hContra
+    obtain ⟨c, hc⟩ := hContra
+    have h1: 5 ∣ -7 := by use c; addarith [hc]
+    have h2: ¬ 5 ∣ -7 := by
+      apply Int.not_dvd_of_exists_lt_and_lt
+      use -2; constructor; numbers; numbers
+    contradiction
+
+
 
 example : AntiSymmetric (· ∼ ·) := by
-  sorry
+  -- let x, y be arbitrary, and suppose
+  -- y ≡₅ (x + 1) and x ≡₅ (y + 1)
+  intro x y h1 h2
+  obtain h3 | h3 := eq_or_ne x y
+  · apply h3
+  ·
+  -- Bad Proof "by contradiction", sort of. Note
+  -- h3 isn't even used here.
+  -- TODO: fix this!
+    obtain ⟨a, ha⟩ := h1
+    obtain ⟨b, hb⟩ := h2
+    have h4:=
+      calc 5 * (a + b)
+        _ = 5 * a + 5 * b := by ring
+        _ = (y - (x + 1)) + (x - (y + 1)) := by rw [ha, hb]
+        _ = -2 := by ring
 
+    have h5: 5 ∣ -2 := by use (a + b); apply h4.symm
+    have h6: ¬ 5 ∣ -2 := by
+      apply Int.not_dvd_of_exists_lt_and_lt
+      use -1; constructor; numbers; numbers
+    contradiction
+/-
 example : ¬ AntiSymmetric (· ∼ ·) := by
   sorry
+-/
 
 example : Transitive (· ∼ ·) := by
   sorry
