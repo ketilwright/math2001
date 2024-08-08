@@ -424,29 +424,59 @@ end
 
 
 example : Reflexive ((· : Set ℕ) ⊆ ·) := by
-  sorry
+  dsimp [Reflexive]
+  intro s
+  dsimp [Set.subset_def]
+  intro x hx; apply hx
 
+/-
 example : ¬ Reflexive ((· : Set ℕ) ⊆ ·) := by
   sorry
+-/
 
+/-
 example : Symmetric ((· : Set ℕ) ⊆ ·) := by
   sorry
-
+-/
 example : ¬ Symmetric ((· : Set ℕ) ⊆ ·) := by
-  sorry
+  dsimp [Symmetric]; push_neg
+  use {1}, {1, 2}
+  dsimp [Set.subset_def]
+  constructor
+  ·
+    intro n hn; left; apply hn
+  · push_neg
+    use 2
+    exhaust
+
 
 example : AntiSymmetric ((· : Set ℕ) ⊆ ·) := by
-  sorry
-
+  dsimp [AntiSymmetric]
+  intro s r h1 h2
+  dsimp [Set.subset_def] at h1
+  dsimp [Set.subset_def] at h2
+  ext x
+  constructor
+  ·
+    intro h3;
+    apply h1 x h3
+  ·
+    intro h4
+    apply h2 x h4
+/-
 example : ¬ AntiSymmetric ((· : Set ℕ) ⊆ ·) := by
   sorry
-
+-/
 example : Transitive ((· : Set ℕ) ⊆ ·) := by
-  sorry
+  dsimp [Transitive]
+  intro A B C h1 h2
+  intro x hx
+  apply h2 (h1 hx)
 
+/-
 example : ¬ Transitive ((· : Set ℕ) ⊆ ·) := by
   sorry
-
+-/
 
 
 section
