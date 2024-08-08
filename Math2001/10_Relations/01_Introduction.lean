@@ -482,28 +482,61 @@ example : ¬ Transitive ((· : Set ℕ) ⊆ ·) := by
 section
 local infix:50 "≺" => fun ((x1, y1) : ℝ × ℝ) (x2, y2) ↦ (x1 ≤ x2 ∧ y1 ≤ y2)
 
-example : Reflexive (· ≺ ·) := by
-  sorry
 
+example : Reflexive (· ≺ ·) := by
+  dsimp [Reflexive]
+  intro (x, y); dsimp
+
+  constructor
+  ·
+    rw [le_iff_lt_or_eq]; right; rfl
+  ·
+    rw [le_iff_lt_or_eq]; right; rfl
+
+/-
 example : ¬ Reflexive (· ≺ ·) := by
   sorry
+-/
+/-
 
 example : Symmetric (· ≺ ·) := by
   sorry
-
+-/
 example : ¬ Symmetric (· ≺ ·) := by
-  sorry
+  dsimp [Symmetric]; push_neg
+  use (2, 4), (3, 5)
+  constructor
+  ·
+    constructor; numbers; numbers
+  ·
+    left; numbers
 
 example : AntiSymmetric (· ≺ ·) := by
-  sorry
+  dsimp [AntiSymmetric]
+  intro (x₁, y₁) (x₂, y₂) h1 h2
+  dsimp at h1; dsimp at h2
+  obtain ⟨h1l, h1r⟩ := h1
+  obtain ⟨h2l, h2r⟩ := h2
+  calc (x₁, y₁)
+    _ = (x₂, y₂) := by rw [ge_antisymm h2l h1l, ge_antisymm h2r h1r]
 
+/-
 example : ¬ AntiSymmetric (· ≺ ·) := by
   sorry
-
+-/
 example : Transitive (· ≺ ·) := by
-  sorry
+  dsimp [Transitive]
+  intro (x₁, y₁) (x₂, y₂) (x₃, y₃) h1 h2
+  dsimp at h1; dsimp at h2
+  obtain ⟨h1l, h1r⟩ := h1
+  obtain ⟨h2l, h2r⟩ := h2
+  dsimp
+  constructor
+  · apply le_trans h1l h2l
+  · apply le_trans h1r h2r
 
+/-
 example : ¬ Transitive (· ≺ ·) := by
   sorry
-
+-/
 end
