@@ -351,7 +351,6 @@ example : ¬ Transitive (· ∼ ·) := by
     ·
       use 1; numbers
     ·
-      dsimp [Int.ModEq]
       apply Int.not_dvd_of_exists_lt_and_lt
       use 2
       constructor
@@ -364,30 +363,62 @@ end
 
 section
 local infix:50 "∼" => fun (x y : ℤ) ↦ x + y ≡ 0 [ZMOD 3]
-
+/-
 example : Reflexive (· ∼ ·) := by
   sorry
-
+-/
 example : ¬ Reflexive (· ∼ ·) := by
-  sorry
+  dsimp [Reflexive]; push_neg
+  use 1
+  apply Int.not_dvd_of_exists_lt_and_lt
+  use 0
+  constructor
+  · numbers
+  · numbers
+
+
 
 example : Symmetric (· ∼ ·) := by
-  sorry
+  dsimp [Symmetric]
+  intro x y h1
+  rw [add_comm]; apply h1
 
+/-
 example : ¬ Symmetric (· ∼ ·) := by
   sorry
+-/
 
+/-
 example : AntiSymmetric (· ∼ ·) := by
   sorry
-
+-/
 example : ¬ AntiSymmetric (· ∼ ·) := by
-  sorry
+  dsimp [AntiSymmetric]; push_neg
+  use 0, 3
+  constructor
+  ·
+    use 1; numbers
+  · constructor
+    · use 1; numbers
+    · numbers
 
+/-
 example : Transitive (· ∼ ·) := by
   sorry
+-/
 
 example : ¬ Transitive (· ∼ ·) := by
-  sorry
+  dsimp [Transitive]; push_neg
+  use 1, 2, 1
+  constructor
+  · use 1; numbers
+  · constructor
+    · use 1; numbers
+    · apply Int.not_dvd_of_exists_lt_and_lt
+      use 0
+      constructor
+      · numbers
+      · numbers
 
 end
 
