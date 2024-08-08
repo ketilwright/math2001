@@ -270,7 +270,6 @@ end
 section
 local infix:50 "∼" => fun (x y : ℤ) ↦ y ≡ x + 1 [ZMOD 5]
 
-
 /-
 example : Reflexive (· ∼ ·) := by
   sorry
@@ -309,21 +308,25 @@ example : ¬ Symmetric (· ∼ ·) := by
       use -2; constructor; numbers; numbers
     contradiction
 
-
 example : AntiSymmetric (· ∼ ·) := by
-  -- let x, y be arbitrary, and suppose
-  -- y ≡ (x + 1) [zmod 5] and x ≡ (y + 1) [zmod 5]
+  --  let x, y be arbitrary,
+  --  Suppose
+  --        y ≡ (x + 1) [zmod 5] and
+  --        x ≡ (y + 1) [zmod 5]
+  --  which leads us to 5 ∣ -2.
+  --  Thus our premise is false
+  --  and ~ is vacuously antisymmetric
   dsimp [AntiSymmetric]
   intro x y h1 h2
-  obtain ⟨a, ha⟩ := h1
-  obtain ⟨b, hb⟩ := h2
-  have h3:=
-    calc 5 * (a + b)
-      _ = 5 * a + 5 * b := by ring
-      _ = (y - (x + 1)) + (x - (y + 1)) := by rw [ha, hb]
-      _ = -2 := by ring
-  have h4: 5 ∣ -2 := by use (a + b); apply h3.symm
-  have h5: ¬ 5 ∣ -2 := by
+  have h3: 5 ∣ -2 := by
+    obtain ⟨a, ha⟩ := h1
+    obtain ⟨b, hb⟩ := h2
+    use (a + b)
+    calc -2
+      _ = (y - (x + 1)) + (x - (y + 1)) := by ring
+      _ = 5 * a + 5 * b := by rw [ha, hb]
+      _ = 5 * (a + b) := by ring
+  have h4 : ¬ 5 ∣ -2 := by
     apply Int.not_dvd_of_exists_lt_and_lt
     use -1; constructor; numbers; numbers
   contradiction
@@ -334,11 +337,27 @@ example : ¬ AntiSymmetric (· ∼ ·) := by
   sorry
 -/
 
+/-
 example : Transitive (· ∼ ·) := by
   sorry
-
+-/
 example : ¬ Transitive (· ∼ ·) := by
-  sorry
+  dsimp [Transitive]; push_neg
+  use 0, 6, 12
+  constructor
+  ·
+    use 1; numbers
+  · constructor
+    ·
+      use 1; numbers
+    ·
+      dsimp [Int.ModEq]
+      apply Int.not_dvd_of_exists_lt_and_lt
+      use 2
+      constructor
+      · numbers
+      · numbers
+
 
 end
 
